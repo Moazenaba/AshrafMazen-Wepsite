@@ -1,0 +1,6 @@
+{
+  "name": "موقع الشيخ أشرف مازن",
+  "description": "الموقع الرسمي للشيخ أشرف مازن - شروحات، خطب، ودروس علمية مرئية ومسموعة ومكتوبة",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
