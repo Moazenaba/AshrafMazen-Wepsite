@@ -88,22 +88,12 @@ export const Home: React.FC = () => {
         </div>
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-4 sm:space-y-6">
-          {/* Sheikh Name Badge & Header */}
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 py-1.5 rounded-full bg-emerald-800/10 dark:bg-emerald-500/10 text-emerald-900 dark:text-emerald-300 border border-emerald-800/20 dark:border-emerald-500/20 text-xs sm:text-sm font-semibold mb-1">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>المكتبة العلمية والتأصيلية</span>
-          </div>
-
           <h1 className="font-amiri text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-emerald-950 dark:text-emerald-100 drop-shadow-sm leading-tight sm:leading-snug">
             الشيخ أشرف مازن
           </h1>
 
           <p className="font-cairo text-base sm:text-xl md:text-2xl text-stone-700 dark:text-stone-300 max-w-2xl mx-auto font-medium leading-relaxed px-2">
             شروحات، خطب، ودروس علمية مرئية ومسموعة ومكتوبة
-          </p>
-
-          <p className="text-xs sm:text-base text-stone-500 dark:text-stone-400 max-w-xl mx-auto px-2 leading-relaxed">
-            مكتبة جامعة لنشر العلم الشرعي المؤصل، شروحات المتون في العقيدة والفقه والأصول، مع تفريغات مقروءة وتسجيلات عالية الجودة.
           </p>
 
           {/* Quick Search Bar */}
