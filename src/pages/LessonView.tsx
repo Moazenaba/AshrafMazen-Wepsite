@@ -144,6 +144,8 @@ export const LessonView: React.FC = () => {
     });
   };
 
+  const [isShareCopied, setIsShareCopied] = useState(false);
+
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -153,14 +155,23 @@ export const LessonView: React.FC = () => {
       }).catch(() => {});
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert('تم نسخ رابط الدرس إلى الحافظة بنجاح');
+      setIsShareCopied(true);
+      setTimeout(() => setIsShareCopied(false), 2500);
     }
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
+      {/* Share Toast Notification */}
+      {isShareCopied && (
+        <div className="fixed top-20 right-1/2 translate-x-1/2 z-50 bg-stone-900 text-stone-100 dark:bg-amber-400 dark:text-stone-950 px-5 py-2.5 rounded-2xl shadow-xl text-xs sm:text-sm font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+          <Check className="w-4 h-4 text-emerald-400 dark:text-stone-950" />
+          <span>تم نسخ رابط الدرس إلى الحافظة بنجاح</span>
+        </div>
+      )}
+
       {/* Breadcrumbs */}
-      <nav className="flex items-center flex-wrap gap-2 text-xs text-stone-500 dark:text-stone-400">
+      <nav className="flex items-center flex-wrap gap-1.5 sm:gap-2 text-xs text-stone-500 dark:text-stone-400">
         <Link to="/" className="hover:text-emerald-700 dark:hover:text-amber-300">
           الرئيسية
         </Link>
@@ -183,20 +194,20 @@ export const LessonView: React.FC = () => {
           {series.title}
         </Link>
         <ChevronRight className="w-3.5 h-3.5 rotate-180" />
-        <span className="text-emerald-800 dark:text-amber-400 font-semibold truncate max-w-[200px] sm:max-w-none">
+        <span className="text-emerald-800 dark:text-amber-400 font-semibold truncate max-w-[160px] sm:max-w-none">
           {lesson.title}
         </span>
       </nav>
 
       {/* Lesson Header Title Area */}
-      <div className="space-y-3 border-b border-stone-200 dark:border-stone-800 pb-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
+      <div className="space-y-3 border-b border-stone-200 dark:border-stone-800 pb-5 sm:pb-6">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex items-center flex-wrap gap-2">
             {(() => {
               const catTheme = getCategoryColorTheme(category?.color);
               return (
                 <>
-                  <span className={`px-3 py-1 rounded-lg font-amiri font-bold text-sm border ${catTheme.badgeBg} ${catTheme.badgeText} ${catTheme.badgeBorder}`}>
+                  <span className={`px-2.5 py-1 rounded-lg font-amiri font-bold text-xs sm:text-sm border ${catTheme.badgeBg} ${catTheme.badgeText} ${catTheme.badgeBorder}`}>
                     {getArabicLessonOrdinal(lesson.lesson_number)}
                   </span>
                   {category && (
@@ -219,7 +230,7 @@ export const LessonView: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {lesson.published_at && (
               <span className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-1 font-cairo">
                 <Calendar className="w-3.5 h-3.5" />
@@ -231,7 +242,7 @@ export const LessonView: React.FC = () => {
               onClick={() => lesson && toggleBookmark(lesson.id)}
               title={bookmarked ? 'إزالة الدرس من المحفوظات' : 'حفظ الدرس في المفضلة'}
               aria-label={bookmarked ? 'إزالة الدرس من المحفوظات' : 'حفظ الدرس في المفضلة'}
-              className={`p-2 rounded-xl transition-all ${
+              className={`p-2 min-w-[38px] min-h-[38px] flex items-center justify-center rounded-xl transition-all ${
                 bookmarked
                   ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 border border-amber-300 dark:border-amber-700/60'
                   : 'text-stone-500 hover:text-emerald-800 dark:hover:text-amber-300 hover:bg-stone-200/60 dark:hover:bg-stone-800/60'
@@ -244,27 +255,27 @@ export const LessonView: React.FC = () => {
               type="button"
               onClick={handleShare}
               title="مشاركة الدرس"
-              className="p-2 rounded-xl text-stone-500 hover:text-emerald-800 dark:hover:text-amber-300 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors"
+              className="p-2 min-w-[38px] min-h-[38px] flex items-center justify-center rounded-xl text-stone-500 hover:text-emerald-800 dark:hover:text-amber-300 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors"
             >
               <Share2 className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        <h1 className="font-amiri text-3xl sm:text-4xl md:text-5xl font-bold text-stone-900 dark:text-stone-100 leading-snug">
+        <h1 className="font-amiri text-2xl sm:text-4xl md:text-5xl font-bold text-stone-900 dark:text-stone-100 leading-snug sm:leading-snug">
           {lesson.title}
         </h1>
       </div>
 
-      {/* Tabs Switcher: فيديو / استماع / قراءة */}
-      <div className="flex items-center gap-2 border-b border-stone-200 dark:border-stone-800 pb-2">
+      {/* Tabs Switcher: فيديو / استماع / قراءة (Segmented Control on Mobile) */}
+      <div className="p-1 bg-stone-200/60 dark:bg-stone-800/60 rounded-2xl flex items-center gap-1">
         <button
           type="button"
           onClick={() => setActiveTab('video')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all ${
+          className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl font-semibold text-xs sm:text-sm transition-all min-h-[44px] ${
             activeTab === 'video'
               ? 'bg-emerald-800 text-white shadow-md'
-              : 'text-stone-600 dark:text-stone-300 hover:bg-stone-200/60 dark:hover:bg-stone-800/60'
+              : 'text-stone-700 dark:text-stone-300 hover:bg-stone-300/50 dark:hover:bg-stone-700/50'
           }`}
         >
           <Video className="w-4 h-4" />
@@ -277,10 +288,10 @@ export const LessonView: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveTab('audio')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all ${
+          className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl font-semibold text-xs sm:text-sm transition-all min-h-[44px] ${
             activeTab === 'audio'
               ? 'bg-emerald-800 text-white shadow-md'
-              : 'text-stone-600 dark:text-stone-300 hover:bg-stone-200/60 dark:hover:bg-stone-800/60'
+              : 'text-stone-700 dark:text-stone-300 hover:bg-stone-300/50 dark:hover:bg-stone-700/50'
           }`}
         >
           <Headphones className="w-4 h-4" />
@@ -293,10 +304,10 @@ export const LessonView: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveTab('transcript')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all ${
+          className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl font-semibold text-xs sm:text-sm transition-all min-h-[44px] ${
             activeTab === 'transcript'
               ? 'bg-emerald-800 text-white shadow-md'
-              : 'text-stone-600 dark:text-stone-300 hover:bg-stone-200/60 dark:hover:bg-stone-800/60'
+              : 'text-stone-700 dark:text-stone-300 hover:bg-stone-300/50 dark:hover:bg-stone-700/50'
           }`}
         >
           <FileText className="w-4 h-4" />

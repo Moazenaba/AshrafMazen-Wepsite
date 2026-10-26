@@ -79,51 +79,74 @@ export const Home: React.FC = () => {
   };
 
   return (
-    <div className="space-y-20 pb-16">
+    <div className="space-y-12 sm:space-y-20 pb-16">
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-10 sm:pt-16 pb-12 sm:pb-20 bg-gradient-to-b from-emerald-950/10 via-emerald-900/5 to-transparent border-b border-stone-200/60 dark:border-stone-800/60">
+      <section className="relative overflow-hidden pt-6 sm:pt-16 pb-10 sm:pb-20 bg-gradient-to-b from-emerald-950/10 via-emerald-900/5 to-transparent border-b border-stone-200/60 dark:border-stone-800/60">
         {/* Subtle decorative Islamic pattern background element */}
         <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none select-none flex items-center justify-center">
-          <Scroll className="w-[600px] h-[600px]" />
+          <Scroll className="w-[450px] sm:w-[600px] h-[450px] sm:h-[600px]" />
         </div>
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-6">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-4 sm:space-y-6">
           {/* Sheikh Name Badge & Header */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-800/10 dark:bg-emerald-500/10 text-emerald-900 dark:text-emerald-300 border border-emerald-800/20 dark:border-emerald-500/20 text-xs sm:text-sm font-semibold mb-2">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3.5 py-1.5 rounded-full bg-emerald-800/10 dark:bg-emerald-500/10 text-emerald-900 dark:text-emerald-300 border border-emerald-800/20 dark:border-emerald-500/20 text-xs sm:text-sm font-semibold mb-1">
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             <span>المكتبة العلمية والتأصيلية</span>
           </div>
 
-          <h1 className="font-amiri text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-emerald-950 dark:text-emerald-100 drop-shadow-sm leading-tight sm:leading-snug">
+          <h1 className="font-amiri text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-emerald-950 dark:text-emerald-100 drop-shadow-sm leading-tight sm:leading-snug">
             الشيخ أشرف مازن
           </h1>
 
-          <p className="font-cairo text-lg sm:text-xl md:text-2xl text-stone-700 dark:text-stone-300 max-w-2xl mx-auto font-medium leading-relaxed">
+          <p className="font-cairo text-base sm:text-xl md:text-2xl text-stone-700 dark:text-stone-300 max-w-2xl mx-auto font-medium leading-relaxed px-2">
             شروحات، خطب، ودروس علمية مرئية ومسموعة ومكتوبة
           </p>
 
-          <p className="text-sm sm:text-base text-stone-500 dark:text-stone-400 max-w-xl mx-auto">
+          <p className="text-xs sm:text-base text-stone-500 dark:text-stone-400 max-w-xl mx-auto px-2 leading-relaxed">
             مكتبة جامعة لنشر العلم الشرعي المؤصل، شروحات المتون في العقيدة والفقه والأصول، مع تفريغات مقروءة وتسجيلات عالية الجودة.
           </p>
 
           {/* Quick Search Bar */}
-          <div className="pt-4 max-w-2xl mx-auto">
+          <div className="pt-2 sm:pt-4 max-w-2xl mx-auto space-y-3">
             <form onSubmit={handleSearchSubmit} className="relative flex items-center">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="ابحث عن عنوان درس، باب، أو مسألة علمية..."
-                className="w-full pl-28 pr-12 py-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:focus:ring-amber-400 focus:border-transparent text-stone-800 dark:text-stone-100 placeholder-stone-400 shadow-lg text-sm sm:text-base transition-all"
+                placeholder="ابحث عن عنوان درس، باب، أو مسألة..."
+                className="w-full pl-24 sm:pl-28 pr-11 sm:pr-12 py-3.5 sm:py-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:focus:ring-amber-400 focus:border-transparent text-stone-800 dark:text-stone-100 placeholder-stone-400 shadow-lg text-sm sm:text-base transition-all min-h-[48px]"
               />
-              <Search className="w-5 h-5 text-stone-400 absolute right-4 pointer-events-none" />
+              <Search className="w-4 h-4 sm:w-5 sm:h-5 text-stone-400 absolute right-3.5 sm:right-4 pointer-events-none" />
               <button
                 type="submit"
-                className="absolute left-2.5 px-5 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 dark:bg-emerald-700 dark:hover:bg-emerald-600 text-white font-semibold text-xs sm:text-sm transition-all shadow-sm"
+                className="absolute left-1.5 sm:left-2.5 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 dark:bg-emerald-700 dark:hover:bg-emerald-600 text-white font-semibold text-xs sm:text-sm transition-all shadow-sm min-h-[38px] flex items-center justify-center"
               >
                 بحث
               </button>
             </form>
+
+            {/* 1-Tap Mobile Quick Access Chips */}
+            <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-xs font-semibold pt-1">
+              <span className="text-stone-400 text-[11px] font-normal hidden sm:inline">وصول سريع:</span>
+              <a
+                href="#categories"
+                className="px-3 py-1.5 rounded-xl bg-white/80 dark:bg-stone-900/80 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800 hover:border-emerald-700 dark:hover:border-amber-400 transition-all active:scale-95 min-h-[36px] flex items-center"
+              >
+                العلوم الشرعية
+              </a>
+              <a
+                href="#latest"
+                className="px-3 py-1.5 rounded-xl bg-white/80 dark:bg-stone-900/80 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800 hover:border-emerald-700 dark:hover:border-amber-400 transition-all active:scale-95 min-h-[36px] flex items-center"
+              >
+                أحدث الدروس
+              </a>
+              <Link
+                to="/bookmarks"
+                className="px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 transition-all active:scale-95 min-h-[36px] flex items-center"
+              >
+                المحفوظات
+              </Link>
+            </div>
           </div>
         </div>
       </section>

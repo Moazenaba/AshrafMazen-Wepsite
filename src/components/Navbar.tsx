@@ -53,22 +53,22 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-stone-50/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-stone-200/80 dark:border-stone-800/80 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+      <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo & Sheikh Branding */}
           <Link
             to="/"
-            className="group flex items-center gap-3.5 focus:outline-none"
+            className="group flex items-center gap-2.5 sm:gap-3.5 focus:outline-none shrink-0"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            <div className="w-11 h-11 rounded-2xl bg-emerald-800 dark:bg-emerald-700 text-amber-300 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform border border-amber-500/30">
-              <BookOpen className="w-6 h-6" />
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-emerald-800 dark:bg-emerald-700 text-amber-300 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform border border-amber-500/30">
+              <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <span className="font-amiri text-2xl font-bold tracking-tight text-emerald-950 dark:text-emerald-100 group-hover:text-emerald-800 dark:group-hover:text-amber-300 transition-colors">
+              <span className="font-amiri text-xl sm:text-2xl font-bold tracking-tight text-emerald-950 dark:text-emerald-100 group-hover:text-emerald-800 dark:group-hover:text-amber-300 transition-colors block leading-none">
                 الشيخ أشرف مازن
               </span>
-              <p className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
+              <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-medium mt-0.5">
                 الموقع العلمي والرسمي
               </p>
             </div>
@@ -105,14 +105,14 @@ export const Navbar: React.FC = () => {
           </nav>
 
           {/* Right Action Icons: Search, Bookmarks, Dark Mode, Admin Button */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1 sm:gap-2.5">
             <Link
               to="/search"
               aria-label="بحث في الدروس"
               title="البحث في الدروس"
-              className="p-2.5 rounded-xl text-stone-600 dark:text-stone-300 hover:text-emerald-800 dark:hover:text-amber-300 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors"
+              className="p-2 sm:p-2.5 min-w-[38px] min-h-[38px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center rounded-xl text-stone-600 dark:text-stone-300 hover:text-emerald-800 dark:hover:text-amber-300 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-4 h-4 sm:w-5 sm:h-5" />
             </Link>
 
             {/* Bookmarks Link */}
@@ -120,13 +120,13 @@ export const Navbar: React.FC = () => {
               to="/bookmarks"
               aria-label="الدروس المحفوظة"
               title="الدروس المحفوظة"
-              className={`relative p-2.5 rounded-xl transition-colors ${
+              className={`relative p-2 sm:p-2.5 min-w-[38px] min-h-[38px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center rounded-xl transition-colors ${
                 location.pathname === '/bookmarks'
                   ? 'bg-emerald-800 text-white shadow-xs'
                   : 'text-stone-600 dark:text-stone-300 hover:text-emerald-800 dark:hover:text-amber-300 hover:bg-stone-200/60 dark:hover:bg-stone-800/60'
               }`}
             >
-              <Bookmark className={`w-5 h-5 ${bookmarkCount > 0 ? 'fill-amber-400 text-amber-500 dark:text-amber-400' : ''}`} />
+              <Bookmark className={`w-4 h-4 sm:w-5 sm:h-5 ${bookmarkCount > 0 ? 'fill-amber-400 text-amber-500 dark:text-amber-400' : ''}`} />
               {bookmarkCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-stone-950 font-mono text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs">
                   {bookmarkCount > 9 ? '+9' : bookmarkCount}
@@ -143,32 +143,32 @@ export const Navbar: React.FC = () => {
               rel="nofollow"
               aria-label={isAdmin ? 'لوحة التحكم' : 'إدارة الموقع'}
               title={isAdmin ? 'لوحة التحكم' : 'إدارة الموقع'}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-emerald-900/90 hover:bg-emerald-800 text-amber-300 hover:text-amber-200 border border-amber-500/30 dark:border-amber-400/25 text-xs sm:text-sm font-semibold transition-all shadow-xs focus:outline-hidden focus:ring-2 focus:ring-amber-400/50"
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-xl bg-emerald-900/90 hover:bg-emerald-800 text-amber-300 hover:text-amber-200 border border-amber-500/30 dark:border-amber-400/25 text-xs sm:text-sm font-semibold transition-all shadow-xs focus:outline-hidden focus:ring-2 focus:ring-amber-400/50 min-h-[38px] sm:min-h-[44px]"
             >
               {isAdmin ? (
                 <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
               ) : (
                 <LogIn className="w-4 h-4 text-amber-400 shrink-0" />
               )}
-              <span className="whitespace-nowrap">{isAdmin ? 'لوحة التحكم' : 'إدارة الموقع'}</span>
+              <span className="whitespace-nowrap hidden xs:inline">{isAdmin ? 'لوحة التحكم' : 'إدارة الموقع'}</span>
             </Link>
 
             {/* Mobile Menu Button */}
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 md:hidden rounded-xl text-stone-700 dark:text-stone-200 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 focus:outline-none"
+              className="p-2 min-w-[38px] min-h-[38px] flex items-center justify-center md:hidden rounded-xl text-stone-700 dark:text-stone-200 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 focus:outline-none"
               aria-label="القائمة"
             >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Menu Dropdown Drawer */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950 px-4 pt-3 pb-5 space-y-2">
+        <div className="md:hidden border-t border-stone-200 dark:border-stone-800 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-lg px-4 pt-3 pb-6 space-y-2.5 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
           {navLinks.map((item) => {
             if (item.path.startsWith('/#')) {
               return (
@@ -176,7 +176,7 @@ export const Navbar: React.FC = () => {
                   key={item.path}
                   href={item.path}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-4 py-2.5 text-base font-semibold rounded-xl text-stone-700 dark:text-stone-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                  className="flex items-center min-h-[44px] px-4 py-2.5 text-base font-semibold rounded-xl text-stone-700 dark:text-stone-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 active:bg-emerald-100 dark:active:bg-emerald-900/40 transition-colors"
                 >
                   {item.label}
                 </a>
@@ -187,10 +187,10 @@ export const Navbar: React.FC = () => {
                 key={item.path}
                 to={item.path}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`block px-4 py-2.5 text-base font-semibold rounded-xl ${
+                className={`flex items-center min-h-[44px] px-4 py-2.5 text-base font-semibold rounded-xl transition-colors ${
                   isActive(item.path)
-                    ? 'bg-emerald-800 text-white'
-                    : 'text-stone-700 dark:text-stone-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
+                    ? 'bg-emerald-800 text-white shadow-sm'
+                    : 'text-stone-700 dark:text-stone-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 active:bg-emerald-100 dark:active:bg-emerald-900/40'
                 }`}
               >
                 {item.label}
@@ -201,14 +201,14 @@ export const Navbar: React.FC = () => {
           <Link
             to="/bookmarks"
             onClick={() => setIsMobileMenuOpen(false)}
-            className={`flex items-center justify-between px-4 py-2.5 text-base font-semibold rounded-xl ${
+            className={`flex items-center justify-between min-h-[44px] px-4 py-2.5 text-base font-semibold rounded-xl transition-colors ${
               location.pathname === '/bookmarks'
-                ? 'bg-emerald-800 text-white'
-                : 'text-stone-700 dark:text-stone-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
+                ? 'bg-emerald-800 text-white shadow-sm'
+                : 'text-stone-700 dark:text-stone-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 active:bg-emerald-100 dark:active:bg-emerald-900/40'
             }`}
           >
             <span className="flex items-center gap-2">
-              <Bookmark className="w-4 h-4 text-amber-500" />
+              <Bookmark className="w-4 h-4 text-amber-500 fill-amber-400/20" />
               <span>الدروس المحفوظة</span>
             </span>
             {bookmarkCount > 0 && (
@@ -222,10 +222,10 @@ export const Navbar: React.FC = () => {
             to="/admin"
             rel="nofollow"
             onClick={() => setIsMobileMenuOpen(false)}
-            className="flex items-center gap-2 px-4 py-2.5 text-base font-semibold rounded-xl text-amber-700 dark:text-amber-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border-t border-stone-100 dark:border-stone-800/80 pt-3 mt-1"
+            className="flex items-center gap-2.5 min-h-[44px] px-4 py-2.5 text-base font-semibold rounded-xl text-amber-700 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-400/10 hover:bg-amber-500/20 dark:hover:bg-amber-400/20 border border-amber-500/20 dark:border-amber-400/20 pt-3 mt-2"
           >
-            {isAdmin ? <ShieldCheck className="w-4 h-4" /> : <LogIn className="w-4 h-4" />}
-            <span>{isAdmin ? 'لوحة التحكم' : 'إدارة الموقع'}</span>
+            {isAdmin ? <ShieldCheck className="w-5 h-5 text-amber-500" /> : <LogIn className="w-5 h-5 text-amber-500" />}
+            <span>{isAdmin ? 'لوحة التحكم الإدارية' : 'إدارة الموقع'}</span>
           </Link>
         </div>
       )}
