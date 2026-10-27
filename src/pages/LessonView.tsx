@@ -36,6 +36,7 @@ export const LessonView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('video');
   const [fontSize, setFontSize] = useState<number>(18);
   const [isCopied, setIsCopied] = useState(false);
+  const [isShareCopied, setIsShareCopied] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const { isBookmarked, toggleBookmark } = useBookmarks();
@@ -143,8 +144,6 @@ export const LessonView: React.FC = () => {
       setTimeout(() => setIsCopied(false), 2000);
     });
   };
-
-  const [isShareCopied, setIsShareCopied] = useState(false);
 
   const handleShare = () => {
     if (navigator.share) {
