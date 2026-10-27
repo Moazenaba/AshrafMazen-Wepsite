@@ -1,8 +1,24 @@
 import { supabase } from '../lib/supabase';
 import { translateSupabaseError } from '../utils/supabaseErrors';
-import type { Category, Series, Lesson, AdminUser } from '../types';
+import type {
+  Category,
+  Series,
+  Lesson,
+  AdminUser,
+  SocialLink,
+  SocialPlatform,
+  SiteSettings,
+} from '../types';
 
-export type { Category, Series, Lesson, AdminUser };
+export type {
+  Category,
+  Series,
+  Lesson,
+  AdminUser,
+  SocialLink,
+  SocialPlatform,
+  SiteSettings,
+};
 
 export interface LessonWithRelations extends Lesson {
   series?: Series | null;
@@ -840,3 +856,197 @@ export async function updateUserPassword(newPassword: string): Promise<void> {
     throw new Error(translateSupabaseError(error));
   }
 }
+
+/**
+ * ============================================================================
+ * SITE SETTINGS & BRANDING (site_settings table & "branding" bucket)
+ * ============================================================================
+ */
+
+let cachedSiteSettings: SiteSettings | null = null;
+let cachedActiveSocialLinks: SocialLink[] | null = null;
+
+export const DEFAULT_SITE_SETTINGS: SiteSettings = {
+  banner_prefix: 'الموقع الرسمي لفضيلة الشيخ',
+  banner_name: 'أبو عبد الرحمن أشرف بن طه بن مازن',
+  banner_logo_url: '',
+  about_sheikh:
+    'الشيخ أشرف مازن، من علماء وأساتذة العلوم الشرعية المعاصرين. يُعنى بنشر العلم الشرعي المؤصل، وشرح المتون العلمية في الفقه، والعقيدة، والحديث، والأصول وعلوم التزكية وفق منهج أهل السنة والجماعة.',
+};
+
+export async function getSiteSettings(forceRefresh = false): Promise<SiteSettings> {
+  if (cachedSiteSettings && !forceRefresh) {
+    return cachedSiteSettings;
+  }
+  try {
+    const { data, error } = await supabase.from('site_settings').select('key, value');
+    if (!error && data) {
+      const settingsMap: Record<string, string> = {};
+      data.forEach((row) => {
+        if (row.key) settingsMap[row.key] = row.value || '';
+      });
+
+      cachedSiteSettings = {
+        banner_prefix: settingsMap.banner_prefix || DEFAULT_SITE_SETTINGS.banner_prefix,
+        banner_name: settingsMap.banner_name || DEFAULT_SITE_SETTINGS.banner_name,
+        banner_logo_url: settingsMap.banner_logo_url || '',
+        about_sheikh: settingsMap.about_sheikh || DEFAULT_SITE_SETTINGS.about_sheikh,
+      };
+      return cachedSiteSettings;
+    }
+  } catch (err) {
+    console.warn('Failed to load site_settings, using fallback:', err);
+  }
+
+  cachedSiteSettings = { ...DEFAULT_SITE_SETTINGS };
+  return cachedSiteSettings;
+}
+
+export async function saveSiteSettings(settings: Partial<SiteSettings>): Promise<void> {
+  const entries = Object.entries(settings).filter(([_, val]) => val !== undefined);
+  if (entries.length === 0) return;
+
+  const rows = entries.map(([key, value]) => ({
+    key,
+    value: value || '',
+  }));
+
+  const { error } = await supabase.from('site_settings').upsert(rows, { onConflict: 'key' });
+  if (error) {
+    throw new Error(translateSupabaseError(error));
+  }
+
+  // Refresh cache
+  cachedSiteSettings = null;
+  await getSiteSettings(true);
+}
+
+export async function uploadBrandingLogo(file: File): Promise<string> {
+  if (!file) throw new Error('لم يتم تحديد أي ملف شعار.');
+
+  // Validate format
+  const extension = file.name.split('.').pop()?.toLowerCase() || '';
+  const allowed = ['png', 'jpg', 'jpeg', 'svg', 'webp'];
+  if (!allowed.includes(extension)) {
+    throw new Error('صيغة الملف غير مدعومة. يرجى اختيار ملف صورة بصيغة (PNG, JPG, SVG, WebP).');
+  }
+
+  // Validate size (max 2MB)
+  if (file.size > 2 * 1024 * 1024) {
+    throw new Error('حجم الصورة كبير جداً. الحد الأقصى المسموح به هو 2 ميجابايت.');
+  }
+
+  const uniqueId =
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  const filename = `logo-${uniqueId}.${extension}`;
+
+  const { data, error } = await supabase.storage.from('branding').upload(filename, file, {
+    cacheControl: '3600',
+    upsert: false,
+  });
+
+  if (error) {
+    console.error('Branding logo upload error:', error);
+    throw new Error(translateSupabaseError(error));
+  }
+
+  const { data: urlData } = supabase.storage.from('branding').getPublicUrl(data.path);
+  return urlData.publicUrl;
+}
+
+/**
+ * ============================================================================
+ * SOCIAL LINKS (social_links table)
+ * ============================================================================
+ */
+
+export async function getActiveSocialLinks(forceRefresh = false): Promise<SocialLink[]> {
+  if (cachedActiveSocialLinks && !forceRefresh) {
+    return cachedActiveSocialLinks;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('social_links')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+
+    if (!error && data) {
+      cachedActiveSocialLinks = data;
+      return data;
+    }
+  } catch (err) {
+    console.warn('getActiveSocialLinks fallback:', err);
+  }
+
+  cachedActiveSocialLinks = [];
+  return [];
+}
+
+export async function getAllSocialLinksAdmin(): Promise<SocialLink[]> {
+  const { data, error } = await supabase
+    .from('social_links')
+    .select('*')
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    throw new Error(translateSupabaseError(error));
+  }
+
+  return data || [];
+}
+
+export async function createSocialLink(link: Omit<SocialLink, 'id'>): Promise<SocialLink> {
+  const platform = (link.platform || '').trim();
+  const url = (link.url || '').trim();
+  if (!platform) throw new Error('يرجى اختيار المنصة.');
+  if (!url) throw new Error('يرجى إدخال الرابط.');
+
+  const payload = {
+    platform,
+    url,
+    sort_order: Number(link.sort_order) || 0,
+    is_active: link.is_active ?? true,
+  };
+
+  const { data, error } = await supabase
+    .from('social_links')
+    .insert([payload])
+    .select()
+    .single();
+
+  if (error) throw new Error(translateSupabaseError(error));
+  cachedActiveSocialLinks = null;
+  return data;
+}
+
+export async function updateSocialLink(
+  id: string,
+  updates: Partial<SocialLink>
+): Promise<SocialLink> {
+  const payload: any = { ...updates };
+  if (payload.platform) payload.platform = payload.platform.trim();
+  if (payload.url) payload.url = payload.url.trim();
+
+  const { data, error } = await supabase
+    .from('social_links')
+    .update(payload)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw new Error(translateSupabaseError(error));
+  cachedActiveSocialLinks = null;
+  return data;
+}
+
+export async function deleteSocialLink(id: string): Promise<boolean> {
+  const { error } = await supabase.from('social_links').delete().eq('id', id);
+  if (error) throw new Error(translateSupabaseError(error));
+  cachedActiveSocialLinks = null;
+  return true;
+}
+

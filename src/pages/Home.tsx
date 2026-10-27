@@ -85,8 +85,8 @@ export const Home: React.FC = () => {
 
   return (
     <div className="space-y-8 sm:space-y-12 pb-16">
-      {/* 1. HERO BAND (Compact Islamic Portal Header) */}
-      <section className="relative overflow-hidden pt-6 sm:pt-10 pb-8 sm:pb-12 bg-gradient-to-b from-emerald-950/15 via-emerald-900/5 to-transparent border-b border-stone-200/80 dark:border-[#22302a]">
+      {/* 1. HERO BAND (Compact Islamic Portal Header - Intro & Search) */}
+      <section className="relative overflow-hidden pt-4 sm:pt-6 pb-6 sm:pb-8 bg-gradient-to-b from-emerald-950/10 via-emerald-900/5 to-transparent border-b border-stone-200/80 dark:border-[#22302a]">
         {/* Subtle Islamic Geometric Star Lattice */}
         <div
           className="absolute inset-0 opacity-[0.05] dark:opacity-[0.07] pointer-events-none select-none"
@@ -96,16 +96,8 @@ export const Home: React.FC = () => {
           }}
         />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-3 sm:space-y-4">
-          {/* Sheikh Name with calligraphic presence */}
-          <div className="inline-block relative">
-            <h1 className="font-amiri text-4xl sm:text-6xl font-bold tracking-tight text-emerald-950 dark:text-emerald-100 drop-shadow-xs leading-tight sm:leading-snug">
-              الشيخ أشرف مازن
-            </h1>
-            <div className="h-1 w-24 sm:w-36 bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto mt-1 rounded-full" />
-          </div>
-
-          <p className="font-cairo text-base sm:text-xl text-stone-700 dark:text-stone-300 max-w-2xl mx-auto font-medium leading-relaxed px-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-3">
+          <p className="font-cairo text-base sm:text-lg text-emerald-900 dark:text-emerald-100 max-w-2xl mx-auto font-medium leading-relaxed px-2">
             شروحات، خطب، ودروس علمية مرئية ومسموعة ومكتوبة
           </p>
 

@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, ArrowUp, Mail, MessageSquare, ExternalLink } from 'lucide-react';
-import { getCategories, type Category } from '../services/dataService';
+import { getCategories, getActiveSocialLinks, type Category, type SocialLink } from '../services/dataService';
+import { SocialIcons } from './SocialIcons';
 
 export const Footer: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
 
   useEffect(() => {
     getCategories().then((data) => {
       setCategories(data.slice(0, 6));
+    }).catch(() => {});
+
+    getActiveSocialLinks().then((links) => {
+      setSocialLinks(links);
     }).catch(() => {});
   }, []);
 
@@ -47,6 +53,15 @@ export const Footer: React.FC = () => {
             <p className="text-xs sm:text-sm text-emerald-200/80 leading-relaxed font-cairo">
               منصة علمية إسلامية تعنى بنشر الدروس، والشروحات التأصيلية، والمواعظ، والخطب وفق منهج أهل السنة والجماعة، مع توفير التسجيلات المرئية والمسموعة والتفريغات المقروءة لطلبة العلم وعموم المسلمين.
             </p>
+            {socialLinks.length > 0 && (
+              <div className="pt-2">
+                <SocialIcons
+                  links={socialLinks}
+                  size="sm"
+                  itemClassName="bg-emerald-900/80 border-emerald-700/60 text-emerald-200 hover:text-white"
+                />
+              </div>
+            )}
           </div>
 
           {/* Column 2: Quick Links to Categories */}

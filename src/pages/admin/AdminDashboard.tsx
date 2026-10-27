@@ -43,6 +43,7 @@ import {
 } from '../../services/dataService';
 import { formatArabicDate, getArabicLessonOrdinal, getCategoryColorTheme } from '../../utils/helpers';
 import { CategoryModal, SeriesModal, LessonModal, DeleteConfirmModal } from '../../components/admin/AdminModals';
+import { BrandingManager } from '../../components/admin/BrandingManager';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import type { Category, Series, Lesson, AdminUser, LessonStatus } from '../../types';
 
@@ -56,7 +57,7 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type AdminTab = 'lessons' | 'series' | 'categories' | 'system';
+type AdminTab = 'lessons' | 'series' | 'categories' | 'branding' | 'system';
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout }) => {
   const navigate = useNavigate();
@@ -455,6 +456,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
             }`}
           >
             إدارة الأقسام ({categories.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('branding')}
+            className={`py-3 px-4 font-semibold text-sm border-b-2 whitespace-nowrap transition-all ${
+              activeTab === 'branding'
+                ? 'border-emerald-800 text-emerald-800 dark:border-amber-400 dark:text-amber-300'
+                : 'border-transparent text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+            }`}
+          >
+            إدارة الواجهة والتواصل
           </button>
           <button
             type="button"
@@ -940,7 +952,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 4: SYSTEM & ARCHITECTURE */}
+        {/* TAB 4: BRANDING & SOCIAL MEDIA LINKS */}
+        {/* ========================================================================= */}
+        {activeTab === 'branding' && <BrandingManager />}
+
+        {/* ========================================================================= */}
+        {/* TAB 5: SYSTEM & ARCHITECTURE */}
         {/* ========================================================================= */}
         {activeTab === 'system' && (
           <div className="max-w-3xl space-y-6">

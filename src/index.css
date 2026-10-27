@@ -35,6 +35,7 @@
   --font-serif: 'Amiri', serif;
   --font-amiri: 'Amiri', serif;
   --font-cairo: 'Cairo', sans-serif;
+  --font-ruqaa: 'Aref Ruqaa', 'Amiri', serif;
 
   /* Refined dark colors mapped to stone so all components take this deep warm charcoal-green scholarly look in dark mode */
   --color-stone-950: #0e1512;
@@ -84,4 +85,8 @@
 
 .font-cairo {
   font-family: var(--font-cairo);
+}
+
+.font-ruqaa {
+  font-family: var(--font-ruqaa);
 }
