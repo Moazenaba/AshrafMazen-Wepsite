@@ -160,6 +160,8 @@ export interface CategoryColorTheme {
   badgeBorder: string;
   dot: string;
   iconBg: string;
+  headerBg: string;
+  headerGradient: string;
 }
 
 export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
@@ -174,6 +176,8 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     badgeBorder: 'border-emerald-200/80 dark:border-emerald-800/80',
     dot: 'bg-emerald-500 dark:bg-emerald-400',
     iconBg: 'bg-emerald-100/80 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300',
+    headerBg: 'bg-emerald-800 dark:bg-[#12281d]',
+    headerGradient: 'from-emerald-900 via-emerald-800 to-teal-900',
   },
   amber: {
     id: 'amber',
@@ -186,6 +190,8 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     badgeBorder: 'border-amber-200/80 dark:border-amber-800/80',
     dot: 'bg-amber-500 dark:bg-amber-400',
     iconBg: 'bg-amber-100/80 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
+    headerBg: 'bg-amber-800 dark:bg-[#2b1f0c]',
+    headerGradient: 'from-amber-900 via-amber-800 to-stone-900',
   },
   sky: {
     id: 'sky',
@@ -198,6 +204,8 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     badgeBorder: 'border-sky-200/80 dark:border-sky-800/80',
     dot: 'bg-sky-500 dark:bg-sky-400',
     iconBg: 'bg-sky-100/80 text-sky-800 dark:bg-sky-900/50 dark:text-sky-300',
+    headerBg: 'bg-sky-800 dark:bg-[#0c2233]',
+    headerGradient: 'from-sky-900 via-sky-800 to-cyan-950',
   },
   indigo: {
     id: 'indigo',
@@ -210,6 +218,8 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     badgeBorder: 'border-indigo-200/80 dark:border-indigo-800/80',
     dot: 'bg-indigo-500 dark:bg-indigo-400',
     iconBg: 'bg-indigo-100/80 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300',
+    headerBg: 'bg-indigo-800 dark:bg-[#181a38]',
+    headerGradient: 'from-indigo-950 via-indigo-900 to-slate-900',
   },
   teal: {
     id: 'teal',
@@ -222,6 +232,8 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     badgeBorder: 'border-teal-200/80 dark:border-teal-800/80',
     dot: 'bg-teal-500 dark:bg-teal-400',
     iconBg: 'bg-teal-100/80 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300',
+    headerBg: 'bg-teal-800 dark:bg-[#0d2624]',
+    headerGradient: 'from-teal-900 via-teal-800 to-emerald-950',
   },
   rose: {
     id: 'rose',
@@ -234,6 +246,8 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     badgeBorder: 'border-rose-200/80 dark:border-rose-800/80',
     dot: 'bg-rose-500 dark:bg-rose-400',
     iconBg: 'bg-rose-100/80 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300',
+    headerBg: 'bg-rose-800 dark:bg-[#301019]',
+    headerGradient: 'from-rose-950 via-rose-900 to-stone-900',
   },
   violet: {
     id: 'violet',
@@ -246,6 +260,8 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     badgeBorder: 'border-violet-200/80 dark:border-violet-800/80',
     dot: 'bg-violet-500 dark:bg-violet-400',
     iconBg: 'bg-violet-100/80 text-violet-800 dark:bg-violet-900/50 dark:text-violet-300',
+    headerBg: 'bg-violet-800 dark:bg-[#201236]',
+    headerGradient: 'from-violet-950 via-violet-900 to-indigo-950',
   },
   slate: {
     id: 'slate',
@@ -258,6 +274,8 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     badgeBorder: 'border-slate-200/80 dark:border-slate-700/80',
     dot: 'bg-slate-500 dark:bg-slate-400',
     iconBg: 'bg-slate-100/80 text-slate-800 dark:bg-slate-800/60 dark:text-slate-300',
+    headerBg: 'bg-slate-800 dark:bg-[#1a2128]',
+    headerGradient: 'from-slate-900 via-slate-800 to-stone-900',
   },
 };
 
@@ -266,4 +284,12 @@ export function getCategoryColorTheme(colorKey?: string): CategoryColorTheme {
     return CATEGORY_PALETTES[colorKey];
   }
   return CATEGORY_PALETTES.emerald;
+}
+
+/**
+ * Formats a view count number in Arabic numerals/locale
+ */
+export function formatArabicViews(views?: number): string {
+  const count = typeof views === 'number' && !isNaN(views) ? views : 0;
+  return new Intl.NumberFormat('ar-EG').format(count);
 }

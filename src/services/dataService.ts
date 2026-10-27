@@ -2,6 +2,8 @@ import { supabase } from '../lib/supabase';
 import { translateSupabaseError } from '../utils/supabaseErrors';
 import type { Category, Series, Lesson, AdminUser } from '../types';
 
+export type { Category, Series, Lesson, AdminUser };
+
 export interface LessonWithRelations extends Lesson {
   series?: Series | null;
   category?: Category | null;
@@ -180,6 +182,25 @@ export async function getLesson(
   }
 }
 
+export async function incrementLessonViews(lessonId: string): Promise<void> {
+  if (!lessonId) return;
+  try {
+    const sessionKey = `viewed_lesson_${lessonId}`;
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      if (sessionStorage.getItem(sessionKey)) {
+        return; // already viewed in this browser session
+      }
+      sessionStorage.setItem(sessionKey, '1');
+    }
+    const { error } = await supabase.rpc('increment_lesson_views', { lesson_id: lessonId });
+    if (error) {
+      console.warn('increment_lesson_views RPC notice:', error.message);
+    }
+  } catch (err) {
+    console.warn('incrementLessonViews error:', err);
+  }
+}
+
 export async function getLatestLessons(limit = 6): Promise<LessonWithRelations[]> {
   try {
     // Fetch latest published lessons
@@ -212,6 +233,174 @@ export async function getLatestLessons(limit = 6): Promise<LessonWithRelations[]
     console.error('getLatestLessons error:', err);
     throw err;
   }
+}
+
+export async function getFeaturedLessons(limit = 5): Promise<LessonWithRelations[]> {
+  try {
+    // Try fetching with featured = true first
+    const { data: lessons, error } = await supabase
+      .from('lessons')
+      .select('*')
+      .eq('status', 'published')
+      .eq('featured', true)
+      .order('published_at', { ascending: false })
+      .limit(limit);
+
+    if (!error && lessons && lessons.length > 0) {
+      const allSeries = await getAllSeries();
+      const allCategories = await getCategories();
+      const seriesMap = new Map(allSeries.map((s) => [s.id, s]));
+      const catMap = new Map(allCategories.map((c) => [c.id, c]));
+
+      return lessons.map((l) => {
+        const s = seriesMap.get(l.series_id) || null;
+        const c = s ? catMap.get(s.category_id) || null : null;
+        return {
+          ...l,
+          series: s,
+          category: c,
+        };
+      });
+    }
+  } catch {
+    // column featured does not exist, fall back smoothly
+  }
+  return getLatestLessons(limit);
+}
+
+export async function getTopViewedLessons(limit = 8): Promise<LessonWithRelations[]> {
+  try {
+    const { data: lessons, error } = await supabase
+      .from('lessons')
+      .select('*')
+      .eq('status', 'published')
+      .order('views', { ascending: false })
+      .limit(limit);
+
+    if (!error && lessons && lessons.length > 0) {
+      const allSeries = await getAllSeries();
+      const allCategories = await getCategories();
+      const seriesMap = new Map(allSeries.map((s) => [s.id, s]));
+      const catMap = new Map(allCategories.map((c) => [c.id, c]));
+
+      return lessons.map((l) => {
+        const s = seriesMap.get(l.series_id) || null;
+        const c = s ? catMap.get(s.category_id) || null : null;
+        return {
+          ...l,
+          series: s,
+          category: c,
+        };
+      });
+    }
+  } catch (err) {
+    console.warn('getTopViewedLessons error:', err);
+  }
+  return getLatestLessons(limit);
+}
+
+export async function getKhutabLessons(limit = 8): Promise<LessonWithRelations[]> {
+  try {
+    const allCategories = await getCategories();
+    const khutabCat = allCategories.find(
+      (c) => c.slug === 'khutab' || c.name.includes('خطب') || c.name.includes('مواعظ')
+    );
+
+    if (!khutabCat) {
+      return [];
+    }
+
+    const series = await getSeriesByCategory(khutabCat.id);
+    if (!series || series.length === 0) return [];
+
+    const seriesIds = series.map((s) => s.id);
+    const { data: lessons, error } = await supabase
+      .from('lessons')
+      .select('*')
+      .in('series_id', seriesIds)
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .limit(limit);
+
+    if (error || !lessons) return [];
+
+    const seriesMap = new Map(series.map((s) => [s.id, s]));
+
+    return lessons.map((l) => ({
+      ...l,
+      series: seriesMap.get(l.series_id) || null,
+      category: khutabCat,
+    }));
+  } catch (err) {
+    console.warn('getKhutabLessons error:', err);
+    return [];
+  }
+}
+
+export interface CategoryWithPortalData extends Category {
+  seriesCount: number;
+  lessonCount: number;
+  recentLessons: LessonWithRelations[];
+}
+
+export async function getCategoriesWithPortalData(recentLimit = 5): Promise<CategoryWithPortalData[]> {
+  try {
+    const [categories, allSeries, { data: allLessons, error: lError }] = await Promise.all([
+      getCategories(),
+      getAllSeries(),
+      supabase
+        .from('lessons')
+        .select('*')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false }),
+    ]);
+
+    if (lError) throw lError;
+    const lessonsList = allLessons || [];
+
+    const seriesMap = new Map(allSeries.map((s) => [s.id, s]));
+
+    return categories.map((cat) => {
+      const catSeries = allSeries.filter((s) => s.category_id === cat.id);
+      const catSeriesIds = new Set(catSeries.map((s) => s.id));
+      const catLessons = lessonsList.filter((l) => catSeriesIds.has(l.series_id));
+
+      const populatedRecent: LessonWithRelations[] = catLessons
+        .slice(0, recentLimit)
+        .map((l) => ({
+          ...l,
+          series: seriesMap.get(l.series_id) || null,
+          category: cat,
+        }));
+
+      return {
+        ...cat,
+        seriesCount: catSeries.length,
+        lessonCount: catLessons.length,
+        recentLessons: populatedRecent,
+      };
+    });
+  } catch (err) {
+    console.error('getCategoriesWithPortalData error:', err);
+    throw err;
+  }
+}
+
+export async function getSiteSetting(key: string, defaultVal: string): Promise<string> {
+  try {
+    const { data, error } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', key)
+      .maybeSingle();
+
+    if (!error && data?.value) {
+      return data.value;
+    }
+  } catch {
+    // settings table may not exist
+  }
+  return defaultVal;
 }
 
 export async function searchLessons(query: string): Promise<LessonWithRelations[]> {

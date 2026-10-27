@@ -6,62 +6,71 @@ import {
   Calendar,
   Layers,
   ArrowLeft,
+  Sparkles,
+  Eye,
+  Flame,
+  Mic,
   Video,
   Headphones,
   FileText,
-  Sparkles,
-  Scroll
 } from 'lucide-react';
-import { getCategories, getLatestLessons, getAllSeries } from '../services/dataService';
-import { formatArabicDate, getCategoryColorTheme } from '../utils/helpers';
-import type { Category, Series } from '../types';
-
-interface LessonWithSeries {
-  id: string;
-  series_id: string;
-  lesson_number: number;
-  title: string;
-  youtube_url: string;
-  audio_url: string;
-  transcript: string;
-  status: string;
-  published_at: string | null;
-  created_at: string;
-  series?: Series | null;
-}
+import {
+  getLatestLessons,
+  getFeaturedLessons,
+  getTopViewedLessons,
+  getKhutabLessons,
+  getCategoriesWithPortalData,
+  getCategories,
+  type LessonWithRelations,
+  type CategoryWithPortalData,
+  type Category,
+} from '../services/dataService';
+import { formatArabicDate, formatArabicViews, getCategoryColorTheme } from '../utils/helpers';
+import { PortalPanel } from '../components/PortalPanel';
+import { FeaturedCarousel } from '../components/FeaturedCarousel';
+import { PublicSidebar } from '../components/PublicSidebar';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [latestLessons, setLatestLessons] = useState<LessonWithSeries[]>([]);
-  const [seriesList, setSeriesList] = useState<Series[]>([]);
+  const [portalCategories, setPortalCategories] = useState<CategoryWithPortalData[]>([]);
+  const [featuredLessons, setFeaturedLessons] = useState<LessonWithRelations[]>([]);
+  const [latestLessons, setLatestLessons] = useState<LessonWithRelations[]>([]);
+  const [topViewedLessons, setTopViewedLessons] = useState<LessonWithRelations[]>([]);
+  const [khutabLessons, setKhutabLessons] = useState<LessonWithRelations[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const catMap = new Map(categories.map((c) => [c.id, c]));
-
   useEffect(() => {
     let isMounted = true;
-    async function loadHomeData() {
+    async function loadPortalData() {
       try {
         setLoading(true);
-        const [cats, latest, allSer] = await Promise.all([
+        const [cats, pCats, feat, latest, top, khutab] = await Promise.all([
           getCategories(),
-          getLatestLessons(6),
-          getAllSeries(),
+          getCategoriesWithPortalData(5),
+          getFeaturedLessons(5),
+          getLatestLessons(8),
+          getTopViewedLessons(8),
+          getKhutabLessons(8),
         ]);
+
         if (isMounted) {
           setCategories(cats);
+          setPortalCategories(pCats);
+          setFeaturedLessons(feat);
           setLatestLessons(latest);
-          setSeriesList(allSer);
+          setTopViewedLessons(top);
+          setKhutabLessons(khutab);
         }
       } catch (err) {
-        console.error('Failed to load home data:', err);
+        console.error('Failed to load portal home data:', err);
       } finally {
         if (isMounted) setLoading(false);
       }
     }
-    loadHomeData();
+
+    loadPortalData();
     return () => {
       isMounted = false;
     };
@@ -74,227 +83,354 @@ export const Home: React.FC = () => {
     }
   };
 
-  const getSeriesCountForCategory = (catId: string) => {
-    return seriesList.filter((s) => s.category_id === catId).length;
-  };
-
   return (
-    <div className="space-y-12 sm:space-y-20 pb-16">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-6 sm:pt-16 pb-10 sm:pb-20 bg-gradient-to-b from-emerald-950/10 via-emerald-900/5 to-transparent border-b border-stone-200/60 dark:border-stone-800/60">
-        {/* Subtle decorative Islamic pattern background element */}
-        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none select-none flex items-center justify-center">
-          <Scroll className="w-[450px] sm:w-[600px] h-[450px] sm:h-[600px]" />
-        </div>
+    <div className="space-y-8 sm:space-y-12 pb-16">
+      {/* 1. HERO BAND (Compact Islamic Portal Header) */}
+      <section className="relative overflow-hidden pt-6 sm:pt-10 pb-8 sm:pb-12 bg-gradient-to-b from-emerald-950/15 via-emerald-900/5 to-transparent border-b border-stone-200/80 dark:border-[#22302a]">
+        {/* Subtle Islamic Geometric Star Lattice */}
+        <div
+          className="absolute inset-0 opacity-[0.05] dark:opacity-[0.07] pointer-events-none select-none"
+          style={{
+            backgroundImage: `radial-gradient(circle at 50% 50%, rgba(5,150,105,0.8) 1.5px, transparent 1.5px)`,
+            backgroundSize: '20px 20px',
+          }}
+        />
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-4 sm:space-y-6">
-          <h1 className="font-amiri text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-emerald-950 dark:text-emerald-100 drop-shadow-sm leading-tight sm:leading-snug">
-            الشيخ أشرف مازن
-          </h1>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-3 sm:space-y-4">
+          {/* Sheikh Name with calligraphic presence */}
+          <div className="inline-block relative">
+            <h1 className="font-amiri text-4xl sm:text-6xl font-bold tracking-tight text-emerald-950 dark:text-emerald-100 drop-shadow-xs leading-tight sm:leading-snug">
+              الشيخ أشرف مازن
+            </h1>
+            <div className="h-1 w-24 sm:w-36 bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto mt-1 rounded-full" />
+          </div>
 
-          <p className="font-cairo text-base sm:text-xl md:text-2xl text-stone-700 dark:text-stone-300 max-w-2xl mx-auto font-medium leading-relaxed px-2">
+          <p className="font-cairo text-base sm:text-xl text-stone-700 dark:text-stone-300 max-w-2xl mx-auto font-medium leading-relaxed px-2">
             شروحات، خطب، ودروس علمية مرئية ومسموعة ومكتوبة
           </p>
 
-          {/* Quick Search Bar */}
-          <div className="pt-2 sm:pt-4 max-w-2xl mx-auto space-y-3">
-            <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+          {/* Compact Prominent Search Bar */}
+          <div className="pt-2 max-w-2xl mx-auto">
+            <form onSubmit={handleSearchSubmit} className="relative flex items-center shadow-md rounded-2xl">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="ابحث عن عنوان درس، باب، أو مسألة..."
-                className="w-full pl-24 sm:pl-28 pr-11 sm:pr-12 py-3.5 sm:py-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:focus:ring-amber-400 focus:border-transparent text-stone-800 dark:text-stone-100 placeholder-stone-400 shadow-lg text-sm sm:text-base transition-all min-h-[48px]"
+                placeholder="ابحث عن عنوان درس، باب، أو مسألة علمية..."
+                className="w-full pl-24 sm:pl-28 pr-11 sm:pr-12 py-3 sm:py-3.5 rounded-2xl bg-white dark:bg-[#151f1a] border border-stone-300 dark:border-[#22302a] focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:focus:ring-amber-400 focus:border-transparent text-stone-900 dark:text-stone-100 placeholder-stone-400 text-sm sm:text-base transition-all"
               />
               <Search className="w-4 h-4 sm:w-5 sm:h-5 text-stone-400 absolute right-3.5 sm:right-4 pointer-events-none" />
               <button
                 type="submit"
-                className="absolute left-1.5 sm:left-2.5 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 dark:bg-emerald-700 dark:hover:bg-emerald-600 text-white font-semibold text-xs sm:text-sm transition-all shadow-sm min-h-[38px] flex items-center justify-center"
+                className="absolute left-1.5 sm:left-2 px-4 sm:px-5 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-900 dark:bg-emerald-700 dark:hover:bg-emerald-600 text-white font-semibold text-xs sm:text-sm transition-all shadow-xs flex items-center justify-center min-h-[36px]"
               >
                 بحث
               </button>
             </form>
-
-            {/* 1-Tap Mobile Quick Access Chips */}
-            <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-xs font-semibold pt-1">
-              <span className="text-stone-400 text-[11px] font-normal hidden sm:inline">وصول سريع:</span>
-              <a
-                href="#categories"
-                className="px-3 py-1.5 rounded-xl bg-white/80 dark:bg-stone-900/80 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800 hover:border-emerald-700 dark:hover:border-amber-400 transition-all active:scale-95 min-h-[36px] flex items-center"
-              >
-                العلوم الشرعية
-              </a>
-              <a
-                href="#latest"
-                className="px-3 py-1.5 rounded-xl bg-white/80 dark:bg-stone-900/80 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-800 hover:border-emerald-700 dark:hover:border-amber-400 transition-all active:scale-95 min-h-[36px] flex items-center"
-              >
-                أحدث الدروس
-              </a>
-              <Link
-                to="/bookmarks"
-                className="px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 transition-all active:scale-95 min-h-[36px] flex items-center"
-              >
-                المحفوظات
-              </Link>
-            </div>
           </div>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
-        {/* Section: "الجديد" (Latest Lessons) */}
-        <section id="latest" className="space-y-8 scroll-mt-24">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-stone-200 dark:border-stone-800 pb-4">
-            <div>
-              <div className="flex items-center gap-2 text-emerald-800 dark:text-amber-400 font-semibold text-xs mb-1">
-                <Sparkles className="w-4 h-4" />
-                <span>أحدث الإضافات</span>
-              </div>
-              <h2 className="font-amiri text-3xl sm:text-4xl font-bold text-stone-900 dark:text-stone-100">
-                الجديد من الدروس
-              </h2>
-            </div>
-            <Link
-              to="/search"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-800 dark:text-amber-400 hover:underline"
-            >
-              <span>تصفح جميع الدروس</span>
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
-          </div>
+      {/* Main Content & Sidebar Grid (Desktop: Main Column + Sidebar; Mobile: Single Column) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Main Column (8 cols in 12-col grid) */}
+          <div className="order-1 lg:col-span-8 space-y-10 sm:space-y-12">
+            {/* 2. FEATURED STRIP "اخترنا لك" */}
+            <FeaturedCarousel lessons={featuredLessons} loading={loading} />
 
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div
-                  key={i}
-                  className="h-44 rounded-2xl bg-stone-200 dark:bg-stone-800 animate-pulse"
-                />
-              ))}
-            </div>
-          ) : latestLessons.length === 0 ? (
-            <div className="p-10 text-center text-stone-500 bg-stone-100 dark:bg-stone-900 rounded-2xl font-cairo">
-              لا توجد مواد منشورة بعد.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {latestLessons.map((lesson) => {
-                const cat = lesson.series ? catMap.get(lesson.series.category_id) : null;
-                const catTheme = getCategoryColorTheme(cat?.color);
-
-                return (
-                  <Link
-                    key={lesson.id}
-                    to={`/lesson/${lesson.id}`}
-                    className={`group block p-6 rounded-2xl ${catTheme.cardBg} border ${catTheme.cardBorder} shadow-xs hover:shadow-md transition-all relative overflow-hidden`}
-                  >
-                    <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400 mb-3">
-                      <span className={`font-semibold px-2.5 py-1 rounded-lg border ${catTheme.badgeBg} ${catTheme.badgeText} ${catTheme.badgeBorder}`}>
-                        {lesson.series?.title || 'سلسلة علمية'}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5" />
-                        {formatArabicDate(lesson.published_at || lesson.created_at)}
-                      </span>
-                    </div>
-
-                    <h3 className="font-amiri text-xl font-bold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-amber-300 transition-colors line-clamp-2 mb-4 leading-snug">
-                      {lesson.title}
-                    </h3>
-
-                    {/* Available Media Formats indicator */}
-                    <div className="flex items-center justify-between pt-4 border-t border-stone-200/50 dark:border-stone-800/80 text-xs">
-                      <div className="flex items-center gap-2">
-                        {lesson.youtube_url && (
-                          <span
-                            title="مرئي (يوتيوب)"
-                            className="p-1.5 rounded-md bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400"
-                          >
-                            <Video className="w-3.5 h-3.5" />
-                          </span>
-                        )}
-                        {lesson.audio_url && (
-                          <span
-                            title="مسموع (صوت)"
-                            className="p-1.5 rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400"
-                          >
-                            <Headphones className="w-3.5 h-3.5" />
-                          </span>
-                        )}
-                        {lesson.transcript && (
-                          <span
-                            title="تفريغ مكتوب"
-                            className="p-1.5 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
-                          >
-                            <FileText className="w-3.5 h-3.5" />
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-emerald-800 dark:text-amber-400 font-semibold flex items-center gap-1 group-hover:translate-x-[-3px] transition-transform">
-                        <span>عرض الدرس</span>
-                        <ArrowLeft className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* Section: "العلوم الشرعية" (Categories) */}
-        <section id="categories" className="space-y-8 scroll-mt-24">
-          <div className="border-b border-stone-200 dark:border-stone-800 pb-4">
-            <div className="flex items-center gap-2 text-emerald-800 dark:text-amber-400 font-semibold text-xs mb-1">
-              <Layers className="w-4 h-4" />
-              <span>المتون والشروحات</span>
-            </div>
-            <h2 className="font-amiri text-3xl sm:text-4xl font-bold text-stone-900 dark:text-stone-100">
-              العلوم الشرعية
-            </h2>
-            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
-              أبواب العلم المصنفة بحسب الفنون والمتون التأصيلية
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categories.map((cat) => {
-              const seriesCount = getSeriesCountForCategory(cat.id);
-              const catTheme = getCategoryColorTheme(cat.color);
-
-              return (
-                <Link
-                  key={cat.id}
-                  to={`/category/${cat.slug}`}
-                  className={`group relative p-7 rounded-2xl ${catTheme.cardBg} border ${catTheme.cardBorder} transition-all shadow-xs hover:shadow-md flex flex-col justify-between`}
+            {/* 3. THREE-PANEL ROW WITH SOLID COLORED HEADERS */}
+            <section className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {/* Panel 1: "الجديد" */}
+                <PortalPanel
+                  title="الجديد من الدروس"
+                  icon={<Sparkles className="w-4 h-4" />}
+                  headerBg="bg-emerald-900 dark:bg-[#12281d]"
+                  footerLink="/search"
+                  footerText="عرض جميع الدروس"
                 >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform border ${catTheme.iconBg} ${catTheme.badgeBorder}`}>
-                        <BookOpen className="w-6 h-6" />
+                  <div className="divide-y divide-stone-100 dark:divide-[#22302a]/70 -mx-1">
+                    {loading ? (
+                      Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="h-12 bg-stone-100 dark:bg-[#1a261f] rounded my-1 animate-pulse" />
+                      ))
+                    ) : latestLessons.length === 0 ? (
+                      <p className="text-xs text-stone-400 py-6 text-center">لا توجد مواد بعد.</p>
+                    ) : (
+                      latestLessons.slice(0, 8).map((lesson) => (
+                        <Link
+                          key={lesson.id}
+                          to={`/lesson/${lesson.id}`}
+                          className="flex items-center justify-between py-2 px-1.5 hover:bg-stone-50 dark:hover:bg-[#1a261f] rounded-lg transition-colors group gap-2"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-amiri text-sm font-bold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-amber-300 transition-colors truncate">
+                              {lesson.title}
+                            </h4>
+                            <div className="flex items-center gap-1.5 text-[11px] text-stone-400 dark:text-stone-500 font-cairo">
+                              {lesson.series?.title && (
+                                <span className="truncate max-w-[110px]">{lesson.series.title}</span>
+                              )}
+                              {lesson.series?.title && lesson.published_at && <span>•</span>}
+                              {lesson.published_at && (
+                                <span>{formatArabicDate(lesson.published_at)}</span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0 text-stone-400 dark:text-stone-500 text-xs font-cairo">
+                            {typeof lesson.views === 'number' && (
+                              <span className="flex items-center gap-1 text-[11px]">
+                                <Eye className="w-3 h-3" />
+                                <span>{formatArabicViews(lesson.views)}</span>
+                              </span>
+                            )}
+                            <ArrowLeft className="w-3.5 h-3.5 text-stone-300 dark:text-stone-600 group-hover:text-emerald-700 dark:group-hover:text-amber-400 group-hover:translate-x-[-2px] transition-transform" />
+                          </div>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                </PortalPanel>
+
+                {/* Panel 2: "الأكثر مشاهدة" */}
+                <PortalPanel
+                  title="الأكثر مشاهدة"
+                  icon={<Flame className="w-4 h-4" />}
+                  headerBg="bg-emerald-900 dark:bg-[#12281d]"
+                  footerLink="/search"
+                  footerText="عرض المزيد"
+                >
+                  <div className="divide-y divide-stone-100 dark:divide-[#22302a]/70 -mx-1">
+                    {loading ? (
+                      Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="h-12 bg-stone-100 dark:bg-[#1a261f] rounded my-1 animate-pulse" />
+                      ))
+                    ) : topViewedLessons.length === 0 ? (
+                      <p className="text-xs text-stone-400 py-6 text-center">لا توجد مواد بعد.</p>
+                    ) : (
+                      topViewedLessons.slice(0, 8).map((lesson, idx) => (
+                        <Link
+                          key={lesson.id}
+                          to={`/lesson/${lesson.id}`}
+                          className="flex items-center justify-between py-2 px-1.5 hover:bg-stone-50 dark:hover:bg-[#1a261f] rounded-lg transition-colors group gap-2"
+                        >
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <span className="w-5 h-5 rounded-md bg-amber-400/20 text-amber-700 dark:text-amber-300 font-mono text-[11px] font-bold flex items-center justify-center shrink-0">
+                              {idx + 1}
+                            </span>
+                            <div className="min-w-0">
+                              <h4 className="font-amiri text-sm font-bold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-amber-300 transition-colors truncate">
+                                {lesson.title}
+                              </h4>
+                              <div className="flex items-center gap-1.5 text-[11px] text-stone-400 dark:text-stone-500 font-cairo">
+                                {lesson.series?.title && (
+                                  <span className="truncate max-w-[100px]">{lesson.series.title}</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0 text-stone-400 dark:text-stone-500 text-xs font-cairo">
+                            {typeof lesson.views === 'number' && (
+                              <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-800 dark:text-amber-300">
+                                <Eye className="w-3 h-3" />
+                                <span>{formatArabicViews(lesson.views)}</span>
+                              </span>
+                            )}
+                            <ArrowLeft className="w-3.5 h-3.5 text-stone-300 dark:text-stone-600 group-hover:text-emerald-700 dark:group-hover:text-amber-400 group-hover:translate-x-[-2px] transition-transform" />
+                          </div>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                </PortalPanel>
+
+                {/* Panel 3: "الخطب والمواعظ" */}
+                <PortalPanel
+                  title="الخطب والمواعظ"
+                  icon={<Mic className="w-4 h-4" />}
+                  headerBg="bg-emerald-900 dark:bg-[#12281d]"
+                  footerLink="/category/khutab"
+                  footerText="عرض كافة الخطب"
+                >
+                  <div className="divide-y divide-stone-100 dark:divide-[#22302a]/70 -mx-1">
+                    {loading ? (
+                      Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="h-12 bg-stone-100 dark:bg-[#1a261f] rounded my-1 animate-pulse" />
+                      ))
+                    ) : khutabLessons.length === 0 ? (
+                      <div className="py-6 text-center space-y-1">
+                        <p className="text-xs text-stone-400">لا توجد خطب منشورة حالياً.</p>
+                        <Link to="/search" className="text-xs text-emerald-700 dark:text-amber-400 font-semibold hover:underline">
+                          تصفح الدروس البديلة
+                        </Link>
                       </div>
-                      <span className={`w-3 h-3 rounded-full ${catTheme.dot} shadow-xs ring-4 ring-white dark:ring-stone-900`} />
-                    </div>
+                    ) : (
+                      khutabLessons.slice(0, 8).map((lesson) => (
+                        <Link
+                          key={lesson.id}
+                          to={`/lesson/${lesson.id}`}
+                          className="flex items-center justify-between py-2 px-1.5 hover:bg-stone-50 dark:hover:bg-[#1a261f] rounded-lg transition-colors group gap-2"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-amiri text-sm font-bold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-amber-300 transition-colors truncate">
+                              {lesson.title}
+                            </h4>
+                            {lesson.published_at && (
+                              <p className="text-[11px] text-stone-400 dark:text-stone-500 font-cairo">
+                                {formatArabicDate(lesson.published_at)}
+                              </p>
+                            )}
+                          </div>
 
-                    <h3 className="font-amiri text-2xl font-bold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-amber-400 transition-colors">
-                      {cat.name}
-                    </h3>
+                          <div className="flex items-center gap-1.5 shrink-0 text-stone-400 dark:text-stone-500 text-xs font-cairo">
+                            {typeof lesson.views === 'number' && (
+                              <span className="flex items-center gap-1 text-[11px]">
+                                <Eye className="w-3 h-3" />
+                                <span>{formatArabicViews(lesson.views)}</span>
+                              </span>
+                            )}
+                            <ArrowLeft className="w-3.5 h-3.5 text-stone-300 dark:text-stone-600 group-hover:text-emerald-700 dark:group-hover:text-amber-400 group-hover:translate-x-[-2px] transition-transform" />
+                          </div>
+                        </Link>
+                      ))
+                    )}
                   </div>
+                </PortalPanel>
+              </div>
+            </section>
 
-                  <div className="pt-6 mt-4 border-t border-stone-200/50 dark:border-stone-800/80 flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
-                    <span className="font-medium">
-                      {seriesCount} {seriesCount === 1 ? 'سلسلة علمية' : 'سلاسل علمية'}
-                    </span>
-                    <span className="font-semibold text-emerald-800 dark:text-amber-400 flex items-center gap-1 group-hover:translate-x-[-3px] transition-transform">
-                      <span>تصفح السلاسل</span>
-                      <ArrowLeft className="w-3.5 h-3.5" />
-                    </span>
+            {/* 4. CATEGORIES BLOCK "العلوم الشرعية" (Compact Grid: 4 per row desktop, 2 mobile) */}
+            <section id="categories" className="space-y-4 scroll-mt-24">
+              <div className="flex items-center justify-between border-b border-stone-200 dark:border-[#22302a] pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-800 text-amber-300 flex items-center justify-center">
+                    <Layers className="w-4 h-4" />
                   </div>
-                </Link>
-              );
-            })}
+                  <h2 className="font-amiri text-2xl font-bold text-stone-900 dark:text-stone-100">
+                    العلوم الشرعية والمتون
+                  </h2>
+                </div>
+                <span className="text-xs text-stone-500 dark:text-stone-400 font-cairo">
+                  {categories.length} تخصصات علمية
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4">
+                {portalCategories.map((cat) => {
+                  const catTheme = getCategoryColorTheme(cat.color);
+
+                  return (
+                    <Link
+                      key={cat.id}
+                      to={`/category/${cat.slug}`}
+                      className={`group p-4 rounded-xl ${catTheme.cardBg} border ${catTheme.cardBorder} hover:shadow-md transition-all flex flex-col justify-between`}
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div
+                            className={`w-9 h-9 rounded-lg flex items-center justify-center border ${catTheme.iconBg} ${catTheme.badgeBorder}`}
+                          >
+                            <BookOpen className="w-4 h-4" />
+                          </div>
+                          <span className={`w-2.5 h-2.5 rounded-full ${catTheme.dot}`} />
+                        </div>
+
+                        <h3 className="font-amiri text-lg font-bold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-amber-400 transition-colors">
+                          {cat.name}
+                        </h3>
+                      </div>
+
+                      <div className="pt-3 mt-3 border-t border-stone-200/50 dark:border-[#22302a] flex items-center justify-between text-[11px] text-stone-500 dark:text-stone-400 font-cairo">
+                        <span>
+                          {cat.seriesCount} سلاسل • {cat.lessonCount} درس
+                        </span>
+                        <ArrowLeft className="w-3.5 h-3.5 text-stone-400 group-hover:text-emerald-700 dark:group-hover:text-amber-400 group-hover:translate-x-[-2px] transition-transform" />
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* 5. PER-CATEGORY PANELS (2-Column Grid of Categories with Recent Lessons) */}
+            <section className="space-y-6">
+              <div className="flex items-center justify-between border-b border-stone-200 dark:border-[#22302a] pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
+                  <h2 className="font-amiri text-2xl font-bold text-stone-900 dark:text-stone-100">
+                    أقسام العلم والدروس التابعة لها
+                  </h2>
+                </div>
+                <span className="text-xs text-stone-500 dark:text-stone-400 font-cairo hidden sm:inline">
+                  أحدث المواد في كل فن شرعي
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {portalCategories
+                  .filter((cat) => cat.recentLessons.length > 0)
+                  .map((cat) => {
+                    const theme = getCategoryColorTheme(cat.color);
+
+                    return (
+                      <PortalPanel
+                        key={cat.id}
+                        title={cat.name}
+                        icon={<BookOpen className="w-4 h-4" />}
+                        headerBg={theme.headerBg}
+                        actionLink={`/category/${cat.slug}`}
+                        actionText="عرض القسم"
+                        footerLink={`/category/${cat.slug}`}
+                        footerText={`عرض كافة دروس ${cat.name} (${cat.lessonCount} درس)`}
+                      >
+                        <div className="divide-y divide-stone-100 dark:divide-[#22302a]/70 -mx-1">
+                          {cat.recentLessons.map((lesson) => (
+                            <Link
+                              key={lesson.id}
+                              to={`/lesson/${lesson.id}`}
+                              className="flex items-center justify-between py-2 px-1.5 hover:bg-stone-50 dark:hover:bg-[#1a261f] rounded-lg transition-colors group gap-2"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <h4 className="font-amiri text-sm font-bold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-amber-300 transition-colors truncate">
+                                  {lesson.title}
+                                </h4>
+                                <div className="flex items-center gap-2 text-[11px] text-stone-400 dark:text-stone-500 font-cairo">
+                                  {lesson.series?.title && (
+                                    <span className="truncate max-w-[130px]">{lesson.series.title}</span>
+                                  )}
+                                  {lesson.published_at && (
+                                    <span>• {formatArabicDate(lesson.published_at)}</span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-1.5 shrink-0 text-stone-400 dark:text-stone-500 text-xs font-cairo">
+                                {typeof lesson.views === 'number' && (
+                                  <span className="flex items-center gap-1 text-[11px]">
+                                    <Eye className="w-3 h-3" />
+                                    <span>{formatArabicViews(lesson.views)}</span>
+                                  </span>
+                                )}
+                                <ArrowLeft className="w-3.5 h-3.5 text-stone-300 dark:text-stone-600 group-hover:text-emerald-700 dark:group-hover:text-amber-400 group-hover:translate-x-[-2px] transition-transform" />
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </PortalPanel>
+                    );
+                  })}
+              </div>
+            </section>
           </div>
-        </section>
+
+          {/* 6. SIDEBAR (4 cols in 12-col grid; right in RTL, stacks below on mobile) */}
+          <div className="order-2 lg:col-span-4">
+            <PublicSidebar categories={categories} latestLessons={latestLessons} />
+          </div>
+        </div>
       </div>
     </div>
   );

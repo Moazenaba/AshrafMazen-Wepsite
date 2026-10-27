@@ -30,6 +30,8 @@ export type Lesson = {
   status: LessonStatus;
   published_at: string | null;
   created_at: string;
+  views?: number;
+  featured?: boolean;
 };
 
 export type AdminUser = {
