@@ -265,3 +265,6 @@ export const normalizeArabic = (text: string | null | undefined): string =>
     .replace(/ى/g, 'ي')
     .replace(/ة/g, 'ه')
     .toLowerCase();
+
+// A number in Arabic-Indic digits
+export const arabicNumber = (n: number): string => new Intl.NumberFormat('ar-EG').format(n);

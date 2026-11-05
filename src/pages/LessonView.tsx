@@ -1,35 +1,23 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, Share2, Copy, Check, Bookmark, Clock } from 'lucide-react';
-import {
-  getLesson,
-  getSeries,
-  getCategory,
-  getLessonsBySeries,
-  incrementLessonViews,
-} from '../services/dataService';
-import {
-  getArabicLessonOrdinal,
-  formatArabicDate,
-  formatArabicCount,
-  formatAudioTime,
-  COUNT_FORMS,
-} from '../utils/helpers';
+import { ChevronLeft, Share2, Copy, Check, Bookmark } from 'lucide-react';
+import { getArabicLessonOrdinal, formatArabicDate, formatArabicCount, COUNT_FORMS } from '../utils/helpers';
 import { AudioPlayer, type MediaHandle } from '../components/AudioPlayer';
 import { VideoPlayer } from '../components/VideoPlayer';
 import { useBookmarks } from '../services/bookmarkService';
-import { saveRecentLesson } from '../services/recentLessonService';
-import {
-  getResumeSeconds,
-  saveLessonPosition,
-  markLessonWatched,
-  isLessonWatched,
-} from '../services/progressService';
+import { saveLessonPosition, markLessonWatched, isLessonWatched } from '../services/progressService';
 import { activeChapterIndex } from '../utils/chapters';
 import { createPlaybackMeter, trackReading, trackView } from '../services/analytics';
 import { ReportLink } from '../components/ReportLink';
 import { getYouTubeId, getYouTubeThumbnail } from '../lib/youtube';
-import type { Lesson, LessonChapter, Series, Category } from '../types';
+import { type Lesson, type LessonChapter, type Series } from '../types';
+import { ChapterList } from './lesson/ChapterList';
+import { ReadingNow } from './lesson/ReadingNow';
+import { AutoNextBanner } from './lesson/AutoNextBanner';
+import { LessonNav } from './lesson/LessonNav';
+import { SeriesLessonsList } from './lesson/SeriesLessonsList';
+import { useLessonData } from './lesson/useLessonData';
+import { excerpt, buildVideoJsonLd } from './lesson/seo';
 
 type TabType = 'video' | 'audio' | 'transcript';
 
@@ -56,56 +44,17 @@ function readStoredFontSize(): number {
   return DEFAULT_FONT_SIZE;
 }
 
-function excerpt(text: string | null | undefined, max = 160): string {
-  const clean = (text || '').replace(/\s+/g, ' ').trim();
-  return clean.length > max ? `${clean.slice(0, max).trim()}…` : clean;
-}
-
-// What search engines read for a video lesson, including the chapters as key moments
-function buildVideoJsonLd(
-  lesson: Lesson,
-  series: Series,
-  videoId: string,
-  chapters: LessonChapter[],
-  pageUrl: string
-): Record<string, unknown> {
-  const thumbnail = getYouTubeThumbnail(lesson.youtube_url);
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'VideoObject',
-    name: lesson.title,
-    description: excerpt(lesson.transcript) || `${series.title} - الشيخ أشرف مازن`,
-    thumbnailUrl: thumbnail ? [thumbnail] : undefined,
-    uploadDate: lesson.published_at || lesson.created_at,
-    inLanguage: 'ar',
-    url: pageUrl,
-    embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}`,
-    contentUrl: `https://www.youtube.com/watch?v=${videoId}`,
-    hasPart: chapters.map((c) => ({
-      '@type': 'Clip',
-      name: c.title,
-      startOffset: c.seconds,
-      url: `${pageUrl}?t=${c.seconds}`,
-    })),
-  };
-}
-
 export const LessonView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   // ?t=<seconds> opens the lesson at that moment (the chapter links given to search engines use it)
   const [searchParams] = useSearchParams();
   const linkedSecond = Math.max(0, Math.floor(Number(searchParams.get('t')) || 0));
-  const [lesson, setLesson] = useState<Lesson | null>(null);
-  const [series, setSeries] = useState<Series | null>(null);
-  const [category, setCategory] = useState<Category | null>(null);
-  const [seriesLessons, setSeriesLessons] = useState<Lesson[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>('video');
   const [fontSize, setFontSize] = useState<number>(readStoredFontSize);
   const [isCopied, setIsCopied] = useState(false);
   const [isShareCopied, setIsShareCopied] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [resumeAt, setResumeAt] = useState(0);
+  const { lesson, series, category, seriesLessons, loading, resumeAt } = useLessonData(id, linkedSecond);
   const [position, setPosition] = useState({ seconds: 0, duration: 0 });
   const [countdown, setCountdown] = useState<number | null>(null);
 
@@ -124,67 +73,20 @@ export const LessonView: React.FC = () => {
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const bookmarked = lesson ? isBookmarked(lesson.id) : false;
 
+  // A new lesson starts from the beginning, with no countdown running
   useEffect(() => {
-    let isMounted = true;
-    async function loadLessonData() {
-      if (!id) return;
-      try {
-        setLoading(true);
-        setPosition({ seconds: 0, duration: 0 });
-        setCountdown(null);
-        lastSavedRef.current = 0;
-
-        // Visitors must never see lessons with status 'draft' -> includeDrafts = false
-        // Drafts are asked for too: the database returns them only to an admin (a visitor gets nothing back),
-        // so the admin can preview a lesson before publishing it
-        const l = await getLesson(id, true);
-        if (!l) {
-          if (isMounted) {
-            setLesson(null);
-            setLoading(false);
-          }
-          return;
-        }
-
-        // Counted once per browser session, and only for a lesson that exists and is published
-        if (l.status === 'published') incrementLessonViews(l.id);
-
-        const [s, pubLessons] = await Promise.all([
-          getSeries(l.series_id),
-          getLessonsBySeries(l.series_id, false),
-        ]);
-
-        let cat: Category | null = null;
-        if (s) {
-          cat = await getCategory(s.category_id);
-        }
-
-        if (isMounted) {
-          setLesson(l);
-          setSeries(s);
-          setCategory(cat);
-          setSeriesLessons(pubLessons);
-          setResumeAt(linkedSecond || getResumeSeconds(l.id));
-          saveRecentLesson({ id: l.id, title: l.title, seriesTitle: s?.title });
-
-          // Open on the first kind of media the lesson actually has
-          if (l.youtube_url) setActiveTab('video');
-          else if (l.audio_url) setActiveTab('audio');
-          else setActiveTab('transcript');
-        }
-      } catch (err) {
-        console.error('Failed to load lesson:', err);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-
-    loadLessonData();
-
-    return () => {
-      isMounted = false;
-    };
+    setPosition({ seconds: 0, duration: 0 });
+    setCountdown(null);
+    lastSavedRef.current = 0;
   }, [id]);
+
+  // Open on the first kind of media the lesson actually has
+  useEffect(() => {
+    if (!lesson) return;
+    if (lesson.youtube_url) setActiveTab('video');
+    else if (lesson.audio_url) setActiveTab('audio');
+    else setActiveTab('transcript');
+  }, [lesson?.id]);
 
   // Previous and next published lessons in this series
   const currentIndex = seriesLessons.findIndex((l) => l.id === lesson?.id);
@@ -541,145 +443,23 @@ export const LessonView: React.FC = () => {
 
       {/* Chapters: jump straight to a part of the lesson */}
       {isMediaTab && chapters.length > 0 && (
-        <section aria-labelledby="chapters-heading" className="card p-4 sm:p-5 space-y-3">
-          <h2 id="chapters-heading" className="flex items-center gap-2 font-semibold text-stone-900 dark:text-stone-100">
-            <Clock className="w-5 h-5 text-emerald-800 dark:text-amber-400" aria-hidden="true" />
-            <span>فصول الدرس</span>
-          </h2>
-          <ol className="space-y-1">
-            {chapters.map((chapter, i) => (
-              <li key={`${chapter.seconds}-${i}`}>
-                <button
-                  type="button"
-                  onClick={() => seekTo(chapter.seconds)}
-                  aria-current={i === currentChapter ? 'true' : undefined}
-                  className={`w-full flex items-baseline gap-4 px-3 py-2.5 rounded-xl text-start transition-colors ${
-                    i === currentChapter
-                      ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 font-semibold'
-                      : 'text-stone-800 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'
-                  }`}
-                >
-                  <span className="shrink-0 w-16 text-sm text-stone-600 dark:text-stone-400 tabular-nums">
-                    {formatAudioTime(chapter.seconds)}
-                  </span>
-                  <span>{chapter.title}</span>
-                </button>
-              </li>
-            ))}
-          </ol>
-        </section>
+        <ChapterList chapters={chapters} currentChapter={currentChapter} onSeek={seekTo} />
       )}
 
       {/* The paragraph being read, estimated from playback, with a way into the full text */}
       {isMediaTab && activeParagraph >= 0 && paragraphs.length > 0 && (
-        <section aria-labelledby="reading-now-heading" className="card p-4 sm:p-6 space-y-2 sm:space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 id="reading-now-heading" className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
-              الفقرة الحالية من التفريغ <span className="font-normal text-stone-500 dark:text-stone-400">(تقريبية)</span>
-            </h2>
-            <button
-              type="button"
-              onClick={() => setActiveTab('transcript')}
-              className="link-grow inline-flex items-center min-h-11 text-sm font-semibold text-emerald-800 dark:text-emerald-300"
-            >
-              اقرأ التفريغ كاملاً
-            </button>
-          </div>
-          <p className="font-amiri text-lg leading-loose text-stone-900 dark:text-stone-100 line-clamp-3">
-            {paragraphs[activeParagraph]}
-          </p>
-        </section>
+        <ReadingNow paragraph={paragraphs[activeParagraph]} onOpenTranscript={() => setActiveTab('transcript')} />
       )}
 
       {/* Auto-next: the next lesson starts unless the visitor cancels */}
       {countdown !== null && nextLesson && (
-        <section aria-label="الدرس التالي" className="card p-5 flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-1 min-w-0">
-            <p className="text-sm text-stone-600 dark:text-stone-400">
-              الدرس التالي بعد {new Intl.NumberFormat('ar-EG').format(countdown)} ثوانٍ
-            </p>
-            <p className="font-semibold text-stone-900 dark:text-stone-100">{nextLesson.title}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setCountdown(null)}
-              className="press inline-flex items-center h-11 px-4 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold"
-            >
-              إلغاء
-            </button>
-            <Link
-              to={`/lesson/${nextLesson.id}`}
-              className="press inline-flex items-center h-11 px-5 rounded-xl bg-emerald-800 hover:bg-emerald-900 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-semibold"
-            >
-              ابدأ الآن
-            </Link>
-          </div>
-        </section>
+        <AutoNextBanner countdown={countdown} nextLesson={nextLesson} onCancel={() => setCountdown(null)} />
       )}
 
-      {(prevLesson || nextLesson) && (
-        <nav aria-label="التنقل بين دروس السلسلة" data-reveal className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
-          {prevLesson ? (
-            <Link
-              to={`/lesson/${prevLesson.id}`}
-              className="card block p-4 sm:p-5"
-            >
-              <span className="block text-sm text-stone-600 dark:text-stone-400">السابق</span>
-              <span className="block mt-1 font-semibold text-stone-900 dark:text-stone-100">{prevLesson.title}</span>
-            </Link>
-          ) : (
-            <span className="hidden sm:block" />
-          )}
-          {nextLesson && (
-            <Link
-              to={`/lesson/${nextLesson.id}`}
-              className="card block p-4 sm:p-5 sm:text-left"
-            >
-              <span className="block text-sm text-stone-600 dark:text-stone-400">التالي</span>
-              <span className="block mt-1 font-semibold text-stone-900 dark:text-stone-100">{nextLesson.title}</span>
-            </Link>
-          )}
-        </nav>
-      )}
+      <LessonNav prev={prevLesson} next={nextLesson} />
 
       {seriesLessons.length > 1 && (
-        <section aria-labelledby="series-lessons-heading" data-reveal className="space-y-3 sm:space-y-4">
-          <div className="flex items-baseline justify-between gap-4">
-            <h2 id="series-lessons-heading" className="font-amiri text-2xl sm:text-3xl font-bold text-emerald-950 dark:text-stone-100">
-              دروس {series.title}
-            </h2>
-            <span className="text-sm text-stone-600 dark:text-stone-400">
-              {formatArabicCount(seriesLessons.length, COUNT_FORMS.lesson)}
-            </span>
-          </div>
-          <ol className="card p-2 sm:p-3">
-            {seriesLessons.map((item) => {
-              const isCurrent = item.id === lesson.id;
-              return (
-                <li key={item.id}>
-                  <Link
-                    to={`/lesson/${item.id}`}
-                    aria-current={isCurrent ? 'page' : undefined}
-                    className={`flex items-baseline gap-3 sm:gap-4 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl transition-colors ${
-                      isCurrent
-                        ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 font-semibold'
-                        : 'text-stone-800 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'
-                    }`}
-                  >
-                    <span className="w-8 shrink-0 text-stone-500 dark:text-stone-400 tabular-nums">
-                      {new Intl.NumberFormat('ar-EG').format(item.lesson_number)}
-                    </span>
-                    <span className="flex-1 min-w-0">{item.title}</span>
-                    {watchedIds.has(item.id) && (
-                      <Check className="w-4 h-4 shrink-0 self-center text-emerald-700 dark:text-emerald-400" aria-label="تمّت متابعته" />
-                    )}
-                  </Link>
-                </li>
-              );
-            })}
-          </ol>
-        </section>
+        <SeriesLessonsList seriesTitle={series.title} lessons={seriesLessons} currentId={lesson.id} watchedIds={watchedIds} />
       )}
       <ReportLink />
     </article>
