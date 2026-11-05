@@ -28,7 +28,7 @@ export const AudioLibrary: React.FC = () => {
   const [category, setCategory] = useState('');
 
   useEffect(() => {
-    document.title = 'الصوتيات - الشيخ أشرف مازن';
+    document.title = 'دروس صوتية - الشيخ أشرف مازن';
     getAudioLessons()
       .then(setLessons)
       .catch(() => setFailed(true))

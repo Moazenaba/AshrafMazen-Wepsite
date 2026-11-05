@@ -24,8 +24,7 @@ const origins = [
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:4173',
-  'https://sheikh-mazen.org',
-  'https://www.sheikh-mazen.org',
+  'https://ashraf-mazen.vercel.app',
   'https://*.vercel.app',
   ...(process.env.R2_CORS_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean),
 ];

@@ -184,7 +184,7 @@ export const BannerSettings: React.FC = () => {
                     <span>تغيير</span>
                     <input
                       type="file"
-                      accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                      accept="image/png,image/jpeg,image/webp"
                       onChange={handleLogoUpload}
                       disabled={uploadingLogo}
                       className="hidden"
@@ -205,7 +205,7 @@ export const BannerSettings: React.FC = () => {
                 <input
                   type="file"
                   id="logo-upload"
-                  accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                  accept="image/png,image/jpeg,image/webp"
                   onChange={handleLogoUpload}
                   disabled={uploadingLogo}
                   className="hidden"

@@ -1,0 +1,16 @@
+# الشيخ أشرف مازن
+
+> الموقع الرسمي للشيخ أشرف مازن: دروس وشروحات وخطب ومحاضرات علمية مرئية ومسموعة ومكتوبة، ومكتبة كتب بصيغة PDF. المحتوى بالعربية.
+
+## الأقسام الرئيسية
+
+- [الصفحة الرئيسية](https://ashraf-mazen.vercel.app/): أحدث الدروس والخطب والأقسام العلمية
+- [المرئيات](https://ashraf-mazen.vercel.app/videos): فيديوهات قناة الشيخ وقوائم التشغيل
+- [الصوتيات](https://ashraf-mazen.vercel.app/audio): الدروس والمحاضرات الصوتية
+- [المكتبة](https://ashraf-mazen.vercel.app/books): كتب ورسائل بصيغة PDF
+- [البحث](https://ashraf-mazen.vercel.app/search): البحث في الدروس والفيديوهات والكتب
+
+## معلومات للزواحف
+
+- [خريطة الموقع](https://ashraf-mazen.vercel.app/sitemap.xml)
+- [robots.txt](https://ashraf-mazen.vercel.app/robots.txt)

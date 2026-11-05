@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { TurnstileWidget, turnstileEnabled } from '../components/TurnstileWidget';
 import { useSearchParams } from 'react-router-dom';
 import { Check, Loader2 } from 'lucide-react';
 
@@ -29,6 +30,8 @@ export const Contribute: React.FC = () => {
   const [target, setTarget] = useState(params.get('target') || '');
   const [contact, setContact] = useState('');
   const [website, setWebsite] = useState(''); // the hidden field: only bots fill it
+  const [turnstile, setTurnstile] = useState('');
+  const [widgetKey, setWidgetKey] = useState(0); // a new widget after a failed send: the old token is used up
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
@@ -54,13 +57,15 @@ export const Contribute: React.FC = () => {
       const response = await fetch('/api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kind, title, url, author, details, target, contact, website, t: openedAt.current }),
+        body: JSON.stringify({ kind, title, url, author, details, target, contact, website, turnstile, t: openedAt.current }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'تعذّر إرسال الطلب. حاول مرة أخرى.');
       setDone(true);
     } catch (err: any) {
       setError(err?.message || 'تعذّر إرسال الطلب. حاول مرة أخرى.');
+      setTurnstile('');
+      setWidgetKey((k) => k + 1);
     } finally {
       setSending(false);
     }
@@ -222,9 +227,11 @@ export const Contribute: React.FC = () => {
           </p>
         )}
 
+        <TurnstileWidget key={widgetKey} onToken={setTurnstile} />
+
         <button
           type="submit"
-          disabled={sending}
+          disabled={sending || (turnstileEnabled && !turnstile)}
           className="press inline-flex items-center justify-center gap-2 h-12 px-8 rounded-lg bg-mushaf hover:bg-mushaf-deep text-gold-soft font-bold disabled:opacity-60"
         >
           {sending && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}

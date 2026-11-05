@@ -1,49 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
-    <loc>https://sheikh-mazen.org/</loc>
+    <loc>https://ashraf-mazen.vercel.app/</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/videos</loc>
+    <loc>https://ashraf-mazen.vercel.app/videos</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/audio</loc>
+    <loc>https://ashraf-mazen.vercel.app/audio</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/books</loc>
+    <loc>https://ashraf-mazen.vercel.app/books</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/search</loc>
+    <loc>https://ashraf-mazen.vercel.app/search</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/category/aqeedah</loc>
+    <loc>https://ashraf-mazen.vercel.app/category/aqeedah</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/category/fiqh</loc>
+    <loc>https://ashraf-mazen.vercel.app/category/fiqh</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/category/usul-fiqh</loc>
+    <loc>https://ashraf-mazen.vercel.app/category/usul-fiqh</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/category/mustalah</loc>
+    <loc>https://ashraf-mazen.vercel.app/category/mustalah</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/category/khutab</loc>
+    <loc>https://ashraf-mazen.vercel.app/category/khutab</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/category/%D9%85%D8%B5%D8%B7%D9%84%D8%AD-%D8%A7%D9%84%D8%AD%D8%AF%D9%8A%D8%AB</loc>
+    <loc>https://ashraf-mazen.vercel.app/category/%D9%85%D8%B5%D8%B7%D9%84%D8%AD-%D8%A7%D9%84%D8%AD%D8%AF%D9%8A%D8%AB</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/series/test</loc>
+    <loc>https://ashraf-mazen.vercel.app/series/test</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/series/%D9%85%D8%B5%D8%B7%D9%84%D8%AD</loc>
+    <loc>https://ashraf-mazen.vercel.app/series/%D9%85%D8%B5%D8%B7%D9%84%D8%AD</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/series/%D8%AE%D8%B7%D8%A8-%D8%A7%D9%84%D8%AC%D9%85%D8%B9%D8%A9</loc>
+    <loc>https://ashraf-mazen.vercel.app/series/%D8%AE%D8%B7%D8%A8-%D8%A7%D9%84%D8%AC%D9%85%D8%B9%D8%A9</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/lesson/c8d2d6c5-3628-40a1-8166-def7488192ce</loc>
+    <loc>https://ashraf-mazen.vercel.app/lesson/c8d2d6c5-3628-40a1-8166-def7488192ce</loc>
     <lastmod>2026-10-27</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/pyWf1uZYg2U/hqdefault.jpg</video:thumbnail_loc>
@@ -54,7 +54,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/lesson/9bd0e144-91f6-42b2-a9db-b0e0d7348c74</loc>
+    <loc>https://ashraf-mazen.vercel.app/lesson/9bd0e144-91f6-42b2-a9db-b0e0d7348c74</loc>
     <lastmod>2026-10-27</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/loVFoAlqeCc/hqdefault.jpg</video:thumbnail_loc>
@@ -65,10 +65,10 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/playlist/PLHcd1VuAeT_NcmgwOimYSUQVJVK9WwM3_</loc>
+    <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_NcmgwOimYSUQVJVK9WwM3_</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/KN3BR-84F5w</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/KN3BR-84F5w</loc>
     <lastmod>2026-11-02</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/KN3BR-84F5w/hqdefault.jpg</video:thumbnail_loc>
@@ -79,7 +79,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/7mVnceb1DWk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/7mVnceb1DWk</loc>
     <lastmod>2026-10-17</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/7mVnceb1DWk/hqdefault.jpg</video:thumbnail_loc>
@@ -90,7 +90,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/11X_z7c6rw8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/11X_z7c6rw8</loc>
     <lastmod>2026-10-11</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/11X_z7c6rw8/hqdefault.jpg</video:thumbnail_loc>
@@ -101,7 +101,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/y_TaZ9R0zTE</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/y_TaZ9R0zTE</loc>
     <lastmod>2026-10-04</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/y_TaZ9R0zTE/hqdefault.jpg</video:thumbnail_loc>
@@ -112,7 +112,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/lRTsR23M1Cc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/lRTsR23M1Cc</loc>
     <lastmod>2026-09-12</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/lRTsR23M1Cc/hqdefault.jpg</video:thumbnail_loc>
@@ -123,7 +123,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/wSmwDem_T5k</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/wSmwDem_T5k</loc>
     <lastmod>2026-09-06</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/wSmwDem_T5k/hqdefault.jpg</video:thumbnail_loc>
@@ -134,7 +134,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Pl2oSOA6rRA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Pl2oSOA6rRA</loc>
     <lastmod>2026-08-28</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Pl2oSOA6rRA/hqdefault.jpg</video:thumbnail_loc>
@@ -145,7 +145,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/hj0ATjfj170</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/hj0ATjfj170</loc>
     <lastmod>2026-08-09</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/hj0ATjfj170/hqdefault.jpg</video:thumbnail_loc>
@@ -156,7 +156,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/8XsvQz_m0rU</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/8XsvQz_m0rU</loc>
     <lastmod>2026-08-01</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/8XsvQz_m0rU/hqdefault.jpg</video:thumbnail_loc>
@@ -167,7 +167,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/lYgTeMMi8FM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/lYgTeMMi8FM</loc>
     <lastmod>2026-07-25</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/lYgTeMMi8FM/hqdefault.jpg</video:thumbnail_loc>
@@ -178,7 +178,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ejNz3l3UEyw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ejNz3l3UEyw</loc>
     <lastmod>2026-07-18</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ejNz3l3UEyw/hqdefault.jpg</video:thumbnail_loc>
@@ -189,7 +189,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/vRAQljQRiCs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/vRAQljQRiCs</loc>
     <lastmod>2026-07-12</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/vRAQljQRiCs/hqdefault.jpg</video:thumbnail_loc>
@@ -200,7 +200,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/BT__sySn99U</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/BT__sySn99U</loc>
     <lastmod>2026-06-27</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/BT__sySn99U/hqdefault.jpg</video:thumbnail_loc>
@@ -211,7 +211,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/GH5dq5ri-fw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/GH5dq5ri-fw</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/GH5dq5ri-fw/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة| فقه الهجرة إلى الله| #الشيخ_أشرف_مازن</video:title>
@@ -221,7 +221,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/YHTFHmg4hlI</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/YHTFHmg4hlI</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/YHTFHmg4hlI/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة | أثر استقرار الأسرة في بناء الإنسان | #الشيخ_أشرف_مازن</video:title>
@@ -231,7 +231,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Oi0nKaIVmRc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Oi0nKaIVmRc</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Oi0nKaIVmRc/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة | كن راضيا وإياك والتباهي | #الشيخ_أشرف_مازن</video:title>
@@ -241,7 +241,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/jNP_beDMoGY</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/jNP_beDMoGY</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/jNP_beDMoGY/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة/ رمضان شهرالإرادة والكرم/#الشيخ_أشرف_مازن</video:title>
@@ -251,7 +251,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/WFavJMC0QE8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/WFavJMC0QE8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/WFavJMC0QE8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة/ أيام الله فى رمضان/#الشيخ_أشرف_مازن</video:title>
@@ -261,7 +261,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/IeeRWIwAgls</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/IeeRWIwAgls</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/IeeRWIwAgls/hqdefault.jpg</video:thumbnail_loc>
       <video:title>الحفاظ على مصر من الإيمان/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -271,7 +271,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/YDHtMoqatJc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/YDHtMoqatJc</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/YDHtMoqatJc/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة /جرائم التحرش الإلكترونى/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -281,7 +281,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/mrn6OjrtN1s</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/mrn6OjrtN1s</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/mrn6OjrtN1s/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة | حقــــــوق اليتـــــــامى | #الشيخ_أشرف_مازن | جودة الملف FULL HD</video:title>
@@ -291,7 +291,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/o3QMJ6jIHMs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/o3QMJ6jIHMs</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/o3QMJ6jIHMs/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة النصوص الشرعية بين الفهم الصحيح وسوء التأويل</video:title>
@@ -301,7 +301,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/l3GiOKzo8e8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/l3GiOKzo8e8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/l3GiOKzo8e8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>ملخص خطبة الجمعة حقـــــوق اليتــــــــامى 1 الشيخ أشرف مازن</video:title>
@@ -311,7 +311,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ZWFkuK4ZDMc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ZWFkuK4ZDMc</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ZWFkuK4ZDMc/hqdefault.jpg</video:thumbnail_loc>
       <video:title>سعة رحمة الله باب الأمل وسبيل النجاة/#الشيخ_أشرف_مازن</video:title>
@@ -321,7 +321,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/P8cRoGTtjD0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/P8cRoGTtjD0</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/P8cRoGTtjD0/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة | الأرض المباركة|# لفضيلةالشيخ_أشرف_مازن</video:title>
@@ -331,7 +331,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/3IxVlGJ8pfI</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/3IxVlGJ8pfI</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/3IxVlGJ8pfI/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة| إتقان العمل واجب ديني وحضارى|#الشيخ_أشرف_مازن</video:title>
@@ -341,7 +341,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/zySPAkgahl0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/zySPAkgahl0</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/zySPAkgahl0/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة /جبر الخواطر/# الشيخ أشرف -مازن</video:title>
@@ -351,7 +351,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/5gyjeIbnTcc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/5gyjeIbnTcc</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/5gyjeIbnTcc/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة /المهن فى الإسلام طريق العمران والإيمان معا /# الشيخ - أشرف - مازن</video:title>
@@ -361,7 +361,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/GpgtKhJzMNk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/GpgtKhJzMNk</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/GpgtKhJzMNk/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة /بطولات لاتنس/# لفضيلة الشيخ - أشرف -مازن</video:title>
@@ -371,7 +371,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/4r6m4PAB9Y0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/4r6m4PAB9Y0</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/4r6m4PAB9Y0/hqdefault.jpg</video:thumbnail_loc>
       <video:title>ملخص خطبة الجمعة | النبى معلما ومربيا | #الشيخ_أشرف_مازن | جودة الملف FULL HD</video:title>
@@ -381,7 +381,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/YTUZvqt3_3I</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/YTUZvqt3_3I</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/YTUZvqt3_3I/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة | استقبال شهر رمضان | #الشيخ_أشرف_مازن</video:title>
@@ -391,7 +391,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/HTrNNRuWr1w</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/HTrNNRuWr1w</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/HTrNNRuWr1w/hqdefault.jpg</video:thumbnail_loc>
       <video:title>Friday Sermon | Calling to God with wisdom and good counsel | #Sheikh_Ashraf_Mazen FULL HD File Q...</video:title>
@@ -401,7 +401,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/AULACydfWvo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/AULACydfWvo</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/AULACydfWvo/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة/سماحة الإسلام/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -411,7 +411,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/0eNK9rzp-pw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/0eNK9rzp-pw</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/0eNK9rzp-pw/hqdefault.jpg</video:thumbnail_loc>
       <video:title>ملخص خطبة الجمعة | واعتصموا بحبل الله جميعا ولا تفرقوا| #الشيخ_أشرف_بن_طه_آل_مازن</video:title>
@@ -421,7 +421,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/l3vqri7VoPY</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/l3vqri7VoPY</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/l3vqri7VoPY/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة/ كن رجلا/بمسجد عثمان بن عفان بكفر زلابية بأشمون/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -431,7 +431,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/3oFnzZW30Gc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/3oFnzZW30Gc</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/3oFnzZW30Gc/hqdefault.jpg</video:thumbnail_loc>
       <video:title>ملخص خطبة الجمعة | إن الدين يسر | #الشيخ_أشرف_بن_طه_آل_مازن</video:title>
@@ -441,7 +441,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/k3owGUBk-dg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/k3owGUBk-dg</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/k3owGUBk-dg/hqdefault.jpg</video:thumbnail_loc>
       <video:title>ملخص خطبة الجمعة | الخمر وأضرارها| #الشخ_أشرف_بن_طه_آل_مازن</video:title>
@@ -451,7 +451,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/2wAnusrcOak</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/2wAnusrcOak</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/2wAnusrcOak/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة/اليقين/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -461,7 +461,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/joCmJj8BObY</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/joCmJj8BObY</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/joCmJj8BObY/hqdefault.jpg</video:thumbnail_loc>
       <video:title>ملخص خطبة الجمعة | الحفاظ على مصر من الإيمان | #الشيخ_أشرف_مازن</video:title>
@@ -471,7 +471,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/0-_yz1mbdKE</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/0-_yz1mbdKE</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/0-_yz1mbdKE/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة /الدفاع عن الأوطان/ # لفضيلة الشيخ أشرف -مازن</video:title>
@@ -481,7 +481,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/wiZfLoIxUBY</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/wiZfLoIxUBY</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/wiZfLoIxUBY/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة /صحح مفاهيمك/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -491,7 +491,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/9gsIUSips3A</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/9gsIUSips3A</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/9gsIUSips3A/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة / بالتى هى أحسن/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -501,7 +501,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/YMmCIB35eb8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/YMmCIB35eb8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/YMmCIB35eb8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة | البيئة هى الأم الكبرى | #الشيخ_أشرف_مازن</video:title>
@@ -511,7 +511,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/AHk0jADP70w</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/AHk0jADP70w</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/AHk0jADP70w/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة /ما أنزلنا عليك القرآن لتشقى/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -521,7 +521,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/IQJQaG-lZFw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/IQJQaG-lZFw</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/IQJQaG-lZFw/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة/ أهمية الوقت وادمان السوشال مديا/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -531,7 +531,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/cZ79cw0pzkQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/cZ79cw0pzkQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/cZ79cw0pzkQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة/ هلا شققت عن قلبة/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -541,7 +541,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/nm0_GdCcQlc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/nm0_GdCcQlc</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/nm0_GdCcQlc/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة /كيف تكون جميلا؟/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -551,7 +551,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Zv1niez-zBs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Zv1niez-zBs</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Zv1niez-zBs/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة /احترام الكبير/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -561,7 +561,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/fHIGI-BQmTs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/fHIGI-BQmTs</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/fHIGI-BQmTs/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة /العقول المحمدية/ # لفضيلة الشيخ أشرف -مازن</video:title>
@@ -571,7 +571,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/gXi2fitS16w</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/gXi2fitS16w</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/gXi2fitS16w/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة/ التطرف ليس فى الدين فقط/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -581,7 +581,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/HeUIZSWlbC8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/HeUIZSWlbC8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/HeUIZSWlbC8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>ملخص خطبة الجمعة |استجابة الصحابة لتحويل القبلة |#الشيخ_أشرف_مازن</video:title>
@@ -591,7 +591,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/o2zUrv7YOeQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/o2zUrv7YOeQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/o2zUrv7YOeQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة: كيف نستعيد قيمنا وأخلاقنا الجميلة؟ - الشيخ أشرف بن مازن</video:title>
@@ -601,7 +601,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/fiXK3lpN3fE</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/fiXK3lpN3fE</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/fiXK3lpN3fE/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة: الصدق في الأقوال والأفعال والهمم - الشيخ أشرف بن مازن</video:title>
@@ -611,7 +611,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/hMDqDLIgVe4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/hMDqDLIgVe4</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/hMDqDLIgVe4/hqdefault.jpg</video:thumbnail_loc>
       <video:title>فضل سوره الحجرات الشيخ اشرف مازن 6_3_2020</video:title>
@@ -621,7 +621,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/amBmMAsvFOY</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/amBmMAsvFOY</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/amBmMAsvFOY/hqdefault.jpg</video:thumbnail_loc>
       <video:title>من سنن الله تعالى الكونية6 12 2019</video:title>
@@ -631,7 +631,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/dnxQzoctyv4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/dnxQzoctyv4</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/dnxQzoctyv4/hqdefault.jpg</video:thumbnail_loc>
       <video:title>فقه بناء الدول 11 10</video:title>
@@ -641,7 +641,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/UDQIaDvu3iE</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/UDQIaDvu3iE</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/UDQIaDvu3iE/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة عن ذكر الله تعالى وأثره في استقامة النفس البشرية بتاريخ 18 10</video:title>
@@ -651,7 +651,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/649Qx8bI1aQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/649Qx8bI1aQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/649Qx8bI1aQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة بتاريخ 11 10 2019 بأسم فقه بناء الدول</video:title>
@@ -661,7 +661,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/4hhyQNRS97k</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/4hhyQNRS97k</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/4hhyQNRS97k/hqdefault.jpg</video:thumbnail_loc>
       <video:title>حقوق الوالدين وذوي الأرحام29 11 2019</video:title>
@@ -671,7 +671,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/4f09b6rfgGo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/4f09b6rfgGo</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/4f09b6rfgGo/hqdefault.jpg</video:thumbnail_loc>
       <video:title>ترويج الاشاعات والاكاذيب27 9 2019</video:title>
@@ -681,7 +681,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/co2NMfWgkMw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/co2NMfWgkMw</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/co2NMfWgkMw/hqdefault.jpg</video:thumbnail_loc>
       <video:title>الدروس المستفاده من حجه الوداع|الشيخ اشرف مازن|8ذوالحجه1440الموافق9/8/2019</video:title>
@@ -691,7 +691,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/RLvO6tA5TKw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/RLvO6tA5TKw</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/RLvO6tA5TKw/hqdefault.jpg</video:thumbnail_loc>
       <video:title>ماذا بعد الحج|الشيخ اشرف ن طه أل مازن|15ذو الحجه1440الموافق16/8/2019</video:title>
@@ -701,7 +701,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/A_Ord5UyT28</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/A_Ord5UyT28</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/A_Ord5UyT28/hqdefault.jpg</video:thumbnail_loc>
       <video:title>حرمه الدماء في الاسلام|الشيخ اشرف مازن</video:title>
@@ -711,7 +711,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/FPSbrxsRbjA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/FPSbrxsRbjA</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/FPSbrxsRbjA/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شروط قبول العمل|الشيخ اشرف مازن</video:title>
@@ -721,7 +721,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/aV22pDpi0Hg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/aV22pDpi0Hg</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/aV22pDpi0Hg/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شهاده النبى صلى الله عليه وسلم لاصحابه|الشيخ اشرف مازن|10شوال1440الموافق 14 6 2019</video:title>
@@ -731,7 +731,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/FYpaN0-j0QU</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/FYpaN0-j0QU</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/FYpaN0-j0QU/hqdefault.jpg</video:thumbnail_loc>
       <video:title>ماذا عن شوال|الشيخ اشرف مازن| 4شوال 1440الموافق 7 6 2019</video:title>
@@ -741,7 +741,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/RmIlMu_eQQ8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/RmIlMu_eQQ8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/RmIlMu_eQQ8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>ماذا بعد رمضان|الشيخ اشرف مازن| 4شوال 1440 الموافق7 6 2019</video:title>
@@ -751,7 +751,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/RUem0jj6epc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/RUem0jj6epc</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/RUem0jj6epc/hqdefault.jpg</video:thumbnail_loc>
       <video:title>رمضان شهر البركه والصله والتعرض لرحمات الله|الشيخ اشرف مازن| 26رمضان 1440 الموافق 31 5 2019</video:title>
@@ -761,7 +761,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/xAsSRwPJ0FM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/xAsSRwPJ0FM</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/xAsSRwPJ0FM/hqdefault.jpg</video:thumbnail_loc>
       <video:title>رمضان شهر العتق من النار_الشيخ اشرف طه مازن_5من رمضان 1440الموافق 10/5/2019</video:title>
@@ -771,7 +771,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/x97R6bxFF4Y</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/x97R6bxFF4Y</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/x97R6bxFF4Y/hqdefault.jpg</video:thumbnail_loc>
       <video:title>احترام النظام العام</video:title>
@@ -781,7 +781,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ym-H7LHTlW4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ym-H7LHTlW4</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ym-H7LHTlW4/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبه الجمعه بعنوان|المسئولية|الشبخ اشرف بن طه آل مازن5/4/2019 29من رجب 1440</video:title>
@@ -791,7 +791,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/aZLQB0-jXT0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/aZLQB0-jXT0</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/aZLQB0-jXT0/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطورة المخدرات والإدمان على الفرد والمجتمع الشيخ اشرف مازن</video:title>
@@ -801,7 +801,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/DPXtVi_l67o</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/DPXtVi_l67o</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/DPXtVi_l67o/hqdefault.jpg</video:thumbnail_loc>
       <video:title>مفهومُ الشهادةِ بينَ الحقيقةِ والادعاءِ الشيخ اشرف مازن</video:title>
@@ -811,7 +811,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/LQpmenHZ72c</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/LQpmenHZ72c</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/LQpmenHZ72c/hqdefault.jpg</video:thumbnail_loc>
       <video:title>البناء الاقتصادي السديد وأثره في استقرار المجتمع الشيخ اشرف مازن</video:title>
@@ -821,7 +821,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/1q5NgJeOt0g</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/1q5NgJeOt0g</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/1q5NgJeOt0g/hqdefault.jpg</video:thumbnail_loc>
       <video:title>البرُّ بالأوطَانِ مِن شمائلِ الإيمَانِ</video:title>
@@ -831,7 +831,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/MMBYwChC2Es</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/MMBYwChC2Es</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/MMBYwChC2Es/hqdefault.jpg</video:thumbnail_loc>
       <video:title>النظافة من ابرز سماح المجتمع المتحضر</video:title>
@@ -841,7 +841,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/QOzSInNjBjI</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/QOzSInNjBjI</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/QOzSInNjBjI/hqdefault.jpg</video:thumbnail_loc>
       <video:title>حقوق الطفل قبل ولادته- الشيخ اشرف مازن</video:title>
@@ -851,7 +851,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/SGuo1lB0nEE</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/SGuo1lB0nEE</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/SGuo1lB0nEE/hqdefault.jpg</video:thumbnail_loc>
       <video:title>احترام النظام العام- الشيخ اشرف مازن</video:title>
@@ -861,7 +861,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Vv2Y972IkG8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Vv2Y972IkG8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Vv2Y972IkG8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>التأسي بأخلاق الرسول الكريم (صلى الله عليه وسلم)|الشيخ اشرف مازن</video:title>
@@ -871,7 +871,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/9T1ysCQphSo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/9T1ysCQphSo</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/9T1ysCQphSo/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خيرية الأمة وخيرية نبيها وكيف نحقق خيرية الأمة الآن ؟|الشيخ اشرف مازن</video:title>
@@ -881,7 +881,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Mp85iw8MLw8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Mp85iw8MLw8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Mp85iw8MLw8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>عالمية الرسالة المحمدية كما يجب أن نفهمها|الشيخ اشرف مازن24/11/2018</video:title>
@@ -891,7 +891,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/4fSt3E7RLUg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/4fSt3E7RLUg</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/4fSt3E7RLUg/hqdefault.jpg</video:thumbnail_loc>
       <video:title>حب الله ورسوله بين الحقيقة والادعاء|الشيخ أشرف مازن16/11/2018</video:title>
@@ -901,7 +901,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/9xWrISoE394</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/9xWrISoE394</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/9xWrISoE394/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبه الجمعه من مسجد الحسين بن على بأشمون|نبى الرحمه|الشيخ اشرف مازن9/11/2018</video:title>
@@ -911,7 +911,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/LqFO-d3voCA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/LqFO-d3voCA</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/LqFO-d3voCA/hqdefault.jpg</video:thumbnail_loc>
       <video:title>دور الشباب فى بناء المجتمعات والحضارات|الشيخ اشرف مازن2/11/2018</video:title>
@@ -921,7 +921,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/njsHlTYLS-s</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/njsHlTYLS-s</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/njsHlTYLS-s/hqdefault.jpg</video:thumbnail_loc>
       <video:title>الابتلاء بالخير والشر|الشيخ اشرف مازن 26/10/2018</video:title>
@@ -931,7 +931,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/VW11QzBtHDk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/VW11QzBtHDk</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/VW11QzBtHDk/hqdefault.jpg</video:thumbnail_loc>
       <video:title>معيه الله وأثرها النفسى على عباد الله|الشيخ أشرف مازن|19/10/2018</video:title>
@@ -941,7 +941,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/7vY2SYx5aB4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/7vY2SYx5aB4</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/7vY2SYx5aB4/hqdefault.jpg</video:thumbnail_loc>
       <video:title>النظافه سلوك حضارى وانسانى|الشيخ اشرف مازن12/10/2018</video:title>
@@ -951,7 +951,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Lg7axooo8Ac</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Lg7axooo8Ac</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Lg7axooo8Ac/hqdefault.jpg</video:thumbnail_loc>
       <video:title>سلسله السيره النبويه2|الشيخ اشرف مازن</video:title>
@@ -961,7 +961,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Xe_qugUxZAs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Xe_qugUxZAs</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Xe_qugUxZAs/hqdefault.jpg</video:thumbnail_loc>
       <video:title>السيره النبويه|الشيخ اشرف مازن</video:title>
@@ -971,7 +971,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/knphAn3RqVc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/knphAn3RqVc</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/knphAn3RqVc/hqdefault.jpg</video:thumbnail_loc>
       <video:title>حجه النبى صلى الله عليه وسلم|الشيخ اشرف مازن 3/8/2018</video:title>
@@ -981,7 +981,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Zqp6aQYiNAY</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Zqp6aQYiNAY</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Zqp6aQYiNAY/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبه الجمعه|خسوف القمر وكيف تحقق التوحيد|الشيخ اشرف مازن27/7/2018</video:title>
@@ -991,7 +991,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/HPVSoK26Mto</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/HPVSoK26Mto</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/HPVSoK26Mto/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبه الجمعه|الحج المبرور وفضله|الشيخ اشرف مازن20/7/2018</video:title>
@@ -1001,7 +1001,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/66GmiQdPZZs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/66GmiQdPZZs</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/66GmiQdPZZs/hqdefault.jpg</video:thumbnail_loc>
       <video:title>فضل الدعوه فى التوحيد |الشيخ اشرف مازن13/7/2018</video:title>
@@ -1011,7 +1011,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/h-m7OOu2wxs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/h-m7OOu2wxs</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/h-m7OOu2wxs/hqdefault.jpg</video:thumbnail_loc>
       <video:title>صفات الناس المؤمنين والكافرين الشيخ اشرف مازن15شوال1439الموافق26/6/2018</video:title>
@@ -1021,7 +1021,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/2kMAs2d0CnA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/2kMAs2d0CnA</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/2kMAs2d0CnA/hqdefault.jpg</video:thumbnail_loc>
       <video:title>صفات الناس2المنافقون الشيخ اشرف مازن 22شوال1439الموافق6/7/2018</video:title>
@@ -1031,7 +1031,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Qj9LoyXnVMg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Qj9LoyXnVMg</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Qj9LoyXnVMg/hqdefault.jpg</video:thumbnail_loc>
       <video:title>فضل ليله القدر|الشيخ اشرف طه مازن</video:title>
@@ -1041,7 +1041,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/WLQvC3RhEJk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/WLQvC3RhEJk</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/WLQvC3RhEJk/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبه العيد|اجتماع العيدبن|الشسخ اشرف طه مازن 1_شوال1439الموافق 15/6/2018</video:title>
@@ -1051,7 +1051,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/2Si8sFETiMA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/2Si8sFETiMA</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/2Si8sFETiMA/hqdefault.jpg</video:thumbnail_loc>
       <video:title>فضل رمضان وكيفيه الصيام فيه|الشيخ اشرف مازن حفظه الله تعالى</video:title>
@@ -1061,7 +1061,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/wi6kk2Qeiiw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/wi6kk2Qeiiw</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/wi6kk2Qeiiw/hqdefault.jpg</video:thumbnail_loc>
       <video:title>المسلمون فى رمضان الشيخ أشرف بن طه آل مازن 4 5 2018</video:title>
@@ -1071,7 +1071,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/qM5l5OeFVto</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/qM5l5OeFVto</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/qM5l5OeFVto/hqdefault.jpg</video:thumbnail_loc>
       <video:title>غزو سوريا وعوده العزه للمسلمين الشيخ اشرف طه مازن 20/4/2018الموافق 4شعبان1439</video:title>
@@ -1081,7 +1081,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/q6vYWGWJwCo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/q6vYWGWJwCo</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/q6vYWGWJwCo/hqdefault.jpg</video:thumbnail_loc>
       <video:title>الاسراء والمعراج (دروس وعبر)فضيله الشيخ اشرف مازن 13/4/2018</video:title>
@@ -1091,7 +1091,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/LWAID1Zoa3s</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/LWAID1Zoa3s</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/LWAID1Zoa3s/hqdefault.jpg</video:thumbnail_loc>
       <video:title>(مصر فى القران والسنه) الشيخ اشرف طه مازن حفظه الله تعالى 23/3/2018</video:title>
@@ -1101,7 +1101,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/atFQPE3D02I</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/atFQPE3D02I</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/atFQPE3D02I/hqdefault.jpg</video:thumbnail_loc>
       <video:title>عفاف المرأه المسلمه فضيله الشيخ اشرف طه مازن21جمادى الاخر الموافق 9/3/2018</video:title>
@@ -1111,7 +1111,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/FYFZxxvcP3Q</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/FYFZxxvcP3Q</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/FYFZxxvcP3Q/hqdefault.jpg</video:thumbnail_loc>
       <video:title>الجيش المصري وحربه مع خوارج العصر فى سيناء30جمادى الاول 1439الموافق16/2/2018</video:title>
@@ -1121,7 +1121,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/W1mWxIQ05Iw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/W1mWxIQ05Iw</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/W1mWxIQ05Iw/hqdefault.jpg</video:thumbnail_loc>
       <video:title>إلا ادلكم بالاخسرين أعمالا اللذين ضل سعيهم فى الحياه الدنيا وهم يحسبون أنهم يحسنون صنعا</video:title>
@@ -1131,7 +1131,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/fZ-n9d5wFiQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/fZ-n9d5wFiQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/fZ-n9d5wFiQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>قصص سوره الكهف الشيخ اشرف طه مازن 26/1/2018</video:title>
@@ -1141,7 +1141,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/D17gqTkibWk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/D17gqTkibWk</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/D17gqTkibWk/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبه الجمعه الحقوق العشره|الشيخ اشرف بن طه آل مازن 12/1/2018</video:title>
@@ -1151,7 +1151,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/xCWXjFMvggM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/xCWXjFMvggM</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/xCWXjFMvggM/hqdefault.jpg</video:thumbnail_loc>
       <video:title>نزول المطر علامه لحقيقه الايمان|الشيخ اشرف بن طه آل مازن5/1/2018</video:title>
@@ -1161,7 +1161,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/DNxhEZZ8pGc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/DNxhEZZ8pGc</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/DNxhEZZ8pGc/hqdefault.jpg</video:thumbnail_loc>
       <video:title>قصه مريم عيها السلام|بين الغلو والتفريط الشيخ اشرف بن طه آل مازن 29/12/2017</video:title>
@@ -1171,7 +1171,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/0CmvYCvChtU</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/0CmvYCvChtU</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/0CmvYCvChtU/hqdefault.jpg</video:thumbnail_loc>
       <video:title>غزوه الخندق وبشاره النبى صلى الله عليه وسلم بفتح الشام22/12/2017</video:title>
@@ -1181,7 +1181,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/9OZs7bYI-nw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/9OZs7bYI-nw</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/9OZs7bYI-nw/hqdefault.jpg</video:thumbnail_loc>
       <video:title>بيت المقدس متى يعود|الشيخ اشرف بن طه آل مازن15/12/2017</video:title>
@@ -1191,7 +1191,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/wxaizf2MBvc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/wxaizf2MBvc</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/wxaizf2MBvc/hqdefault.jpg</video:thumbnail_loc>
       <video:title>نواقض الشهادتين العشره|8/12/2017 الموافق 20ربيع اول 1439</video:title>
@@ -1201,7 +1201,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/_jkosscxVgs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/_jkosscxVgs</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/_jkosscxVgs/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شبه القبريين فى الدعاء والذبح والشفاعه والرد عليها 15بيع اول1439الموافق 3/12/2017</video:title>
@@ -1211,7 +1211,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/uU1mKT8iz-g</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/uU1mKT8iz-g</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/uU1mKT8iz-g/hqdefault.jpg</video:thumbnail_loc>
       <video:title>محبه النبى صلى الله عليه وسلم بين التأصيل والتطبيق|الشيخ اشرف مازن1/12/2017</video:title>
@@ -1221,7 +1221,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/PpzoN9HtlEs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/PpzoN9HtlEs</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/PpzoN9HtlEs/hqdefault.jpg</video:thumbnail_loc>
       <video:title>من شروط لا اله الا الله الصدق والاخلاص والمحبه 24 /11 / 2017الشيخ اشرف مازن</video:title>
@@ -1231,7 +1231,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/qI9pdFBxupU</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/qI9pdFBxupU</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/qI9pdFBxupU/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كيف تحقق الشهادتين ..؟ الشيخ اشرف بن طه ال مازن |مسجد الحسين بن على باشمون17/11/2017</video:title>
@@ -1241,7 +1241,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/WX0XGMMIYwE</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/WX0XGMMIYwE</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/WX0XGMMIYwE/hqdefault.jpg</video:thumbnail_loc>
       <video:title>حقيقه الشكر والصبر الشيخ اشرف مازن|مسجد الحسين بن على بأشمون4/11/2017</video:title>
@@ -1251,7 +1251,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/5fFhNIg-Bv0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/5fFhNIg-Bv0</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/5fFhNIg-Bv0/hqdefault.jpg</video:thumbnail_loc>
       <video:title>مداخل الشيطان للانسان|الشيخ اشرف مازن من مسجد الحسين بن على 30/10/2017</video:title>
@@ -1261,7 +1261,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/FRde7wMr_X8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/FRde7wMr_X8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/FRde7wMr_X8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبه الجمعه بعنوان |شأن الصحبه فى الاسلام |للشيخ اشرف بن طه ال مازن 20/10/2017</video:title>
@@ -1271,7 +1271,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/G1Kdm8Q5lN0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/G1Kdm8Q5lN0</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/G1Kdm8Q5lN0/hqdefault.jpg</video:thumbnail_loc>
       <video:title>متى تباح الغيبه.؟من مسجد الحسين بن على باشمون الشيخ اشرف مازن 22محرم1439الموافق 13/10/2017</video:title>
@@ -1281,7 +1281,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/w2Mbgx7vkn8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/w2Mbgx7vkn8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/w2Mbgx7vkn8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>نصر الله للمصريين فى العاشر من رمضان |دروس وعبر للشيخ اشرف بن طه ال مازن 6/10/2017</video:title>
@@ -1291,7 +1291,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Z8WE-KUAEzM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Z8WE-KUAEzM</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Z8WE-KUAEzM/hqdefault.jpg</video:thumbnail_loc>
       <video:title>الاعتصام بالكتاب والسنه سبب السعاده فى الدارين _الشيخ اشرف مازن 17ذى الحجه الموافق8/9/2017</video:title>
@@ -1301,7 +1301,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/175ndl5dZho</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/175ndl5dZho</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/175ndl5dZho/hqdefault.jpg</video:thumbnail_loc>
       <video:title>فضل العشرالاوائل من ذى الحجه_حكم الاضحيه الشيخ اشرف بن طه ال مازن 25/8/2017</video:title>
@@ -1311,7 +1311,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Ct8lauLQ-wQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Ct8lauLQ-wQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Ct8lauLQ-wQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>مناسك الحج والعمره كامله_فضل العشرمن ذى الحجه الشيخ اشرف بن طه ال مازن18/8/2017</video:title>
@@ -1321,7 +1321,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/R336gv8XJew</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/R336gv8XJew</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/R336gv8XJew/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبه الجمعه _مناسك الحج والعمره للشيخ اشرف بن طه ال مازن 11_8_2017</video:title>
@@ -1331,7 +1331,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/7vGgEkwrHwo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/7vGgEkwrHwo</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/7vGgEkwrHwo/hqdefault.jpg</video:thumbnail_loc>
       <video:title>العقيده الصحيحه الشيخ اشرف بن طه ال مازن 4/8/2017</video:title>
@@ -1341,7 +1341,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/KQTiMqRDHOA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/KQTiMqRDHOA</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/KQTiMqRDHOA/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبه اليوم بعنوان العقيده الصحيحه 4/8/2017</video:title>
@@ -1351,7 +1351,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/DP-zenf8ki0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/DP-zenf8ki0</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/DP-zenf8ki0/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة: متطلبات الولاء والانتماء للوطن - الشيخ أشرف بن مازن</video:title>
@@ -1361,7 +1361,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/WtOk6W0vGD8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/WtOk6W0vGD8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/WtOk6W0vGD8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>خطبة الجمعة: الحياء من الله ومن الخلق ومن النفس شيمة الكرام وفطرة إنسانية سوية</video:title>
@@ -1371,10 +1371,10 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/playlist/PLHcd1VuAeT_OaS9laiTEk1qiTT4Tvcm2E</loc>
+    <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_OaS9laiTEk1qiTT4Tvcm2E</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/eAsNkJ4fMOY</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/eAsNkJ4fMOY</loc>
     <lastmod>2025-04-28</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/eAsNkJ4fMOY/hqdefault.jpg</video:thumbnail_loc>
@@ -1385,7 +1385,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/DarRs-pJ1Hg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/DarRs-pJ1Hg</loc>
     <lastmod>2025-04-28</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/DarRs-pJ1Hg/hqdefault.jpg</video:thumbnail_loc>
@@ -1396,7 +1396,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/pMxuMY5KGJk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/pMxuMY5KGJk</loc>
     <lastmod>2025-04-30</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/pMxuMY5KGJk/hqdefault.jpg</video:thumbnail_loc>
@@ -1407,7 +1407,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/1QsG7UD800A</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/1QsG7UD800A</loc>
     <lastmod>2025-05-05</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/1QsG7UD800A/hqdefault.jpg</video:thumbnail_loc>
@@ -1418,7 +1418,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/gDBsgCoucas</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/gDBsgCoucas</loc>
     <lastmod>2025-05-06</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/gDBsgCoucas/hqdefault.jpg</video:thumbnail_loc>
@@ -1429,7 +1429,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/9GZppoMX7qk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/9GZppoMX7qk</loc>
     <lastmod>2025-05-06</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/9GZppoMX7qk/hqdefault.jpg</video:thumbnail_loc>
@@ -1440,7 +1440,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/UZQfb56T-6M</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/UZQfb56T-6M</loc>
     <lastmod>2025-05-08</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/UZQfb56T-6M/hqdefault.jpg</video:thumbnail_loc>
@@ -1451,7 +1451,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/TFrob49HU0U</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/TFrob49HU0U</loc>
     <lastmod>2025-05-12</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/TFrob49HU0U/hqdefault.jpg</video:thumbnail_loc>
@@ -1462,7 +1462,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/csYZrfzSAnM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/csYZrfzSAnM</loc>
     <lastmod>2025-05-14</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/csYZrfzSAnM/hqdefault.jpg</video:thumbnail_loc>
@@ -1473,7 +1473,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/-eE6QPrpdG0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/-eE6QPrpdG0</loc>
     <lastmod>2025-05-18</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/-eE6QPrpdG0/hqdefault.jpg</video:thumbnail_loc>
@@ -1484,7 +1484,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/EJs86TF7r3w</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/EJs86TF7r3w</loc>
     <lastmod>2025-05-19</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/EJs86TF7r3w/hqdefault.jpg</video:thumbnail_loc>
@@ -1495,7 +1495,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/VKVN1kFMwPw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/VKVN1kFMwPw</loc>
     <lastmod>2025-05-27</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/VKVN1kFMwPw/hqdefault.jpg</video:thumbnail_loc>
@@ -1506,7 +1506,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/DJIJpbUZ88Y</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/DJIJpbUZ88Y</loc>
     <lastmod>2025-05-27</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/DJIJpbUZ88Y/hqdefault.jpg</video:thumbnail_loc>
@@ -1517,7 +1517,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/-8BkAPtzNTo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/-8BkAPtzNTo</loc>
     <lastmod>2025-05-28</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/-8BkAPtzNTo/hqdefault.jpg</video:thumbnail_loc>
@@ -1528,7 +1528,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/s3F9PtX0dEs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/s3F9PtX0dEs</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/s3F9PtX0dEs/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (16)/حقيقة الإيمان عند أهل السنة والجماعة/#لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1538,7 +1538,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/h3pb_JRIgh0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/h3pb_JRIgh0</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/h3pb_JRIgh0/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب(17)/أصول الإيمان وشعبه/#لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1548,7 +1548,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ewhE8CbI1sk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ewhE8CbI1sk</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ewhE8CbI1sk/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب(١٨)/ المعنى الصحيح للإيمان/#لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1558,7 +1558,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/BPJiukVSwbI</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/BPJiukVSwbI</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/BPJiukVSwbI/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب ( 19)/ حقيقة توحيد الألوهية/#لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1568,7 +1568,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/eu9fAglwI_w</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/eu9fAglwI_w</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/eu9fAglwI_w/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب( 20)/ الشرك شركان/#لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1578,7 +1578,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/qcU6U1s6NTA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/qcU6U1s6NTA</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/qcU6U1s6NTA/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (21 )/المفهوم الصحيح لتوحيد الأسماء والصفات/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1588,7 +1588,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ZoKt50ojab0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ZoKt50ojab0</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ZoKt50ojab0/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (22)/ أمثلة الأسماء الحسنى من القرآن والسنة/#لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1598,7 +1598,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/BtJ96nX_t5A</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/BtJ96nX_t5A</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/BtJ96nX_t5A/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب( 23 )/على كم نوع دلالة الأسماء الحسنى ؟/#لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1608,7 +1608,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/3YB-FqqyQxg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/3YB-FqqyQxg</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/3YB-FqqyQxg/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب(24)/من فقه أسماء الله الحسنى/#لفضيلة أشرف -مازن</video:title>
@@ -1618,7 +1618,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/XtICKRSeWqQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/XtICKRSeWqQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/XtICKRSeWqQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب( 25)/ أسماءلا تطلق على الله إلا مع مقابلها/#لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1628,7 +1628,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/rvJqMhOMrhk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/rvJqMhOMrhk</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/rvJqMhOMrhk/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب (٢٦)/الفرق بين صفات الذات وصفات الأفعال/#لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1638,7 +1638,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Y-iDLVQ9c1A</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Y-iDLVQ9c1A</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Y-iDLVQ9c1A/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب(27)/قاعدة ذهبية فى أسماء الله وصفاته/#لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1648,7 +1648,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/p_ibpjz84j4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/p_ibpjz84j4</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/p_ibpjz84j4/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب (28)| لله سبحانه العلو كله| # لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1658,7 +1658,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/3SGEYOjmiHk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/3SGEYOjmiHk</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/3SGEYOjmiHk/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب (29)/ الخلاصة فى معنى استواء الله على عرشه/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1668,7 +1668,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/dVfQahu19X4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/dVfQahu19X4</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/dVfQahu19X4/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب( 30 )/من تواضع لله رفعه الله وأعلى مقامه/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1678,7 +1678,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/3g4I3qqjLxc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/3g4I3qqjLxc</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/3g4I3qqjLxc/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب(٣١)/ اثر الإيمان باسماء الله وصفاته على العبد/#لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1688,7 +1688,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ZrGksdCGu38</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ZrGksdCGu38</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ZrGksdCGu38/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب(32 )/الإلحاد فى أسماء الله وصفاته بأنواعه/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1698,7 +1698,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/h0XFwvejbl0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/h0XFwvejbl0</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/h0XFwvejbl0/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (33)/ العلاقة التلازمية بين أنواع التوحيد/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1708,7 +1708,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/zrtDyQg5oyA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/zrtDyQg5oyA</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/zrtDyQg5oyA/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (34)/ الإيمان بالملائكة وظائفهم من الكتاب والسنة/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1718,7 +1718,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/yjB_2YbdOBQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/yjB_2YbdOBQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/yjB_2YbdOBQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب( 35)/ قل آمنت بما أنزل الله من كتاب/#لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1728,7 +1728,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Bp1RfOuTcCo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Bp1RfOuTcCo</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Bp1RfOuTcCo/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب (36)/وجبنا نحو كتاب ربنا/#لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1738,7 +1738,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ZYaI4t5BFcM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ZYaI4t5BFcM</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ZYaI4t5BFcM/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب (37)/ الإمام أحمدوأمواج الفتنة/#لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1748,7 +1748,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/jzAMpFI0Qrg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/jzAMpFI0Qrg</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/jzAMpFI0Qrg/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب(٣٨)/ أقسام صفات الله تعالى/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1758,7 +1758,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/v2MbK4QOa1w</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/v2MbK4QOa1w</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/v2MbK4QOa1w/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (39)/ مسألة اللفظ بالقرآن/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1768,7 +1768,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/hYV95BQD65A</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/hYV95BQD65A</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/hYV95BQD65A/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (40)/ الإيمان بالرسل/ # لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1778,7 +1778,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/PepjJ2rTEGg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/PepjJ2rTEGg</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/PepjJ2rTEGg/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (41)/الأنبياء إخوة لعلات/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1788,7 +1788,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/JlCO6OQqaGs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/JlCO6OQqaGs</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/JlCO6OQqaGs/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب(42)/ الإيمان بالرسل 2/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1798,7 +1798,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/TLfKL7zM8Lw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/TLfKL7zM8Lw</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/TLfKL7zM8Lw/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب( 43)/ معجزات نبينا محمد صلى الله علي وسلم/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1808,7 +1808,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/qu6t9EWGino</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/qu6t9EWGino</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/qu6t9EWGino/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (44)/ الإيمان باليوم الآخر دليله ومعناه/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1818,7 +1818,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/NJY7o9Y4l00</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/NJY7o9Y4l00</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/NJY7o9Y4l00/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (45)/ أمارات الساعة/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1828,7 +1828,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/t8FERiUJ0H0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/t8FERiUJ0H0</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/t8FERiUJ0H0/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (46)/ الأدلة الواضحة على عذاب القبر/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1838,7 +1838,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/zRQK_oDTEaM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/zRQK_oDTEaM</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/zRQK_oDTEaM/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (47)/ الإيمان بالبعث بعد الموت/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1848,7 +1848,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/o7JPKqMxLVY</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/o7JPKqMxLVY</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/o7JPKqMxLVY/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (48)/ النفخ فى الصور/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1858,7 +1858,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/jU6Kd2aHols</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/jU6Kd2aHols</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/jU6Kd2aHols/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب(49)/صفة الحشر وأول من يكسى يوم القيامة/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1868,7 +1868,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/eGbWVMOYOY4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/eGbWVMOYOY4</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/eGbWVMOYOY4/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (50)/ صفة الموقف يوم القيامة من الكتاب والسنة/# الشيخ أشرف -مازن</video:title>
@@ -1878,7 +1878,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/FDF7NZlJhxw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/FDF7NZlJhxw</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/FDF7NZlJhxw/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 Questions and Answers (51) / The Publication of the Records on the Day of Resurrection</video:title>
@@ -1888,7 +1888,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/oHByZRxQvN8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/oHByZRxQvN8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/oHByZRxQvN8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب( 52)/ صفة الصراط يوم القيامة ومظالم العباد/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1898,7 +1898,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/dxGIA3Dl5CA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/dxGIA3Dl5CA</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/dxGIA3Dl5CA/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (53)/ الجنة والنار مخلوقتان ولاتفنيان/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -1908,7 +1908,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/0C0G9N2K-wU</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/0C0G9N2K-wU</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/0C0G9N2K-wU/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 Questions and Answers (54) | Who is Intercession for and When Does it Occur? | #Sheikh_Ashraf</video:title>
@@ -1918,7 +1918,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/9RPSuHFe8e8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/9RPSuHFe8e8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/9RPSuHFe8e8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب(55) |أنواع الشفاعات وموقف المعتزلة منها|#الشيخ_أشرف_مازن</video:title>
@@ -1928,7 +1928,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/fvwVRiob65k</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/fvwVRiob65k</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/fvwVRiob65k/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 Q&amp;A (56) | The Believer Hopes for His Lord&apos;s Mercy and Fears His Sins | #SheikhAshrafMazen</video:title>
@@ -1938,7 +1938,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/VdVyXwDR8Jw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/VdVyXwDR8Jw</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/VdVyXwDR8Jw/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال (57)|وجواب  الإيمان بالقدر ومراتبه|#الشيخ_أشرف_مازن</video:title>
@@ -1948,7 +1948,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/MEva7_RM4q8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/MEva7_RM4q8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/MEva7_RM4q8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>سؤال وجواب( 58) بيان كمال رحمة الله و عدله|#الشيخ أشرف مازن</video:title>
@@ -1958,7 +1958,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/GiQE1d1afUU</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/GiQE1d1afUU</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/GiQE1d1afUU/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 Questions and Answers (60) | Not Every Ignorant Person Is Excused | #SheikhAshrafMazen</video:title>
@@ -1968,7 +1968,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/u71fnbHMy5o</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/u71fnbHMy5o</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/u71fnbHMy5o/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب (61 ) من لزم طريق أهل السنة استقامت له الحياة|#الشيخ -أشرف - مازن</video:title>
@@ -1978,7 +1978,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/FcIf1j7rJgI</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/FcIf1j7rJgI</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/FcIf1j7rJgI/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب 62  حين تجتمع الإرادة الكونية و الإرادة الشرعية</video:title>
@@ -1988,7 +1988,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/P3RCR8-iC0g</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/P3RCR8-iC0g</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/P3RCR8-iC0g/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب (63) |  أفعال الله كلها خير محض | #الشيخ - أشرف -مازن</video:title>
@@ -1998,7 +1998,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Cld9cZXHKPQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Cld9cZXHKPQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Cld9cZXHKPQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب (64 )| لله عز وجل الحكمة في خلقه و أمره| #الشيخ - أشرف - مازن</video:title>
@@ -2008,7 +2008,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ZeYCQrdK_GY</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ZeYCQrdK_GY</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ZeYCQrdK_GY/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب( 65)| أصول الإيمان و شعبه|#الشيخ - أشرف - مازن</video:title>
@@ -2018,7 +2018,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/UDg3QfBIo7A</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/UDg3QfBIo7A</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/UDg3QfBIo7A/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب (66)|العبد بين المراقبة و المشاهدة| #الشيخ - أشرف - مازن</video:title>
@@ -2028,7 +2028,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/wNB-LrPklJY</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/wNB-LrPklJY</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/wNB-LrPklJY/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب (67) لا يعرف الحق من لم يعرف الباطل|  # الشيخ- أشرف - مازن</video:title>
@@ -2038,7 +2038,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Kit99WKSsk8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Kit99WKSsk8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Kit99WKSsk8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب (68)| للكفر أصول و له شعب| #الشيخ _ أشرف _ مازن</video:title>
@@ -2048,7 +2048,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/FmMzfkzOkig</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/FmMzfkzOkig</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/FmMzfkzOkig/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب( 69 )|هذه شجرة طيبة و تلك شجرة خبيثة|# الشيخ _ أشرف _ مازن</video:title>
@@ -2058,7 +2058,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/rnPR2gG_Ovc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/rnPR2gG_Ovc</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/rnPR2gG_Ovc/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 Q&amp;A (70) | Is Disbelief (Kufr) One Type or Multiple? | #Sheikh_Ashraf_Mazen</video:title>
@@ -2068,7 +2068,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/UMQRf01SMaQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/UMQRf01SMaQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/UMQRf01SMaQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب (71)| معنى الكفر العملي و أنواعه | # الشيخ _ أشرف _ مازن</video:title>
@@ -2078,7 +2078,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/NmD2Ps5f21k</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/NmD2Ps5f21k</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/NmD2Ps5f21k/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200سؤال وجواب (72)| صورة الفعل واحدة و الحكم يختلف| # الشيخ _ أشرف _ مازن</video:title>
@@ -2088,7 +2088,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/bk4OBMuSr0k</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/bk4OBMuSr0k</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/bk4OBMuSr0k/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب (73)| من صور الظلم الأكبر| # الشيخ _ أشرف _ مازن</video:title>
@@ -2098,7 +2098,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ZMGKD2YJSHU</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ZMGKD2YJSHU</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ZMGKD2YJSHU/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب(74)| من صور النفاق الأصغر و الأكبر| # الشيخ _ أشرف _ مازن</video:title>
@@ -2108,7 +2108,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/b6Ud8AAFueQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/b6Ud8AAFueQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/b6Ud8AAFueQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 Q&amp;A (76) | What is &apos;al-Nushra&apos; (untying magic) and what is its ruling? | #Sheikh_Ashraf_Mazen</video:title>
@@ -2118,7 +2118,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/2CEw9LI1C18</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/2CEw9LI1C18</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/2CEw9LI1C18/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 Questions and Answers (77) | The Ruling on Wearing Amulets, Strings, and Talismans | #Sheikh</video:title>
@@ -2128,7 +2128,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/1t9PnZpJ3Uk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/1t9PnZpJ3Uk</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/1t9PnZpJ3Uk/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 Questions and Answers (78) | The Ruling on Wearing Quranic Amulets | #Sheikh_Ashraf_Mazen</video:title>
@@ -2138,7 +2138,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Pe6w_JcNhGk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Pe6w_JcNhGk</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Pe6w_JcNhGk/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 Questions and Answers 79: What is the Ruling on Soothsayers and Fortune Tellers?</video:title>
@@ -2148,7 +2148,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/3dSFhLP2Vc8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/3dSFhLP2Vc8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/3dSFhLP2Vc8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 Questions and Answers (80) A Decisive Stand Must Be Taken Against Them | #Sheikh_Ashraf_Mazen</video:title>
@@ -2158,7 +2158,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/2ssbW6Do_vQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/2ssbW6Do_vQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/2ssbW6Do_vQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 سؤال وجواب (81)|  هذه الأمور من أفعال الجاهلية فاجتنبها | # الشيخ _ أشرف _ مازن</video:title>
@@ -2168,7 +2168,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/9Q_T1EiDyYk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/9Q_T1EiDyYk</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/9Q_T1EiDyYk/hqdefault.jpg</video:thumbnail_loc>
       <video:title>200 Questions and Answers (82) | Why Would One of You Kill His Brother | #Sheikh_Ashraf_Mazen</video:title>
@@ -2178,10 +2178,10 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/playlist/PLHcd1VuAeT_OgW1l36gkouA-wJXTN9FGS</loc>
+    <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_OgW1l36gkouA-wJXTN9FGS</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/XQsZO9DV1pE</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/XQsZO9DV1pE</loc>
     <lastmod>2025-07-09</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/XQsZO9DV1pE/hqdefault.jpg</video:thumbnail_loc>
@@ -2192,7 +2192,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/-grYlwttcwM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/-grYlwttcwM</loc>
     <lastmod>2025-07-09</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/-grYlwttcwM/hqdefault.jpg</video:thumbnail_loc>
@@ -2203,7 +2203,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/JvG8EvdrD8A</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/JvG8EvdrD8A</loc>
     <lastmod>2025-07-08</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/JvG8EvdrD8A/hqdefault.jpg</video:thumbnail_loc>
@@ -2214,7 +2214,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/P07I7kUcW30</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/P07I7kUcW30</loc>
     <lastmod>2025-07-08</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/P07I7kUcW30/hqdefault.jpg</video:thumbnail_loc>
@@ -2225,7 +2225,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/VccYWwLuhXo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/VccYWwLuhXo</loc>
     <lastmod>2025-07-06</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/VccYWwLuhXo/hqdefault.jpg</video:thumbnail_loc>
@@ -2236,7 +2236,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/FV2OTLxp9VA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/FV2OTLxp9VA</loc>
     <lastmod>2025-07-01</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/FV2OTLxp9VA/hqdefault.jpg</video:thumbnail_loc>
@@ -2247,7 +2247,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/x8TCpuMYDP8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/x8TCpuMYDP8</loc>
     <lastmod>2025-06-30</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/x8TCpuMYDP8/hqdefault.jpg</video:thumbnail_loc>
@@ -2258,7 +2258,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/vQG3HC72pq0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/vQG3HC72pq0</loc>
     <lastmod>2025-06-25</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/vQG3HC72pq0/hqdefault.jpg</video:thumbnail_loc>
@@ -2269,7 +2269,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/b3R3F5b2T1A</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/b3R3F5b2T1A</loc>
     <lastmod>2025-06-23</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/b3R3F5b2T1A/hqdefault.jpg</video:thumbnail_loc>
@@ -2280,7 +2280,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/25T84xqcwAQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/25T84xqcwAQ</loc>
     <lastmod>2025-06-18</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/25T84xqcwAQ/hqdefault.jpg</video:thumbnail_loc>
@@ -2291,7 +2291,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/pgVP_-7aV94</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/pgVP_-7aV94</loc>
     <lastmod>2025-06-10</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/pgVP_-7aV94/hqdefault.jpg</video:thumbnail_loc>
@@ -2302,7 +2302,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Ivxs3viIuME</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Ivxs3viIuME</loc>
     <lastmod>2025-05-21</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Ivxs3viIuME/hqdefault.jpg</video:thumbnail_loc>
@@ -2313,7 +2313,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/cxirwTdgjFM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/cxirwTdgjFM</loc>
     <lastmod>2025-05-20</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/cxirwTdgjFM/hqdefault.jpg</video:thumbnail_loc>
@@ -2324,7 +2324,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/KD_LwZEeVv0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/KD_LwZEeVv0</loc>
     <lastmod>2025-05-18</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/KD_LwZEeVv0/hqdefault.jpg</video:thumbnail_loc>
@@ -2335,7 +2335,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/7z9akdsT6Ro</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/7z9akdsT6Ro</loc>
     <lastmod>2025-05-07</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/7z9akdsT6Ro/hqdefault.jpg</video:thumbnail_loc>
@@ -2346,7 +2346,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/7LEyH5sjzMk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/7LEyH5sjzMk</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/7LEyH5sjzMk/hqdefault.jpg</video:thumbnail_loc>
       <video:title>العقيدة الواسطية (19)/ استواء الله على العرش مع معيته لخلقه/ # لفضيلة الشيخ أشرف -مازن</video:title>
@@ -2356,7 +2356,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/IHzbLLno3ws</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/IHzbLLno3ws</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/IHzbLLno3ws/hqdefault.jpg</video:thumbnail_loc>
       <video:title>العقيدة الواسطية (18) | أهل السنة وسط بين الفرق | #الشيخ_أشرف_مازن</video:title>
@@ -2366,7 +2366,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/tlZ6-XmzIX8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/tlZ6-XmzIX8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/tlZ6-XmzIX8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>العقيدة الواسطية (17) | موقف أهل السنة من أحاديث الصفات | #الشيخ_أشرف_مازن</video:title>
@@ -2376,7 +2376,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/VczW2LlOsLU</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/VczW2LlOsLU</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/VczW2LlOsLU/hqdefault.jpg</video:thumbnail_loc>
       <video:title>العقيدة الواسطية (16) | عقيدة أهل السنة والجماعة في صفة الكلام لله عز وجل | #الشيخ_أشرف_مازن</video:title>
@@ -2386,7 +2386,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/dSjjgP_dXLg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/dSjjgP_dXLg</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/dSjjgP_dXLg/hqdefault.jpg</video:thumbnail_loc>
       <video:title>العقيدة الواسطية (15) | معية الله لخلقه نوعان | #الشيخ_أشرف_مازن</video:title>
@@ -2396,7 +2396,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/1gYclGel9MI</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/1gYclGel9MI</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/1gYclGel9MI/hqdefault.jpg</video:thumbnail_loc>
       <video:title>العقيدة الواسطية (14) | إثبات صفتى الاستواء والعلو للرب جل وعلا | #الشيخ_أشرف_مازن</video:title>
@@ -2406,7 +2406,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/y9BuZF3_SWg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/y9BuZF3_SWg</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/y9BuZF3_SWg/hqdefault.jpg</video:thumbnail_loc>
       <video:title>العقيدة الواسطية (13) | ذكر بعض الصفات السلبية المنفية عن الرب جل وعلا | #الشيخ_أشرف_مازن</video:title>
@@ -2416,7 +2416,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/wCUxxe5zhG4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/wCUxxe5zhG4</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/wCUxxe5zhG4/hqdefault.jpg</video:thumbnail_loc>
       <video:title>العقيدة الواسطية (12) | ذكر بعض الصفات الذاتية والفعلية للرب جل وعلا | #الشيخ_أشرف_مازن</video:title>
@@ -2426,7 +2426,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/9IbEFcG8LUs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/9IbEFcG8LUs</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/9IbEFcG8LUs/hqdefault.jpg</video:thumbnail_loc>
       <video:title>العقيدة الواسطية (11) | صفة المجئ والوجه والعينين للرب جل وعلا | #الشيخ_أشرف_مازن</video:title>
@@ -2436,7 +2436,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/-fcIOjtDIso</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/-fcIOjtDIso</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/-fcIOjtDIso/hqdefault.jpg</video:thumbnail_loc>
       <video:title>العقيدة الواسطية (10) | صفات الله عز وجل | #الشيخ_أشرف_مازن</video:title>
@@ -2446,7 +2446,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/KbGXV4AjCyg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/KbGXV4AjCyg</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/KbGXV4AjCyg/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شرح العقيدة الواسطية (9) | إثبات المشيئة والإرادة لله سبحانه | #الشيخ_أشرف_مازن</video:title>
@@ -2456,7 +2456,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/DpfrFK_mKv8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/DpfrFK_mKv8</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/DpfrFK_mKv8/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شرح العقيدة الواسطية (5) | إثبات محبة الله ومودته | #الشيخ_أشرف_مازن</video:title>
@@ -2466,7 +2466,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/P-JkA65lNXQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/P-JkA65lNXQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/P-JkA65lNXQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شرح العقيدة الواسطية (4) | الإيمان بما وصف الله به نفسه | #الشيخ_أشرف_مازن</video:title>
@@ -2476,7 +2476,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/GVE8d1TjDX4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/GVE8d1TjDX4</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/GVE8d1TjDX4/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شرح العقيدة الواسطية (10) | الفرق بين الإرادة الكونية والشرعية | #الشيخ_أشرف_مازن</video:title>
@@ -2486,7 +2486,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/RmUzIzDpK1A</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/RmUzIzDpK1A</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/RmUzIzDpK1A/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شرح العقيدة الواسطية (3) | عقيدة الفرقة الناجية | #الشيخ_أشرف_مازن</video:title>
@@ -2496,7 +2496,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/3-n34SWnLs0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/3-n34SWnLs0</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/3-n34SWnLs0/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شرح العقيدة الواسطية (2) | شرح البسملة والمقدمة | #الشيخ_أشرف_مازن</video:title>
@@ -2506,7 +2506,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/j9aNHqtC2MY</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/j9aNHqtC2MY</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/j9aNHqtC2MY/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شرح العقيدة الواسطية (1) | مقدمة فى التوحيد | #الشيخ_أشرف_مازن</video:title>
@@ -2516,7 +2516,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/HWpV_QAezNo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/HWpV_QAezNo</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/HWpV_QAezNo/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شرح العقيدة الواسطية (6) | بيان صفات الله من القرآن | #الشيخ_أشرف_مازن</video:title>
@@ -2526,7 +2526,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/wyBY4kma2HM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/wyBY4kma2HM</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/wyBY4kma2HM/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شرح العقيدة الواسطية (8) | صفات الله فى آية الكرسي | #الشيخ_أشرف_مازن</video:title>
@@ -2536,7 +2536,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/tbIoXI20Fak</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/tbIoXI20Fak</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/tbIoXI20Fak/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شرح العقيدة الواسطية (7) | صفات الله فى سورة الإخلاص | #الشيخ_أشرف_مازن</video:title>
@@ -2546,7 +2546,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/0R24-OwE6Eg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/0R24-OwE6Eg</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/0R24-OwE6Eg/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شرح العقيدة الواسطية | التصديق بكرامات الأولياء | #الشيخ_أشرف_مازن</video:title>
@@ -2556,7 +2556,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/HS7TQ7Ln6ao</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/HS7TQ7Ln6ao</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/HS7TQ7Ln6ao/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شرح العقيدة الواسطية | عدم الطعن فى الصحابة من صفات أهل السنة | #الشيخ_أشرف_مازن</video:title>
@@ -2566,7 +2566,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ugE1ofFP24M</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ugE1ofFP24M</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ugE1ofFP24M/hqdefault.jpg</video:thumbnail_loc>
       <video:title>شرح العقيدة الواسطية | صفات الله الذاتية والخبرية | #الشيخ_أشرف_مازن</video:title>
@@ -2576,10 +2576,10 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/playlist/PLHcd1VuAeT_O8g0Gr5mJuncnu7L2t_AhA</loc>
+    <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_O8g0Gr5mJuncnu7L2t_AhA</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/nZdaWhpy50Q</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/nZdaWhpy50Q</loc>
     <lastmod>2025-07-01</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/nZdaWhpy50Q/hqdefault.jpg</video:thumbnail_loc>
@@ -2590,7 +2590,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/qB2sQ-HETSY</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/qB2sQ-HETSY</loc>
     <lastmod>2025-08-20</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/qB2sQ-HETSY/hqdefault.jpg</video:thumbnail_loc>
@@ -2601,7 +2601,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/v1uCacipFPQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/v1uCacipFPQ</loc>
     <lastmod>2025-08-27</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/v1uCacipFPQ/hqdefault.jpg</video:thumbnail_loc>
@@ -2612,7 +2612,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/m1GQE8n6jIA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/m1GQE8n6jIA</loc>
     <lastmod>2025-09-05</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/m1GQE8n6jIA/hqdefault.jpg</video:thumbnail_loc>
@@ -2623,7 +2623,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/b74LT4aRXwc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/b74LT4aRXwc</loc>
     <lastmod>2025-10-04</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/b74LT4aRXwc/hqdefault.jpg</video:thumbnail_loc>
@@ -2634,7 +2634,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/l49X1Cvctkg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/l49X1Cvctkg</loc>
     <lastmod>2025-10-06</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/l49X1Cvctkg/hqdefault.jpg</video:thumbnail_loc>
@@ -2645,7 +2645,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/CMZsk1j0BUU</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/CMZsk1j0BUU</loc>
     <lastmod>2025-10-07</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/CMZsk1j0BUU/hqdefault.jpg</video:thumbnail_loc>
@@ -2656,7 +2656,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ARjScavKknA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ARjScavKknA</loc>
     <lastmod>2025-10-08</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ARjScavKknA/hqdefault.jpg</video:thumbnail_loc>
@@ -2667,7 +2667,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ZIFVF-Ora-E</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ZIFVF-Ora-E</loc>
     <lastmod>2025-10-13</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ZIFVF-Ora-E/hqdefault.jpg</video:thumbnail_loc>
@@ -2678,7 +2678,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/nJTWx_QN--g</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/nJTWx_QN--g</loc>
     <lastmod>2025-10-14</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/nJTWx_QN--g/hqdefault.jpg</video:thumbnail_loc>
@@ -2689,7 +2689,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/C-v6kG6vybg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/C-v6kG6vybg</loc>
     <lastmod>2025-10-15</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/C-v6kG6vybg/hqdefault.jpg</video:thumbnail_loc>
@@ -2700,7 +2700,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Ay6XyNrayiw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Ay6XyNrayiw</loc>
     <lastmod>2025-10-29</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Ay6XyNrayiw/hqdefault.jpg</video:thumbnail_loc>
@@ -2711,7 +2711,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/pifUcp0rk14</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/pifUcp0rk14</loc>
     <lastmod>2025-11-03</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/pifUcp0rk14/hqdefault.jpg</video:thumbnail_loc>
@@ -2722,7 +2722,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/x2o-ZjDZPm0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/x2o-ZjDZPm0</loc>
     <lastmod>2025-11-06</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/x2o-ZjDZPm0/hqdefault.jpg</video:thumbnail_loc>
@@ -2733,7 +2733,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/gjhkjczC5k8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/gjhkjczC5k8</loc>
     <lastmod>2025-11-16</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/gjhkjczC5k8/hqdefault.jpg</video:thumbnail_loc>
@@ -2744,7 +2744,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/4uoTsumwndE</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/4uoTsumwndE</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/4uoTsumwndE/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة(١٦)/ هَلْ يَجُوزُ الِاسْتِدْلَالُ بِالْقَدْرِ عَلَي وُقُوعِ الذَّنْبِ٣؟#الشيخ أشرف مازن</video:title>
@@ -2754,7 +2754,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/J8BCJzvRAIA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/J8BCJzvRAIA</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/J8BCJzvRAIA/hqdefault.jpg</video:thumbnail_loc>
       <video:title>The Book of Repentance (17) / Can God&apos;s decree be averted by God&apos;s decree? / By Sheikh Ashraf Mazen</video:title>
@@ -2764,7 +2764,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/AP_DASdVTEE</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/AP_DASdVTEE</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/AP_DASdVTEE/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة (18)/سرائر التوبة 1/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -2774,7 +2774,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/cKcq_k8tPj0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/cKcq_k8tPj0</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/cKcq_k8tPj0/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة (19)/ سرائر التوبة 2/ # لفضيلة الشيخ أشرف -مازن</video:title>
@@ -2784,7 +2784,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/8sxDmUO0CoY</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/8sxDmUO0CoY</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/8sxDmUO0CoY/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة (20)/سرائر التوبة3/# لفضيلة الشيخ أشرف -مازن</video:title>
@@ -2794,7 +2794,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/_0EuBkK4IwQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/_0EuBkK4IwQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/_0EuBkK4IwQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة (22)/ لطائف أسرار التوبة 2/# الشيخ -أشرف -مازن</video:title>
@@ -2804,7 +2804,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/sgl6EiX2mu4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/sgl6EiX2mu4</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/sgl6EiX2mu4/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة (23)/ ماهى مراتب الخضوع والذل والافتقار والانكسار لله رب العالمين/# الشيخ - أشرف -مازن</video:title>
@@ -2814,7 +2814,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/bGnjwLxiFXk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/bGnjwLxiFXk</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/bGnjwLxiFXk/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة| 25| لطائف أسرار التوبة 3|#لفضيلة الشيخ أشرف مازن</video:title>
@@ -2824,7 +2824,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/7lsH-Va0pXQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/7lsH-Va0pXQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/7lsH-Va0pXQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة (24)|وجوب التوبة إلي الله وشروطها|#الشيخ_أشرف_مازن</video:title>
@@ -2834,7 +2834,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/V9J1JGeZZrU</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/V9J1JGeZZrU</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/V9J1JGeZZrU/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة (26)| فَرَحُ الرَّبِّ بِتَوْبَةِ الْعَبْدِ|#الشيخ_أشرف_مازن</video:title>
@@ -2844,7 +2844,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/7CPc6_Id410</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/7CPc6_Id410</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/7CPc6_Id410/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة (27)| سَرَائِرُ التَّوْبَةِ 4|#الشيخ_أشرف_مازن</video:title>
@@ -2854,7 +2854,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/R3VKIVcigg0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/R3VKIVcigg0</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/R3VKIVcigg0/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة (28)|سَرَائِرُ التَّوْبَةِ5|#الشيخ_أشرف_مازن</video:title>
@@ -2864,7 +2864,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/QWlO8NzgsFw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/QWlO8NzgsFw</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/QWlO8NzgsFw/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة (29) |سرائر التوبة 6|#الشيخ_أشرف_مازن</video:title>
@@ -2874,7 +2874,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/0Bj-VWEuCT4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/0Bj-VWEuCT4</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/0Bj-VWEuCT4/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة (30)| سرائر التوبة7|#الشيخ_أشرف_مازن</video:title>
@@ -2884,7 +2884,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/BaQtVoxYSac</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/BaQtVoxYSac</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/BaQtVoxYSac/hqdefault.jpg</video:thumbnail_loc>
       <video:title>The Book of Repentance (31) | The Soul Inclined to Evil as a Source of Sin | #Sheikh_Ashraf_Mazen</video:title>
@@ -2894,7 +2894,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/3bfIg6wqoz4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/3bfIg6wqoz4</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/3bfIg6wqoz4/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة(32)| سرائر التوبة 8| #الشيخ أشرف _ مازن</video:title>
@@ -2904,7 +2904,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/re96PgZp0cY</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/re96PgZp0cY</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/re96PgZp0cY/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة( 33 )الشيطان عدواً للإنسان ومصدراً للمعصية| #الشيخ أشرف - مازن</video:title>
@@ -2914,7 +2914,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/gAWlhc21NgE</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/gAWlhc21NgE</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/gAWlhc21NgE/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة(34)| مداخل الشيطان للإنسان| # الشيخ _ أشرف _ مازن</video:title>
@@ -2924,7 +2924,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/VGdqewjTAsQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/VGdqewjTAsQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/VGdqewjTAsQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة (35)| مَدَاخِلُ الشَّيْطَانِ لِلْإِنْسَانِ | # الشيخ _ أشرف _ مازن</video:title>
@@ -2934,7 +2934,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Ne65F4FH2Ug</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Ne65F4FH2Ug</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Ne65F4FH2Ug/hqdefault.jpg</video:thumbnail_loc>
       <video:title>كتاب التوبة (36)| مَدَاخِلُ الشَّيْطَانِ لِلْإِنْسَانِ 2| # الشيخ _ الشيخ _ أشرف _ مازن</video:title>
@@ -2944,7 +2944,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/L9MqUCl21UQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/L9MqUCl21UQ</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/L9MqUCl21UQ/hqdefault.jpg</video:thumbnail_loc>
       <video:title>Book of Repentance (37) | Ibn al-Qayyim&apos;s Response to al-Harawi | #SheikhAshrafMazen</video:title>
@@ -2954,10 +2954,10 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/playlist/PLHcd1VuAeT_OGrX6jYN80Rw8XaCkBqGTW</loc>
+    <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_OGrX6jYN80Rw8XaCkBqGTW</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/mkeduM7jxtM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/mkeduM7jxtM</loc>
     <lastmod>2026-03-03</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/mkeduM7jxtM/hqdefault.jpg</video:thumbnail_loc>
@@ -2968,7 +2968,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Klet4jXNxsg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Klet4jXNxsg</loc>
     <lastmod>2026-03-01</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Klet4jXNxsg/hqdefault.jpg</video:thumbnail_loc>
@@ -2979,7 +2979,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/XL6tQI3gr6o</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/XL6tQI3gr6o</loc>
     <lastmod>2026-02-25</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/XL6tQI3gr6o/hqdefault.jpg</video:thumbnail_loc>
@@ -2990,7 +2990,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/cDBQHCC-8VE</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/cDBQHCC-8VE</loc>
     <lastmod>2026-02-23</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/cDBQHCC-8VE/hqdefault.jpg</video:thumbnail_loc>
@@ -3001,7 +3001,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/zcSN3vUQyLM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/zcSN3vUQyLM</loc>
     <lastmod>2026-06-24</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/zcSN3vUQyLM/hqdefault.jpg</video:thumbnail_loc>
@@ -3012,7 +3012,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/i4Z5kOMrXOw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/i4Z5kOMrXOw</loc>
     <lastmod>2026-06-25</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/i4Z5kOMrXOw/hqdefault.jpg</video:thumbnail_loc>
@@ -3023,7 +3023,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/XWwnhh40k5U</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/XWwnhh40k5U</loc>
     <lastmod>2026-07-02</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/XWwnhh40k5U/hqdefault.jpg</video:thumbnail_loc>
@@ -3034,7 +3034,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/3XAF_QbGGPU</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/3XAF_QbGGPU</loc>
     <lastmod>2026-07-08</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/3XAF_QbGGPU/hqdefault.jpg</video:thumbnail_loc>
@@ -3045,7 +3045,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/_Pt1vH7XF4k</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/_Pt1vH7XF4k</loc>
     <lastmod>2026-07-28</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/_Pt1vH7XF4k/hqdefault.jpg</video:thumbnail_loc>
@@ -3056,7 +3056,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/gOUsHTol9d8</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/gOUsHTol9d8</loc>
     <lastmod>2026-08-07</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/gOUsHTol9d8/hqdefault.jpg</video:thumbnail_loc>
@@ -3067,7 +3067,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/fg7uiDLDHqo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/fg7uiDLDHqo</loc>
     <lastmod>2026-08-17</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/fg7uiDLDHqo/hqdefault.jpg</video:thumbnail_loc>
@@ -3078,7 +3078,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/k5KlBSU9PbI</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/k5KlBSU9PbI</loc>
     <lastmod>2026-08-26</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/k5KlBSU9PbI/hqdefault.jpg</video:thumbnail_loc>
@@ -3089,7 +3089,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/UI3bDX-PXyU</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/UI3bDX-PXyU</loc>
     <lastmod>2026-09-17</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/UI3bDX-PXyU/hqdefault.jpg</video:thumbnail_loc>
@@ -3100,7 +3100,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/f2paVcSG9ZQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/f2paVcSG9ZQ</loc>
     <lastmod>2026-05-06</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/f2paVcSG9ZQ/hqdefault.jpg</video:thumbnail_loc>
@@ -3111,7 +3111,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/uX-tOWzCnEo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/uX-tOWzCnEo</loc>
     <lastmod>2026-06-03</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/uX-tOWzCnEo/hqdefault.jpg</video:thumbnail_loc>
@@ -3122,7 +3122,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/yTbHlTAqedU</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/yTbHlTAqedU</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/yTbHlTAqedU/hqdefault.jpg</video:thumbnail_loc>
       <video:title>Al-Wabil al-Sayyib (17) | Perfect Love and Absolute Humility to God, Lord of the Worlds | #Sheikh_Ashraf_Mazen</video:title>
@@ -3132,7 +3132,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/KItqZipgmjw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/KItqZipgmjw</loc>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/KItqZipgmjw/hqdefault.jpg</video:thumbnail_loc>
       <video:title>Al-Wabil al-Sayyib 18: The Superiority of Deeds Based on the Truths of Faith in the Hearts | #Sheikh_Ashraf_Mazen</video:title>
@@ -3142,10 +3142,10 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/playlist/PLHcd1VuAeT_PX5Rfu5CKPj-Ok9GAYYUGm</loc>
+    <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_PX5Rfu5CKPj-Ok9GAYYUGm</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/VSVNqNKUbok</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/VSVNqNKUbok</loc>
     <lastmod>2024-10-18</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/VSVNqNKUbok/hqdefault.jpg</video:thumbnail_loc>
@@ -3156,7 +3156,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/wgsWIw7_m1I</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/wgsWIw7_m1I</loc>
     <lastmod>2024-10-10</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/wgsWIw7_m1I/hqdefault.jpg</video:thumbnail_loc>
@@ -3167,7 +3167,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/711FU6SEWGM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/711FU6SEWGM</loc>
     <lastmod>2024-10-09</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/711FU6SEWGM/hqdefault.jpg</video:thumbnail_loc>
@@ -3178,7 +3178,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/k0p35y3fyww</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/k0p35y3fyww</loc>
     <lastmod>2024-10-08</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/k0p35y3fyww/hqdefault.jpg</video:thumbnail_loc>
@@ -3189,7 +3189,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ImyfQW9_YRI</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ImyfQW9_YRI</loc>
     <lastmod>2024-10-08</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ImyfQW9_YRI/hqdefault.jpg</video:thumbnail_loc>
@@ -3200,7 +3200,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/-e3FB1nx_Ig</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/-e3FB1nx_Ig</loc>
     <lastmod>2024-10-07</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/-e3FB1nx_Ig/hqdefault.jpg</video:thumbnail_loc>
@@ -3211,7 +3211,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/zkLMqTHdP2A</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/zkLMqTHdP2A</loc>
     <lastmod>2024-10-06</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/zkLMqTHdP2A/hqdefault.jpg</video:thumbnail_loc>
@@ -3222,7 +3222,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ugoFK_rcaAQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ugoFK_rcaAQ</loc>
     <lastmod>2024-10-01</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ugoFK_rcaAQ/hqdefault.jpg</video:thumbnail_loc>
@@ -3233,7 +3233,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/T7KaPyx5GHE</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/T7KaPyx5GHE</loc>
     <lastmod>2024-09-24</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/T7KaPyx5GHE/hqdefault.jpg</video:thumbnail_loc>
@@ -3244,7 +3244,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/4U4eNtd6yHo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/4U4eNtd6yHo</loc>
     <lastmod>2024-09-23</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/4U4eNtd6yHo/hqdefault.jpg</video:thumbnail_loc>
@@ -3255,7 +3255,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/kz7VXCcpiKE</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/kz7VXCcpiKE</loc>
     <lastmod>2024-09-23</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/kz7VXCcpiKE/hqdefault.jpg</video:thumbnail_loc>
@@ -3266,7 +3266,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/l0fCg8XaBgA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/l0fCg8XaBgA</loc>
     <lastmod>2024-09-22</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/l0fCg8XaBgA/hqdefault.jpg</video:thumbnail_loc>
@@ -3277,7 +3277,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/X0CFrCbQyBM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/X0CFrCbQyBM</loc>
     <lastmod>2024-09-17</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/X0CFrCbQyBM/hqdefault.jpg</video:thumbnail_loc>
@@ -3288,7 +3288,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/pAqovtP9F_c</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/pAqovtP9F_c</loc>
     <lastmod>2024-09-16</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/pAqovtP9F_c/hqdefault.jpg</video:thumbnail_loc>
@@ -3299,10 +3299,10 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/playlist/PLHcd1VuAeT_MeMnXSZEeaJ0byi2Zpp9bR</loc>
+    <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_MeMnXSZEeaJ0byi2Zpp9bR</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/j9O47ibQy2A</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/j9O47ibQy2A</loc>
     <lastmod>2025-04-29</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/j9O47ibQy2A/hqdefault.jpg</video:thumbnail_loc>
@@ -3313,7 +3313,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/XJK5LW3kvnw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/XJK5LW3kvnw</loc>
     <lastmod>2024-08-14</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/XJK5LW3kvnw/hqdefault.jpg</video:thumbnail_loc>
@@ -3324,7 +3324,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/gTv-6uYe1Rs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/gTv-6uYe1Rs</loc>
     <lastmod>2024-08-13</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/gTv-6uYe1Rs/hqdefault.jpg</video:thumbnail_loc>
@@ -3335,7 +3335,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/fZ4oWyN7FqA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/fZ4oWyN7FqA</loc>
     <lastmod>2024-08-12</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/fZ4oWyN7FqA/hqdefault.jpg</video:thumbnail_loc>
@@ -3346,7 +3346,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/xnTyjp0pJPs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/xnTyjp0pJPs</loc>
     <lastmod>2024-08-04</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/xnTyjp0pJPs/hqdefault.jpg</video:thumbnail_loc>
@@ -3357,7 +3357,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/1cxnOjVbYBo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/1cxnOjVbYBo</loc>
     <lastmod>2024-08-04</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/1cxnOjVbYBo/hqdefault.jpg</video:thumbnail_loc>
@@ -3368,7 +3368,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/PGrTGjZlhqU</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/PGrTGjZlhqU</loc>
     <lastmod>2024-08-03</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/PGrTGjZlhqU/hqdefault.jpg</video:thumbnail_loc>
@@ -3379,7 +3379,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/3FBay_e4FwI</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/3FBay_e4FwI</loc>
     <lastmod>2024-07-30</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/3FBay_e4FwI/hqdefault.jpg</video:thumbnail_loc>
@@ -3390,7 +3390,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/hA-YJAPPYds</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/hA-YJAPPYds</loc>
     <lastmod>2024-07-28</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/hA-YJAPPYds/hqdefault.jpg</video:thumbnail_loc>
@@ -3401,7 +3401,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/P8Q8YrvUpao</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/P8Q8YrvUpao</loc>
     <lastmod>2024-07-27</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/P8Q8YrvUpao/hqdefault.jpg</video:thumbnail_loc>
@@ -3412,7 +3412,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/i0yUUzHKxWM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/i0yUUzHKxWM</loc>
     <lastmod>2024-07-26</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/i0yUUzHKxWM/hqdefault.jpg</video:thumbnail_loc>
@@ -3423,7 +3423,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/FI7JnyiHBRs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/FI7JnyiHBRs</loc>
     <lastmod>2024-07-25</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/FI7JnyiHBRs/hqdefault.jpg</video:thumbnail_loc>
@@ -3434,7 +3434,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/uAbSkz99FYA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/uAbSkz99FYA</loc>
     <lastmod>2024-07-23</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/uAbSkz99FYA/hqdefault.jpg</video:thumbnail_loc>
@@ -3445,7 +3445,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/tzbADxJdzug</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/tzbADxJdzug</loc>
     <lastmod>2024-07-19</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/tzbADxJdzug/hqdefault.jpg</video:thumbnail_loc>
@@ -3456,10 +3456,10 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/playlist/PLHcd1VuAeT_P1ubsSD1cgCgRjMAxUhcOg</loc>
+    <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_P1ubsSD1cgCgRjMAxUhcOg</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/TMXKlnBXfQ4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/TMXKlnBXfQ4</loc>
     <lastmod>2025-12-01</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/TMXKlnBXfQ4/hqdefault.jpg</video:thumbnail_loc>
@@ -3470,7 +3470,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/-4mk_um6OLI</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/-4mk_um6OLI</loc>
     <lastmod>2025-12-04</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/-4mk_um6OLI/hqdefault.jpg</video:thumbnail_loc>
@@ -3481,7 +3481,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/svPSjVZNqLs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/svPSjVZNqLs</loc>
     <lastmod>2025-12-08</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/svPSjVZNqLs/hqdefault.jpg</video:thumbnail_loc>
@@ -3492,7 +3492,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/oBJy-xV_jzo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/oBJy-xV_jzo</loc>
     <lastmod>2025-12-23</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/oBJy-xV_jzo/hqdefault.jpg</video:thumbnail_loc>
@@ -3503,7 +3503,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Kuvv6QpUsHc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Kuvv6QpUsHc</loc>
     <lastmod>2025-12-15</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Kuvv6QpUsHc/hqdefault.jpg</video:thumbnail_loc>
@@ -3514,7 +3514,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/32nUn-Vaj6Q</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/32nUn-Vaj6Q</loc>
     <lastmod>2026-01-21</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/32nUn-Vaj6Q/hqdefault.jpg</video:thumbnail_loc>
@@ -3525,7 +3525,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/wTQ_2w2pZwc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/wTQ_2w2pZwc</loc>
     <lastmod>2026-02-05</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/wTQ_2w2pZwc/hqdefault.jpg</video:thumbnail_loc>
@@ -3536,7 +3536,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/igad8MTq7Cc</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/igad8MTq7Cc</loc>
     <lastmod>2026-01-19</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/igad8MTq7Cc/hqdefault.jpg</video:thumbnail_loc>
@@ -3547,7 +3547,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/l_oaJokkSwg</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/l_oaJokkSwg</loc>
     <lastmod>2026-01-13</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/l_oaJokkSwg/hqdefault.jpg</video:thumbnail_loc>
@@ -3558,7 +3558,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/iOrHcLZNUeo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/iOrHcLZNUeo</loc>
     <lastmod>2026-01-10</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/iOrHcLZNUeo/hqdefault.jpg</video:thumbnail_loc>
@@ -3569,10 +3569,10 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/playlist/PLHcd1VuAeT_MtAkP7tyneXYrhj-4OE8UB</loc>
+    <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_MtAkP7tyneXYrhj-4OE8UB</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/9WD-gAenSSI</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/9WD-gAenSSI</loc>
     <lastmod>2026-04-28</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/9WD-gAenSSI/hqdefault.jpg</video:thumbnail_loc>
@@ -3583,7 +3583,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ZW_9mL-BLf0</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ZW_9mL-BLf0</loc>
     <lastmod>2026-04-26</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ZW_9mL-BLf0/hqdefault.jpg</video:thumbnail_loc>
@@ -3594,7 +3594,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/eJdmkR7uARQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/eJdmkR7uARQ</loc>
     <lastmod>2026-03-31</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/eJdmkR7uARQ/hqdefault.jpg</video:thumbnail_loc>
@@ -3605,7 +3605,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/e8uwWlVugkQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/e8uwWlVugkQ</loc>
     <lastmod>2026-03-29</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/e8uwWlVugkQ/hqdefault.jpg</video:thumbnail_loc>
@@ -3616,7 +3616,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/3jpNGgY0opo</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/3jpNGgY0opo</loc>
     <lastmod>2026-03-18</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/3jpNGgY0opo/hqdefault.jpg</video:thumbnail_loc>
@@ -3627,7 +3627,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/YiaraOQdIgs</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/YiaraOQdIgs</loc>
     <lastmod>2026-03-17</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/YiaraOQdIgs/hqdefault.jpg</video:thumbnail_loc>
@@ -3638,7 +3638,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/HaitjNgJApA</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/HaitjNgJApA</loc>
     <lastmod>2026-03-14</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/HaitjNgJApA/hqdefault.jpg</video:thumbnail_loc>
@@ -3649,7 +3649,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/SVg5mJZr0sE</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/SVg5mJZr0sE</loc>
     <lastmod>2026-03-12</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/SVg5mJZr0sE/hqdefault.jpg</video:thumbnail_loc>
@@ -3660,10 +3660,10 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/playlist/PLHcd1VuAeT_PiOe9ozUxHwjOKDruxtlnD</loc>
+    <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_PiOe9ozUxHwjOKDruxtlnD</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/rdaqBQ1HKIY</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/rdaqBQ1HKIY</loc>
     <lastmod>2022-08-22</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/rdaqBQ1HKIY/hqdefault.jpg</video:thumbnail_loc>
@@ -3674,7 +3674,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/KEiwAuJyZ0U</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/KEiwAuJyZ0U</loc>
     <lastmod>2022-08-17</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/KEiwAuJyZ0U/hqdefault.jpg</video:thumbnail_loc>
@@ -3685,7 +3685,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/8kgQZK883Kw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/8kgQZK883Kw</loc>
     <lastmod>2022-08-14</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/8kgQZK883Kw/hqdefault.jpg</video:thumbnail_loc>
@@ -3696,7 +3696,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/NbdwfroP5Zw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/NbdwfroP5Zw</loc>
     <lastmod>2022-08-11</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/NbdwfroP5Zw/hqdefault.jpg</video:thumbnail_loc>
@@ -3707,7 +3707,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/4Zpr9xd43Jw</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/4Zpr9xd43Jw</loc>
     <lastmod>2022-08-10</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/4Zpr9xd43Jw/hqdefault.jpg</video:thumbnail_loc>
@@ -3718,7 +3718,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/UXcCYNMZLws</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/UXcCYNMZLws</loc>
     <lastmod>2022-08-08</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/UXcCYNMZLws/hqdefault.jpg</video:thumbnail_loc>
@@ -3729,10 +3729,10 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/playlist/PLHcd1VuAeT_N4_Vb6tGkmZ1ZkW0UJ-qdE</loc>
+    <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_N4_Vb6tGkmZ1ZkW0UJ-qdE</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/CyuMgq4kfE4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/CyuMgq4kfE4</loc>
     <lastmod>2022-07-16</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/CyuMgq4kfE4/hqdefault.jpg</video:thumbnail_loc>
@@ -3743,7 +3743,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/jRtaU-ukJhI</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/jRtaU-ukJhI</loc>
     <lastmod>2022-06-17</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/jRtaU-ukJhI/hqdefault.jpg</video:thumbnail_loc>
@@ -3754,7 +3754,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/gR5BnSgIKbM</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/gR5BnSgIKbM</loc>
     <lastmod>2022-06-17</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/gR5BnSgIKbM/hqdefault.jpg</video:thumbnail_loc>
@@ -3765,7 +3765,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/zmrXB1SMp9E</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/zmrXB1SMp9E</loc>
     <lastmod>2022-06-17</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/zmrXB1SMp9E/hqdefault.jpg</video:thumbnail_loc>
@@ -3776,7 +3776,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/UlGDwPwCwGI</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/UlGDwPwCwGI</loc>
     <lastmod>2022-06-12</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/UlGDwPwCwGI/hqdefault.jpg</video:thumbnail_loc>
@@ -3787,10 +3787,10 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/playlist/PLHcd1VuAeT_MPiOc-VRay0sMlslQ3mq2r</loc>
+    <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_MPiOc-VRay0sMlslQ3mq2r</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/yUfeBP65p_4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/yUfeBP65p_4</loc>
     <lastmod>2024-10-23</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/yUfeBP65p_4/hqdefault.jpg</video:thumbnail_loc>
@@ -3801,7 +3801,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/Ks-jdmaZpp4</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/Ks-jdmaZpp4</loc>
     <lastmod>2024-10-22</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/Ks-jdmaZpp4/hqdefault.jpg</video:thumbnail_loc>
@@ -3812,7 +3812,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/p46XutQFmjI</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/p46XutQFmjI</loc>
     <lastmod>2024-10-22</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/p46XutQFmjI/hqdefault.jpg</video:thumbnail_loc>
@@ -3823,7 +3823,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/t_dPlLTLQ7g</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/t_dPlLTLQ7g</loc>
     <lastmod>2024-10-21</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/t_dPlLTLQ7g/hqdefault.jpg</video:thumbnail_loc>
@@ -3834,7 +3834,7 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/EVOP-sjmmZk</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/EVOP-sjmmZk</loc>
     <lastmod>2024-10-20</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/EVOP-sjmmZk/hqdefault.jpg</video:thumbnail_loc>
@@ -3845,10 +3845,10 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/playlist/PLHcd1VuAeT_OW6FmnOfwQzbZvEOQed3yB</loc>
+    <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_OW6FmnOfwQzbZvEOQed3yB</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/tygzOfwnScE</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/tygzOfwnScE</loc>
     <lastmod>2024-09-22</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/tygzOfwnScE/hqdefault.jpg</video:thumbnail_loc>
@@ -3859,10 +3859,10 @@
     </video:video>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/playlist/PLHcd1VuAeT_Ok9U3ZDEsBCigGbTHC-jN9</loc>
+    <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_Ok9U3ZDEsBCigGbTHC-jN9</loc>
   </url>
   <url>
-    <loc>https://sheikh-mazen.org/video/ZOfBrKGJRGQ</loc>
+    <loc>https://ashraf-mazen.vercel.app/video/ZOfBrKGJRGQ</loc>
     <lastmod>2024-11-30</lastmod>
     <video:video>
       <video:thumbnail_loc>https://i.ytimg.com/vi/ZOfBrKGJRGQ/hqdefault.jpg</video:thumbnail_loc>

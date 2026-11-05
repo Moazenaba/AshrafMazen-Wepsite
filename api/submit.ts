@@ -76,6 +76,26 @@ export default async function handler(req: any, res: any) {
       return send(res, 429, { error: 'تم إرسال النموذج بسرعة كبيرة. اقرأه ثم أعد المحاولة.' });
     }
 
+    // Optional bot challenge: active only when TURNSTILE_SECRET_KEY is set (and the site has VITE_TURNSTILE_SITE_KEY)
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+    if (turnstileSecret) {
+      const token = clean(body.turnstile, 2048);
+      let human = false;
+      if (token) {
+        try {
+          const check = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ secret: turnstileSecret, response: token }),
+          });
+          human = ((await check.json()) as { success?: boolean }).success === true;
+        } catch {
+          human = false;
+        }
+      }
+      if (!human) return send(res, 400, { error: 'تعذّر التحقق من أنك لست روبوتاً. أعد تحميل الصفحة وحاول مرة أخرى.' });
+    }
+
     const forwarded = String(req.headers?.['x-forwarded-for'] || '').split(',')[0].trim();
     if (tooMany(forwarded || req.socket?.remoteAddress || 'unknown')) {
       return send(res, 429, { error: 'وصلتَ للحد المسموح به من الطلبات هذه الساعة. حاول لاحقاً.' });
@@ -111,6 +131,9 @@ export default async function handler(req: any, res: any) {
     if (!response.ok) {
       const text = await response.text();
       console.error('submission rejected by the database:', response.status, text.slice(0, 300));
+      if (!process.env.SUPABASE_SERVICE_ROLE_KEY && [401, 403].includes(response.status)) {
+        console.error('SUPABASE_SERVICE_ROLE_KEY is not set in the environment: visitors can no longer write directly, set the key in Vercel.');
+      }
       return send(res, 502, {
         error: /too many pending/i.test(text)
           ? 'الطلبات المنتظرة وصلت الحد الأقصى حالياً. حاول لاحقاً.'
