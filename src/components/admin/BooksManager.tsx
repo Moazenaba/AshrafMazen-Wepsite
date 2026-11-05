@@ -270,7 +270,7 @@ const BookModal: React.FC<{
                 </a>
               )}
             </div>
-            <p id="book-pdf-hint" className="mt-1.5 text-xs text-stone-600 dark:text-stone-400">حتى ١٠٠ ميجابايت. أو الصق رابط ملف PDF منشور في مكان آخر:</p>
+            <p id="book-pdf-hint" className="mt-1.5 text-xs text-stone-600 dark:text-stone-400">حتى ٢٠٠ ميجابايت. أو الصق رابط ملف PDF منشور في مكان آخر:</p>
             <input
               type="url"
               dir="ltr"
