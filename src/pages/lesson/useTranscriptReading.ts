@@ -4,14 +4,30 @@ import { trackReading, trackView } from '../../services/analytics';
 import type { Lesson } from '../../types';
 import type { TabType } from './useLessonTabs';
 
-export function useTranscriptReading(lesson: Lesson | null, activeTab: TabType, position: { seconds: number; duration: number }) {
+export function useTranscriptReading(
+  lesson: Lesson | null,
+  activeTab: TabType,
+  position: { seconds: number; duration: number },
+  countView: () => void
+) {
   const lessonId = lesson?.id;
 
-  // Reading time counts while the transcript tab is open
+  // Reading time counts while the transcript tab is open; the first scroll is what counts as a view
   useEffect(() => {
     if (!lessonId || activeTab !== 'transcript') return;
-    trackView('read', `lesson:${lessonId}`);
-    return trackReading(`lesson:${lessonId}`);
+    const key = `lesson:${lessonId}`;
+    const stopTime = trackReading(key);
+    const onFirstScroll = () => {
+      trackView('read', key);
+      countView();
+    };
+    window.addEventListener('scroll', onFirstScroll, { capture: true, once: true, passive: true });
+    return () => {
+      stopTime();
+      window.removeEventListener('scroll', onFirstScroll, true);
+    };
+    // countView only changes when the lesson does
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lessonId, activeTab]);
 
   const paragraphs = useMemo(

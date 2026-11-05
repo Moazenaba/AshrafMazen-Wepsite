@@ -1,7 +1,7 @@
 // Loads a lesson with its series, category and the published lessons of the series.
 // Drafts are asked for too: the database returns them only to an admin, so the admin can preview before publishing.
 import { useEffect, useState } from 'react';
-import { getCategory, getLesson, getLessonsBySeries, getSeries, incrementLessonViews } from '../../services/dataService';
+import { getCategory, getLesson, getLessonsBySeries, getSeries } from '../../services/dataService';
 import { getResumeSeconds } from '../../services/progressService';
 import { saveRecentLesson } from '../../services/recentLessonService';
 import type { Category, Lesson, Series } from '../../types';
@@ -28,9 +28,6 @@ export function useLessonData(id: string | undefined, linkedSecond: number) {
           }
           return;
         }
-
-        // Counted once per browser session, and only for a lesson that exists and is published
-        if (l.status === 'published') incrementLessonViews(l.id);
 
         const [s, published] = await Promise.all([getSeries(l.series_id), getLessonsBySeries(l.series_id, false)]);
         const cat = s ? await getCategory(s.category_id) : null;

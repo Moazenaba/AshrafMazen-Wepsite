@@ -10,7 +10,12 @@ import type { Lesson } from '../../types';
 const AUTO_NEXT_SECONDS = 5;
 const SAVE_EVERY_SECONDS = 5;
 
-export function useLessonPlayback(lesson: Lesson | null, nextLesson: Pick<Lesson, 'id'> | null, resetKey: string | undefined) {
+export function useLessonPlayback(
+  lesson: Lesson | null,
+  nextLesson: Pick<Lesson, 'id'> | null,
+  resetKey: string | undefined,
+  countView: () => void
+) {
   const navigate = useNavigate();
   const [position, setPosition] = useState({ seconds: 0, duration: 0 });
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -45,6 +50,8 @@ export function useLessonPlayback(lesson: Lesson | null, nextLesson: Pick<Lesson
 
   // Playback reports its position here: the transcript follows it, and it is saved every few seconds
   const onMediaTime = (seconds: number, duration: number) => {
+    // The player only reports a position while it plays: that is the moment the lesson counts as viewed
+    countView();
     setPosition((prev) => (Math.floor(prev.seconds) === Math.floor(seconds) && prev.duration === duration ? prev : { seconds, duration }));
     if (lesson && Math.abs(seconds - lastSavedRef.current) >= SAVE_EVERY_SECONDS) {
       saveLessonPosition(lesson.id, seconds, duration);

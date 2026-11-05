@@ -20,6 +20,7 @@ import { useLessonTabs } from './lesson/useLessonTabs';
 import { useShare } from './lesson/useShare';
 import { useTranscriptFont } from './lesson/useTranscriptFont';
 import { useTranscriptReading } from './lesson/useTranscriptReading';
+import { useViewCounter } from './lesson/viewCounter';
 
 // One lesson: video, audio and transcript, its chapters, and the other lessons of its series.
 // Behaviour lives in the use* hooks beside this file (./lesson); this file puts the parts together.
@@ -32,8 +33,9 @@ export const LessonView: React.FC = () => {
   const { lesson, series, category, seriesLessons, loading, resumeAt } = useLessonData(id, linkedSecond);
   const { prevLesson, nextLesson } = siblingsOf(seriesLessons, lesson?.id);
   const tabs = useLessonTabs(lesson);
-  const playback = useLessonPlayback(lesson, nextLesson, id);
-  const reading = useTranscriptReading(lesson, tabs.activeTab, playback.position);
+  const countView = useViewCounter(lesson);
+  const playback = useLessonPlayback(lesson, nextLesson, id, countView);
+  const reading = useTranscriptReading(lesson, tabs.activeTab, playback.position, countView);
   const font = useTranscriptFont();
   const share = useShare(lesson, series);
   const { isBookmarked, toggleBookmark } = useBookmarks();

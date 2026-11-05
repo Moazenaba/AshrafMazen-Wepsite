@@ -13,14 +13,17 @@ No visitor accounts. Visitors send requests via `api/submit`; nothing changes un
 - **File size rule: under ~350 lines.** When a file grows past that, split it (extract a component, a hook, or a data module)
   before adding more. One topic per file. No data access inside JSX; no business rules inside components.
 - Edit with small targeted edits; do not rewrite a file to change a few lines. Do not re-read a file you just edited.
-- Run `npm run typecheck` once when the edit batch is done (not after each edit); `npm run check` before pushing.
+- Run `npm run typecheck` once when the edit batch is done (not after each edit); `npm run check` (types + tests + build) before pushing.
+- **Tests** (`npm test`, Vitest, no browser/database/network): pure rules and the `api/` functions, next to the code as `*.test.ts`
+  (lessonForm, placeLessons, latestFeed, relations, chapters, arabic helpers, youtube links, viewCounter, api/submit). When a rule changes,
+  change its test first. New logic goes in a plain function so it can be tested; builders for test data are in `src/test/factories.ts`.
 - Batch independent tool calls in one turn. Prefer text tools (grep, javascript_exec) over screenshots.
 - Replies: short, Egyptian Arabic, what changed / what is left / what the user must do.
 - Never write secrets anywhere. Server keys (`SUPABASE_SERVICE_ROLE_KEY`, R2 keys) live only in Vercel env vars and `.env.local`.
 
 ## Commands
 
-`npm run dev` (port 3000, also serves `api/`) · `typecheck` · `check` (types + build) · `health` (database permissions + R2) ·
+`npm run dev` (port 3000, also serves `api/`) · `typecheck` · `test` · `check` (types + tests + build) · `health` (database permissions + R2) ·
 `smoke <url>` (every page and function) · `sitemap` · `sync:youtube` / `build:library`.
 
 Admin screens without a login: run `npm run dev`, open `/dev/admin` (fake in-memory database and fake storage, dev only).
@@ -56,6 +59,12 @@ docs/           migrations/ (run in order, see its README), TROUBLESHOOTING.md, 
 Design rules used here: one responsibility per file; screens get data and actions from hooks and only render;
 rules that must be tested without a screen are plain functions (for example `lessonForm.ts`, `placeLessons.ts`);
 a component receives only the props it uses; the same query/attach logic is written once (`db.ts`, `relations.ts`).
+
+## Rules worth knowing
+
+- **A lesson counts as viewed** when the visitor plays its video or audio, or scrolls its transcript once; once per lesson per visit,
+  never on just opening the page, never for a draft preview (`pages/lesson/viewCounter.ts`, `useLessonPlayback`, `useTranscriptReading`).
+  Channel videos count on play (`VideoView`); a book counts when its page opens (a PDF frame cannot report scrolling).
 
 ## Where to change what
 
