@@ -6,6 +6,8 @@ interface LessonThumbProps {
   youtubeUrl?: string | null;
   audioUrl?: string | null;
   className?: string;
+  // The first picture on the page (the largest paint): loaded at once and at high priority, never lazily
+  priority?: boolean;
 }
 
 // YouTube answers a missing or still-processing picture with a small grey placeholder (120 px wide) instead of an error
@@ -13,11 +15,11 @@ const PLACEHOLDER_WIDTH = 121;
 
 // A 16:9 frame for a lesson: the video's own thumbnail, or a calm placeholder for audio-only and text-only lessons.
 // When YouTube has no real picture yet, the frame falls back to the site's green with an icon rather than grey dots.
-export const LessonThumb: React.FC<LessonThumbProps> = ({ youtubeUrl, audioUrl, className = '' }) => {
+export const LessonThumb: React.FC<LessonThumbProps> = ({ youtubeUrl, audioUrl, className = '', priority = false }) => {
   const id = getYouTubeId(youtubeUrl);
-  // Tries the usual size, then the medium one, then gives up on pictures
+  // Tries the medium size first (320x180, true 16:9, a third of the bytes), then the larger one, then gives up on pictures
   const [step, setStep] = useState(0);
-  const sources = id ? [getYouTubeThumbnail(youtubeUrl), `https://i.ytimg.com/vi/${id}/mqdefault.jpg`] : [];
+  const sources = id ? [`https://i.ytimg.com/vi/${id}/mqdefault.jpg`, getYouTubeThumbnail(youtubeUrl)] : [];
   const thumb = sources[step] || null;
   const Icon = youtubeUrl ? Video : audioUrl ? Headphones : FileText;
 
@@ -31,7 +33,8 @@ export const LessonThumb: React.FC<LessonThumbProps> = ({ youtubeUrl, audioUrl, 
           key={thumb}
           src={thumb}
           alt=""
-          loading="lazy"
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : undefined}
           decoding="async"
           onLoad={(e) => {
             if (e.currentTarget.naturalWidth < PLACEHOLDER_WIDTH) setStep((s) => s + 1);

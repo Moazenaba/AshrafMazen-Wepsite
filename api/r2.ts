@@ -12,7 +12,7 @@ const KINDS = {
   pdf: { folder: 'library/files', extensions: ['pdf'], maxMb: 200, type: 'application/pdf' },
   cover: { folder: 'library/covers', extensions: ['jpg', 'jpeg', 'png', 'webp'], maxMb: 5, type: '' },
   audio: { folder: 'audio', extensions: ['mp3', 'm4a', 'wav', 'ogg'], maxMb: 500, type: '' },
-  logo: { folder: 'branding', extensions: ['png', 'jpg', 'jpeg', 'svg', 'webp'], maxMb: 2, type: '' },
+  logo: { folder: 'branding', extensions: ['png', 'jpg', 'jpeg', 'webp'], maxMb: 2, type: '' },
 } as const;
 
 const IMAGE_TYPES: Record<string, string> = {

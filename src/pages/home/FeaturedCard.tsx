@@ -33,7 +33,7 @@ export const FeaturedCard: React.FC<{ lesson: LessonWithRelations }> = ({ lesson
         </div>
       </div>
       <div className="order-1 sm:order-none">
-        <LessonThumb youtubeUrl={lesson.youtube_url} audioUrl={lesson.audio_url} className="w-full" />
+        <LessonThumb youtubeUrl={lesson.youtube_url} audioUrl={lesson.audio_url} className="w-full" priority />
       </div>
     </div>
   </article>

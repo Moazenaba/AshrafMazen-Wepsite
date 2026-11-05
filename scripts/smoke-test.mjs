@@ -1,7 +1,7 @@
 // Opens the running site the way a visitor does and checks that every page and endpoint answers.
 //   npm run dev                                         (in one terminal: serves the pages and the /api functions)
 //   npm run smoke http://localhost:3000                 (in another)
-//   node scripts/smoke-test.mjs https://sheikh-mazen.org     (against the real, deployed site)
+//   node scripts/smoke-test.mjs https://ashraf-mazen.vercel.app     (against the real, deployed site)
 // Note: `vite preview` serves the built pages but not the /api functions, so run the API checks against `npm run dev`
 // or against the deployed site.
 // Exits with 1 if anything fails.

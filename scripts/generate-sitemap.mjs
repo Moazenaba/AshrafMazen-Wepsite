@@ -6,7 +6,7 @@
 //                                              warning, so it can never stop the site from building
 //
 // Settings come from the environment or from .env.local: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, and
-// SITE_URL (the public address; defaults to https://sheikh-mazen.org).
+// SITE_URL (the public address; defaults to the Vercel address).
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -34,7 +34,7 @@ const fail = (message) => {
   process.exit(1);
 };
 
-const siteUrl = (process.env.SITE_URL || 'https://sheikh-mazen.org').replace(/\/$/, '');
+const siteUrl = (process.env.SITE_URL || 'https://ashraf-mazen.vercel.app').replace(/\/$/, '');
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const anonKey = process.env.VITE_SUPABASE_ANON_KEY;
 if (!supabaseUrl || !anonKey) fail('Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY (set them in the environment or .env.local).');
