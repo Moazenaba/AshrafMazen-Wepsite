@@ -4,6 +4,7 @@ import { translateSupabaseError } from '../../utils/supabaseErrors';
 import { deleteFromR2, isR2Url, r2DownloadUrl, uploadToR2 } from '../r2';
 import type { Category, Book } from '../../types';
 import { getCategories } from './catalog';
+import { updateSiteRecord } from './jsonRecord';
 
 export interface BookWithCategory extends Book {
   category?: Category | null;
@@ -11,24 +12,25 @@ export interface BookWithCategory extends Book {
 
 const LIBRARY_KEY = 'library_books';
 
-async function readLibrary(): Promise<Book[]> {
-  const { data, error } = await supabase.from('site_settings').select('value').eq('key', LIBRARY_KEY).maybeSingle();
-  if (error) throw new Error(translateSupabaseError(error));
-  if (!data?.value) return [];
+// The stored text (or nothing / something unreadable) as a list of books
+export function parseBooks(raw: string | null): Book[] {
+  if (!raw) return [];
   try {
-    const list = JSON.parse(data.value);
+    const list = JSON.parse(raw);
     return Array.isArray(list) ? list : [];
   } catch {
     return [];
   }
 }
 
-async function writeLibrary(books: Book[]): Promise<void> {
-  const { error } = await supabase
-    .from('site_settings')
-    .upsert([{ key: LIBRARY_KEY, value: JSON.stringify(books) }], { onConflict: 'key' });
+async function readLibrary(): Promise<Book[]> {
+  const { data, error } = await supabase.from('site_settings').select('value').eq('key', LIBRARY_KEY).maybeSingle();
   if (error) throw new Error(translateSupabaseError(error));
+  return parseBooks(data?.value ?? null);
 }
+
+// A change to the list, applied to the latest saved copy (another admin's books are kept)
+const updateLibrary = (mutate: (books: Book[]) => Book[]) => updateSiteRecord(LIBRARY_KEY, parseBooks, mutate);
 
 // What visitors may see of the library: published books only. Since docs/migrations/2026-11-05-security.sql the
 // library record is readable by admins only, and visitors get it through the published_books() function, which
@@ -108,27 +110,31 @@ export async function createBook(bookData: Partial<Book>): Promise<Book> {
     created_at: new Date().toISOString(),
   };
   const book = cleanBook(bookData, base);
-  const books = await readLibrary();
-  await writeLibrary([...books, book]);
+  await updateLibrary((books) => (books.some((b) => b.id === book.id) ? books : [...books, book]));
   return book;
 }
 
 export async function updateBook(id: string, bookData: Partial<Book>): Promise<Book> {
-  const books = await readLibrary();
-  const index = books.findIndex((b) => b.id === id);
-  if (index === -1) throw new Error('هذا الكتاب لم يعد موجوداً.');
-  const book = cleanBook(bookData, books[index]);
-  if (!book.title) throw new Error('يرجى إدخال عنوان الكتاب.');
-  if (!book.file_url) throw new Error('يرجى رفع ملف الكتاب (PDF) أو إدخال رابطه.');
-  const previous = books[index];
-  books[index] = book;
-  await writeLibrary(books);
+  let previous!: Book;
+  let book!: Book;
+  let after: Book[] = [];
+  await updateLibrary((books) => {
+    const index = books.findIndex((b) => b.id === id);
+    if (index === -1) throw new Error('هذا الكتاب لم يعد موجوداً.');
+    const edited = cleanBook(bookData, books[index]);
+    if (!edited.title) throw new Error('يرجى إدخال عنوان الكتاب.');
+    if (!edited.file_url) throw new Error('يرجى رفع ملف الكتاب (PDF) أو إدخال رابطه.');
+    previous = books[index];
+    book = edited;
+    after = books.map((b, i) => (i === index ? edited : b));
+    return after;
+  });
   // A replaced PDF or cover is no longer used by anything
   for (const [oldUrl, newUrl] of [
     [previous.file_url, book.file_url],
     [previous.cover_url, book.cover_url],
   ] as const) {
-    const stillUsed = books.some((b) => b.file_url === oldUrl || b.cover_url === oldUrl);
+    const stillUsed = after.some((b) => b.file_url === oldUrl || b.cover_url === oldUrl);
     if (oldUrl && oldUrl !== newUrl && !stillUsed && isR2Url(oldUrl)) await deleteFromR2(oldUrl);
   }
   return book;
@@ -136,9 +142,8 @@ export async function updateBook(id: string, bookData: Partial<Book>): Promise<B
 
 // Deletes the book and the files it uploaded; a file that cannot be removed does not block the delete
 export async function deleteBook(book: Pick<Book, 'id' | 'file_url' | 'cover_url'>): Promise<boolean> {
-  const books = await readLibrary();
-  await writeLibrary(books.filter((b) => b.id !== book.id));
-  const remaining = books.filter((b) => b.id !== book.id);
+  let remaining: Book[] = [];
+  await updateLibrary((books) => (remaining = books.filter((b) => b.id !== book.id)));
   for (const url of [book.file_url, book.cover_url]) {
     const stillUsed = remaining.some((b) => b.file_url === url || b.cover_url === url);
     if (!stillUsed && isR2Url(url)) await deleteFromR2(url as string);

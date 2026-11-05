@@ -9,7 +9,7 @@
 - **لا حسابات للزوار.** كل ما يرسله الزائر ينتظر موافقة الإدارة.
 
 > للأعطال وطرق إصلاحها: [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md).
-> لمراجعة ما اكتمل وما بقي: [`docs/REVIEW-ME.md`](docs/REVIEW-ME.md).
+> لمراجعة ما اكتمل وما بقي: [`docs/REVIEW-ME.md`](docs/REVIEW-ME.md). وللجاهزية للإنتاج وقائمة الفحص: [`docs/PRODUCTION.md`](docs/PRODUCTION.md).
 
 ---
 

@@ -1,7 +1,7 @@
 // Lesson extras: featured lessons and chapters, kept as one JSON record in site_settings.
 import { supabase } from '../../lib/supabase';
-import { translateSupabaseError } from '../../utils/supabaseErrors';
 import type { Lesson, LessonChapter } from '../../types';
+import { updateSiteRecord } from './jsonRecord';
 
 interface LessonExtras {
   featured: string[];
@@ -10,12 +10,12 @@ interface LessonExtras {
 
 const LESSON_EXTRAS_KEY = 'lesson_extras';
 
-export async function readLessonExtras(): Promise<LessonExtras> {
+// What is stored (or nothing / something unreadable) as usable extras
+export function parseLessonExtras(raw: string | null): LessonExtras {
   const empty: LessonExtras = { featured: [], chapters: {} };
-  const { data, error } = await supabase.from('site_settings').select('value').eq('key', LESSON_EXTRAS_KEY).maybeSingle();
-  if (error || !data?.value) return empty;
+  if (!raw) return empty;
   try {
-    const parsed = JSON.parse(data.value);
+    const parsed = JSON.parse(raw);
     return {
       featured: Array.isArray(parsed?.featured) ? parsed.featured : [],
       chapters: parsed?.chapters && typeof parsed.chapters === 'object' ? parsed.chapters : {},
@@ -25,26 +25,26 @@ export async function readLessonExtras(): Promise<LessonExtras> {
   }
 }
 
-async function writeLessonExtras(extras: LessonExtras): Promise<void> {
-  const { error } = await supabase
-    .from('site_settings')
-    .upsert([{ key: LESSON_EXTRAS_KEY, value: JSON.stringify(extras) }], { onConflict: 'key' });
-  if (error) throw new Error(translateSupabaseError(error));
+export async function readLessonExtras(): Promise<LessonExtras> {
+  const { data, error } = await supabase.from('site_settings').select('value').eq('key', LESSON_EXTRAS_KEY).maybeSingle();
+  return error ? parseLessonExtras(null) : parseLessonExtras(data?.value ?? null);
 }
 
 // Records a lesson's featured flag and chapters, when the form sent them
 export async function saveLessonExtras(lessonId: string, data: Partial<Lesson>): Promise<void> {
   if (data.featured === undefined && data.chapters === undefined) return;
-  const extras = await readLessonExtras();
-  if (data.featured !== undefined) {
-    extras.featured = extras.featured.filter((id) => id !== lessonId);
-    if (data.featured) extras.featured.unshift(lessonId);
-  }
-  if (data.chapters !== undefined) {
-    if (data.chapters && data.chapters.length) extras.chapters[lessonId] = data.chapters;
-    else delete extras.chapters[lessonId];
-  }
-  await writeLessonExtras(extras);
+  // Applied to the latest saved copy, so another admin's pinned lessons and chapters are kept
+  await updateSiteRecord(LESSON_EXTRAS_KEY, parseLessonExtras, (extras) => {
+    if (data.featured !== undefined) {
+      extras.featured = extras.featured.filter((id) => id !== lessonId);
+      if (data.featured) extras.featured.unshift(lessonId);
+    }
+    if (data.chapters !== undefined) {
+      if (data.chapters && data.chapters.length) extras.chapters[lessonId] = data.chapters;
+      else delete extras.chapters[lessonId];
+    }
+    return extras;
+  });
 }
 
 export function withExtras<T extends Lesson>(lesson: T, extras: LessonExtras): T {

@@ -37,29 +37,18 @@ export default defineConfig(({mode}) => {
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
-      proxy: {
-        '/supabase-proxy': {
-          target: process.env.VITE_SUPABASE_URL || 'https://uzdgvdovssrvaewfewkx.supabase.co',
-          changeOrigin: true,
-          secure: true,
-          rewrite: (path) => path.replace(/^\/supabase-proxy/, ''),
-        },
-        '/rest/v1': {
-          target: process.env.VITE_SUPABASE_URL || 'https://uzdgvdovssrvaewfewkx.supabase.co',
-          changeOrigin: true,
-          secure: true,
-        },
-        '/auth/v1': {
-          target: process.env.VITE_SUPABASE_URL || 'https://uzdgvdovssrvaewfewkx.supabase.co',
-          changeOrigin: true,
-          secure: true,
-        },
-        '/storage/v1': {
-          target: process.env.VITE_SUPABASE_URL || 'https://uzdgvdovssrvaewfewkx.supabase.co',
-          changeOrigin: true,
-          secure: true,
-        },
-      },
+      // Development only: a failed direct call to Supabase is retried through this same-origin path (see src/lib/supabase.js).
+      // The address comes from .env.local; nothing project-specific is written here.
+      proxy: process.env.VITE_SUPABASE_URL
+        ? {
+            '/supabase-proxy': {
+              target: process.env.VITE_SUPABASE_URL,
+              changeOrigin: true,
+              secure: true,
+              rewrite: (path) => path.replace(/^\/supabase-proxy/, ''),
+            },
+          }
+        : undefined,
     },
   };
 });
