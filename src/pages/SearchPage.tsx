@@ -1,25 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import {
-  Search,
-  Calendar,
-  Video,
-  Headphones,
-  FileText,
-  ArrowLeft,
-  X,
-  Eye,
-  Filter,
-} from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { searchLessons, getLatestLessons, getCategories } from '../services/dataService';
-import {
-  formatArabicDate,
-  formatArabicViews,
-  getArabicLessonOrdinal,
-  getCategoryColorTheme,
-} from '../utils/helpers';
-import { PublicSidebar } from '../components/PublicSidebar';
+import { formatArabicDate, formatArabicCount, COUNT_FORMS } from '../utils/helpers';
+import { LessonThumb } from '../components/LessonThumb';
+import { MediaIcons } from '../components/MediaIcons';
+import { SiteSearchExtras } from '../components/SiteSearchExtras';
 import type { Lesson, Series, Category } from '../types';
+
+type MediaFilter = 'all' | 'video' | 'audio' | 'transcript';
+
+const MEDIA_FILTERS: { value: MediaFilter; label: string }[] = [
+  { value: 'all', label: 'الكل' },
+  { value: 'video', label: 'مرئي' },
+  { value: 'audio', label: 'صوتي' },
+  { value: 'transcript', label: 'مكتوب' },
+];
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Marks every occurrence of the query inside a title
+function highlight(text: string, q: string): React.ReactNode {
+  const needle = q.trim();
+  if (!needle) return text;
+  return text.split(new RegExp(`(${escapeRegExp(needle)})`, 'gi')).map((part, i) =>
+    part.toLowerCase() === needle.toLowerCase() ? (
+      <mark key={i} className="bg-amber-200 dark:bg-amber-400/30 text-inherit rounded px-0.5">
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  );
+}
 
 interface SearchResultLesson extends Lesson {
   series?: Series | null;
@@ -34,7 +49,7 @@ export const SearchPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState(initialCategory);
   const [results, setResults] = useState<SearchResultLesson[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [mediaFilter, setMediaFilter] = useState<'all' | 'video' | 'audio' | 'transcript'>('all');
+  const [mediaFilter, setMediaFilter] = useState<MediaFilter>('all');
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
@@ -105,228 +120,135 @@ export const SearchPage: React.FC = () => {
     return true;
   });
 
+  const trimmedQuery = query.trim();
+  const isFiltering = Boolean(trimmedQuery || categoryFilter);
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
-      {/* Header Banner with Portal Style */}
-      <div className="rounded-2xl overflow-hidden border border-stone-200/90 dark:border-[#22302a] shadow-sm">
-        <div className="bg-emerald-900 dark:bg-[#12281d] p-6 sm:p-9 relative text-white border-b-4 border-amber-400">
-          <div
-            className="absolute inset-0 opacity-[0.06] pointer-events-none select-none"
-            style={{
-              backgroundImage: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.9) 1.5px, transparent 1.5px)`,
-              backgroundSize: '16px 16px',
-            }}
-          />
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
+      <header data-reveal className="space-y-6">
+        <h1 className="font-amiri text-4xl sm:text-5xl font-bold text-emerald-950 dark:text-stone-100">البحث في الدروس</h1>
 
-          <div className="relative z-10 space-y-3 text-center sm:text-right">
-            <h1 className="font-amiri text-3xl sm:text-4xl font-bold text-white drop-shadow-xs">
-              البحث في المكتبة العلمية
-            </h1>
-            <p className="text-xs sm:text-sm text-emerald-200/90 font-cairo max-w-2xl leading-relaxed">
-              ابحث في عناوين الشروحات، متون الكتب، وتفريغات الدروس المكتوبة مع تصفية وسائط الاستماع والمشاهدة.
-            </p>
+        <div role="search" className="space-y-4">
+          <div className="relative">
+            <label htmlFor="search-query" className="sr-only">
+              كلمة البحث
+            </label>
+            <input
+              id="search-query"
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="عنوان درس، باب، أو سلسلة..."
+              className="w-full h-14 pr-12 pl-12 rounded-2xl bg-white dark:bg-stone-900 border border-transparent focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:focus:ring-emerald-400 text-stone-900 dark:text-stone-100 placeholder-stone-500 text-base"
+            />
+            <Search className="w-5 h-5 text-stone-500 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                aria-label="مسح البحث"
+                className="absolute left-1.5 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-lg text-stone-500 hover:text-stone-900 dark:hover:text-stone-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
           </div>
-        </div>
-      </div>
 
-      {/* Main Grid: Results (8 cols) + Sidebar (4 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Main Column */}
-        <div className="lg:col-span-8 space-y-6">
-          {/* Search Box & Category Selector */}
-          <div className="p-4 sm:p-5 rounded-xl bg-white dark:bg-[#151f1a] border border-stone-200 dark:border-[#22302a] shadow-xs space-y-3">
-            <div className="relative">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="اكتب كلمة البحث، اسم الباب، أو السلسلة..."
-                className="w-full pl-10 pr-11 py-3 rounded-lg bg-stone-50 dark:bg-[#1a261f] border border-stone-200 dark:border-[#22302a] focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:focus:ring-amber-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 text-sm transition-all"
-                autoFocus
-              />
-              <Search className="w-4 h-4 text-stone-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              {query && (
-                <button
-                  type="button"
-                  onClick={() => setQuery('')}
-                  className="p-1 rounded-full hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2"
-                  title="مسح البحث"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* Filter Controls Row */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs font-semibold">
-              {/* Category Dropdown */}
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300">
+              <span>القسم</span>
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="px-3 py-1.5 rounded-lg border border-stone-200 dark:border-[#22302a] bg-stone-50 dark:bg-[#1a261f] text-stone-700 dark:text-stone-300 focus:outline-none text-xs"
+                className="h-11 px-3 rounded-lg bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-stone-100"
               >
-                <option value="">كافة العلوم الشرعية</option>
+                <option value="">كل الأقسام</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.slug}>
                     {c.name}
                   </option>
                 ))}
               </select>
+            </label>
 
-              {/* Media Format Filter Buttons */}
-              <div className="flex items-center gap-1 bg-stone-100 dark:bg-[#1a261f] p-1 rounded-lg">
+            <div role="group" aria-label="نوع المحتوى" className="inline-flex p-1 rounded-xl bg-stone-100 dark:bg-stone-900">
+              {MEDIA_FILTERS.map((f) => (
                 <button
+                  key={f.value}
                   type="button"
-                  onClick={() => setMediaFilter('all')}
-                  className={`px-3 py-1 rounded-md transition-all ${
-                    mediaFilter === 'all'
-                      ? 'bg-white dark:bg-[#151f1a] text-emerald-800 dark:text-amber-300 shadow-xs'
-                      : 'text-stone-600 dark:text-stone-400'
+                  aria-pressed={mediaFilter === f.value}
+                  onClick={() => setMediaFilter(f.value)}
+                  className={`h-11 px-4 rounded-lg text-sm font-semibold transition-colors ${
+                    mediaFilter === f.value
+                      ? 'bg-white dark:bg-stone-800 text-emerald-800 dark:text-emerald-300'
+                      : 'text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100'
                   }`}
                 >
-                  الكل
+                  {f.label}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setMediaFilter('video')}
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
-                    mediaFilter === 'video'
-                      ? 'bg-white dark:bg-[#151f1a] text-emerald-800 dark:text-amber-300 shadow-xs'
-                      : 'text-stone-600 dark:text-stone-400'
-                  }`}
-                >
-                  <Video className="w-3 h-3" />
-                  <span>مرئي</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMediaFilter('audio')}
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
-                    mediaFilter === 'audio'
-                      ? 'bg-white dark:bg-[#151f1a] text-emerald-800 dark:text-amber-300 shadow-xs'
-                      : 'text-stone-600 dark:text-stone-400'
-                  }`}
-                >
-                  <Headphones className="w-3 h-3" />
-                  <span>صوت</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMediaFilter('transcript')}
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
-                    mediaFilter === 'transcript'
-                      ? 'bg-white dark:bg-[#151f1a] text-emerald-800 dark:text-amber-300 shadow-xs'
-                      : 'text-stone-600 dark:text-stone-400'
-                  }`}
-                >
-                  <FileText className="w-3 h-3" />
-                  <span>تفريغ</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Results Summary */}
-          <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400 border-b border-stone-200 dark:border-[#22302a] pb-2 font-cairo">
-            <span>
-              {hasSearched
-                ? `نتائج البحث (${filteredResults.length})`
-                : `أحدث الدروس المقترحة (${filteredResults.length})`}
-            </span>
-          </div>
-
-          {/* Results List */}
-          {loading ? (
-            <div className="space-y-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-20 rounded-xl bg-stone-200 dark:bg-[#151f1a] animate-pulse" />
               ))}
             </div>
-          ) : filteredResults.length === 0 ? (
-            <div className="p-12 text-center rounded-2xl bg-white dark:bg-[#151f1a] border border-stone-200 dark:border-[#22302a] space-y-2">
-              <p className="font-amiri text-xl font-bold text-stone-700 dark:text-stone-300">
-                لا توجد نتائج مطابقة لبحثك.
-              </p>
-              <p className="text-xs text-stone-500 font-cairo">
-                جرب البحث بكلمات أخرى أو غير خيارات تصفية الأقسام والوسائط.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filteredResults.map((item) => {
-                const cat = item.series ? catMap.get(item.series.category_id) : item.category;
-                const catTheme = getCategoryColorTheme(cat?.color);
+          </div>
+        </div>
+      </header>
 
-                return (
-                  <Link
-                    key={item.id}
-                    to={`/lesson/${item.id}`}
-                    className={`group p-4 sm:p-5 rounded-xl ${catTheme.cardBg} border ${catTheme.cardBorder} hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3`}
-                  >
-                    <div className="space-y-1 min-w-0">
-                      <div className="flex items-center gap-2 text-xs font-cairo">
-                        <span
-                          className={`font-semibold px-2 py-0.5 rounded-md border text-[11px] ${catTheme.badgeBg} ${catTheme.badgeText} ${catTheme.badgeBorder}`}
-                        >
-                          {item.series?.title || 'سلسلة علمية'}
-                        </span>
-                        <span className="text-stone-400 font-amiri">
-                          {getArabicLessonOrdinal(item.lesson_number)}
-                        </span>
-                        {item.published_at && (
-                          <span className="text-stone-400">
-                            • {formatArabicDate(item.published_at)}
-                          </span>
-                        )}
-                        {typeof item.views === 'number' && (
-                          <span className="text-stone-400 flex items-center gap-1">
-                            • <Eye className="w-3 h-3" />
-                            <span>{formatArabicViews(item.views)}</span>
-                          </span>
-                        )}
-                      </div>
-
-                      <h3 className="font-amiri text-lg font-bold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-amber-300 transition-colors truncate">
-                        {item.title}
-                      </h3>
-                    </div>
-
-                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-200/50 dark:border-[#22302a]">
-                      <div className="flex items-center gap-1 text-xs">
-                        {item.youtube_url && (
-                          <span className="p-1 rounded bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400">
-                            <Video className="w-3.5 h-3.5" />
-                          </span>
-                        )}
-                        {item.audio_url && (
-                          <span className="p-1 rounded bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400">
-                            <Headphones className="w-3.5 h-3.5" />
-                          </span>
-                        )}
-                        {item.transcript && (
-                          <span className="p-1 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
-                            <FileText className="w-3.5 h-3.5" />
-                          </span>
-                        )}
-                      </div>
-
-                      <span className="text-xs font-semibold text-emerald-800 dark:text-amber-400 flex items-center gap-1 group-hover:translate-x-[-2px] transition-transform font-cairo">
-                        <span>فتح الدرس</span>
-                        <ArrowLeft className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+      <section aria-labelledby="results-heading" aria-busy={loading} className="space-y-4">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 id="results-heading" className="font-amiri text-2xl sm:text-3xl font-bold text-emerald-950 dark:text-stone-100">
+            {isFiltering || hasSearched ? 'النتائج' : 'أحدث الدروس'}
+          </h2>
+          {!loading && (
+            <span aria-live="polite" className="text-sm text-stone-600 dark:text-stone-400">
+              {formatArabicCount(filteredResults.length, COUNT_FORMS.lesson)}
+            </span>
           )}
         </div>
 
-        {/* Sidebar */}
-        <div className="lg:col-span-4">
-          <PublicSidebar />
-        </div>
-      </div>
+        {loading ? (
+          <div className="space-y-2" aria-hidden="true">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-16 rounded-xl bg-stone-100 dark:bg-stone-900" />
+            ))}
+          </div>
+        ) : filteredResults.length === 0 ? (
+          <div className="space-y-2 py-6">
+            <p className="text-lg text-stone-800 dark:text-stone-200">
+              {trimmedQuery && results.length === 0
+                ? `لا توجد دروس تطابق «${trimmedQuery}».`
+                : 'لا توجد دروس بهذه التصفية.'}
+            </p>
+            <p className="text-stone-600 dark:text-stone-400">جرّب كلمة أقصر، أو اختر «كل الأقسام» و«الكل».</p>
+          </div>
+        ) : (
+          <ul className="card p-2 sm:p-3">
+            {filteredResults.map((lesson, i) => {
+              const category = lesson.category || (lesson.series ? catMap.get(lesson.series.category_id) : null);
+              return (
+                <li key={lesson.id} data-reveal style={{ '--reveal-delay': `${Math.min(i, 6) * 50}ms` } as React.CSSProperties}>
+                  <Link
+                    to={`/lesson/${lesson.id}`}
+                    className="group flex items-center gap-4 sm:gap-6 px-4 py-4 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                  >
+                    <LessonThumb youtubeUrl={lesson.youtube_url} audioUrl={lesson.audio_url} className="w-28 sm:w-40 shrink-0" />
+                    <span className="flex-1 min-w-0 flex flex-col gap-1.5">
+                      <span className="block text-lg font-semibold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-emerald-300 transition-colors">
+                        {highlight(lesson.title, trimmedQuery)}
+                      </span>
+                      <span className="block text-sm text-stone-600 dark:text-stone-400">
+                        {[category?.name, lesson.series?.title, formatArabicDate(lesson.published_at)].filter(Boolean).join(' · ')}
+                      </span>
+                      <MediaIcons youtubeUrl={lesson.youtube_url} audioUrl={lesson.audio_url} transcript={lesson.transcript} />
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+
+      {/* The channel's videos and the library's books, found by the same words */}
+      {!categoryFilter && mediaFilter === 'all' && <SiteSearchExtras query={trimmedQuery} highlight={highlight} />}
     </div>
   );
 };

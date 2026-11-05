@@ -6,3 +6,12 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Design-check reports (screenshots and measurements), not part of the site
+.taste-skill/
+
+# Archives and the second package manager's lock file: the project uses npm (package-lock.json)
+*.rar
+*.zip
+bun.lock
+bun.lockb

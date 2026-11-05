@@ -1,11 +1,31 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig} from 'vite';
+import {defineConfig, loadEnv} from 'vite';
+import {apiDevServer} from './scripts/vite-api-dev';
 
-export default defineConfig(() => {
+export default defineConfig(({mode}) => {
+  // The server functions in api/ read their settings (R2 keys and so on) from .env.local during development,
+  // as they read them from the host's environment once deployed
+  const env = loadEnv(mode, process.cwd(), '');
+  for (const [name, value] of Object.entries(env)) if (process.env[name] === undefined) process.env[name] = value;
+
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), apiDevServer()],
+    build: {
+      rolldownOptions: {
+        output: {
+          // Libraries that rarely change get their own files, so after a site update the browser
+          // keeps them cached and downloads only the site's own code again
+          codeSplitting: {
+            groups: [
+              { name: 'react', test: /node_modules[\\/](react|react-dom|scheduler|react-router|react-router-dom)[\\/]/ },
+              { name: 'supabase', test: /node_modules[\\/](@supabase|iceberg-js|tslib)[\\/]/ },
+            ],
+          },
+        },
+      },
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

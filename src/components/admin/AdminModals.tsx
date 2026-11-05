@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Upload, Link as LinkIcon, AlertTriangle, Video, Headphones, FileText, Check, Loader2, Sparkles, Bookmark, BookOpen, Layers } from 'lucide-react';
-import type { Category, Series, Lesson, LessonStatus } from '../../types';
+import type { Category, Series, Lesson, LessonStatus, LessonChapter } from '../../types';
 import { CATEGORY_PALETTES } from '../../utils/helpers';
+import { parseChaptersText, formatChaptersText } from '../../utils/chapters';
 import { uploadAudioFile } from '../../services/dataService';
 
 interface CategoryModalProps {
@@ -132,38 +133,6 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                     <span className="truncate text-stone-700 dark:text-stone-200">
                       {pal.name}
                     </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Category Icon Selection */}
-          <div>
-            <label className="block font-semibold text-stone-700 dark:text-stone-300 mb-2">
-              أيقونة القسم
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {[
-                { id: 'BookOpen', label: 'كتاب مفتوح', Icon: BookOpen },
-                { id: 'Bookmark', label: 'علامة مرجعية', Icon: Bookmark },
-                { id: 'Sparkles', label: 'تأصيل وتميز', Icon: Sparkles },
-                { id: 'Layers', label: 'مستويات علمية', Icon: Layers },
-              ].map(({ id, label, Icon }) => {
-                const isSelected = icon === id;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setIcon(id)}
-                    className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all ${
-                      isSelected
-                        ? 'border-emerald-700 dark:border-amber-400 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300'
-                        : 'border-stone-200 dark:border-stone-700 hover:border-stone-400 text-stone-600 dark:text-stone-300'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4 shrink-0" />
-                    <span>{label}</span>
                   </button>
                 );
               })}
@@ -415,6 +384,8 @@ interface LessonModalProps {
     youtube_url: string;
     audio_url: string;
     transcript: string;
+    chapters: LessonChapter[];
+    featured: boolean;
     status: LessonStatus;
   }) => Promise<void>;
   seriesList: Series[];
@@ -437,6 +408,8 @@ export const LessonModal: React.FC<LessonModalProps> = ({
   const [audioInputType, setAudioInputType] = useState<'url' | 'file'>('url');
   const [audioUrl, setAudioUrl] = useState('');
   const [transcript, setTranscript] = useState('');
+  const [chaptersText, setChaptersText] = useState('');
+  const [featured, setFeatured] = useState(false);
   const [status, setStatus] = useState<LessonStatus>('published');
   const [uploadingAudio, setUploadingAudio] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -451,8 +424,12 @@ export const LessonModal: React.FC<LessonModalProps> = ({
       setAudioUrl(initialData.audio_url || '');
       setAudioInputType('url');
       setTranscript(initialData.transcript || '');
+      setChaptersText(formatChaptersText(initialData.chapters));
+      setFeatured(Boolean(initialData.featured));
       setStatus(initialData.status);
     } else {
+      setChaptersText('');
+      setFeatured(false);
       setSeriesId(seriesList[0]?.id || '');
       setLessonNumber(1);
       setTitle('');
@@ -484,7 +461,7 @@ export const LessonModal: React.FC<LessonModalProps> = ({
       const publicUrl = await uploadAudioFile(file);
       setAudioUrl(publicUrl);
     } catch (err: any) {
-      setError(err.message || 'فشل رفع الملف الصوتي إلى مساحة التخزين');
+      setError(err.message || 'فشل رفع الملف الصوتي');
     } finally {
       setUploadingAudio(false);
     }
@@ -510,6 +487,8 @@ export const LessonModal: React.FC<LessonModalProps> = ({
         youtube_url: youtubeUrl.trim(),
         audio_url: audioUrl.trim(),
         transcript: transcript.trim(),
+        chapters: parseChaptersText(chaptersText),
+        featured,
         status,
       });
       onClose();
@@ -623,7 +602,7 @@ export const LessonModal: React.FC<LessonModalProps> = ({
               />
               <Video className="w-4 h-4 text-stone-400 absolute right-3 top-1/2 -translate-y-1/2" />
             </div>
-            <p className="text-[11px] text-stone-400 mt-1">
+            <p className="text-xs text-stone-400 mt-1">
               يتم تحويل أي صيغة رابط يوتيوب تلقائياً لمشغل مدمج مناسب.
             </p>
           </div>
@@ -688,7 +667,7 @@ export const LessonModal: React.FC<LessonModalProps> = ({
                 {uploadingAudio && (
                   <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-xs font-semibold">
                     <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
-                    <span>جاري رفع الملف الصوتي إلى مساحة التخزين السحابية (Supabase)...</span>
+                    <span>جاري رفع الملف الصوتي إلى التخزين السحابي (Cloudflare R2)...</span>
                   </div>
                 )}
 
@@ -698,7 +677,7 @@ export const LessonModal: React.FC<LessonModalProps> = ({
                       <Check className="w-4 h-4" />
                       <span>تم حفظ رابط الملف الصوتي بنجاح:</span>
                     </div>
-                    <p className="font-mono text-[11px] text-stone-600 dark:text-stone-300 truncate" dir="ltr">
+                    <p className="font-mono text-xs text-stone-600 dark:text-stone-300 truncate" dir="ltr">
                       {audioUrl}
                     </p>
                   </div>
@@ -714,7 +693,7 @@ export const LessonModal: React.FC<LessonModalProps> = ({
                 <FileText className="w-4 h-4 text-emerald-700 dark:text-amber-400" />
                 <span>التفريغ النصي المكتوب</span>
               </label>
-              <span className="text-[11px] text-stone-400">
+              <span className="text-xs text-stone-400">
                 (يمكن كتابة نص تجريبي للمعاينة)
               </span>
             </div>
@@ -726,6 +705,37 @@ export const LessonModal: React.FC<LessonModalProps> = ({
               className="w-full px-4 py-3 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-700 focus:outline-none font-amiri text-base leading-relaxed"
             />
           </div>
+
+          {/* Chapters: one per line, so the visitor can jump to a point in the lesson */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label htmlFor="lesson-chapters" className="font-semibold text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
+                <Video className="w-4 h-4 text-emerald-700 dark:text-amber-400" />
+                <span>فصول الدرس</span>
+              </label>
+              <span className="text-xs text-stone-500 dark:text-stone-400">(كل فصل في سطر: ٠٠:٠٠ عنوان الفصل)</span>
+            </div>
+            <textarea
+              id="lesson-chapters"
+              rows={4}
+              dir="auto"
+              value={chaptersText}
+              onChange={(e) => setChaptersText(e.target.value)}
+              placeholder={'00:00 المقدمة\n05:30 الشرح الأول\n1:12:00 الخاتمة'}
+              className="w-full px-4 py-3 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-700 focus:outline-none tabular-nums text-base leading-relaxed"
+            />
+          </div>
+
+          {/* Featured: this lesson is shown in the "اخترنا لك" block on the home page */}
+          <label className="flex items-center gap-3 p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/40 border border-stone-200 dark:border-stone-700 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={featured}
+              onChange={(e) => setFeatured(e.target.checked)}
+              className="w-5 h-5 accent-emerald-800"
+            />
+            <span className="font-semibold text-stone-700 dark:text-stone-300">عرض هذا الدرس في "اخترنا لك" بالصفحة الرئيسية</span>
+          </label>
 
           {/* Status (Draft vs Published) */}
           <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/40 border border-stone-200 dark:border-stone-700">
@@ -761,7 +771,7 @@ export const LessonModal: React.FC<LessonModalProps> = ({
                 </span>
               </label>
             </div>
-            <p className="text-[11px] text-stone-400 mt-2">
+            <p className="text-xs text-stone-400 mt-2">
               ملاحظة: عند تحويل الدرس إلى «منشور» يتم تسجيل تاريخ ووقت النشر تلقائياً.
             </p>
           </div>

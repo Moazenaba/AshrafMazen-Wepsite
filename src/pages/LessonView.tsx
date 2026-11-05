@@ -1,24 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import {
-  Video,
-  Headphones,
-  FileText,
-  ChevronRight,
-  ArrowRight,
-  ArrowLeft,
-  Calendar,
-  Layers,
-  Share2,
-  Copy,
-  Check,
-  ZoomIn,
-  ZoomOut,
-  Bookmark,
-  Eye,
-  BookOpen,
-  Play,
-} from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ChevronLeft, Share2, Copy, Check, Bookmark, Clock } from 'lucide-react';
 import {
   getLesson,
   getSeries,
@@ -28,29 +10,113 @@ import {
 } from '../services/dataService';
 import {
   getArabicLessonOrdinal,
-  getYouTubeEmbedUrl,
   formatArabicDate,
-  formatArabicViews,
-  getCategoryColorTheme,
+  formatArabicCount,
+  formatAudioTime,
+  COUNT_FORMS,
 } from '../utils/helpers';
-import { AudioPlayer } from '../components/AudioPlayer';
-import { PortalPanel } from '../components/PortalPanel';
+import { AudioPlayer, type MediaHandle } from '../components/AudioPlayer';
+import { VideoPlayer } from '../components/VideoPlayer';
 import { useBookmarks } from '../services/bookmarkService';
-import type { Lesson, Series, Category } from '../types';
+import { saveRecentLesson } from '../services/recentLessonService';
+import {
+  getResumeSeconds,
+  saveLessonPosition,
+  markLessonWatched,
+  isLessonWatched,
+} from '../services/progressService';
+import { activeChapterIndex } from '../utils/chapters';
+import { createPlaybackMeter, trackReading, trackView } from '../services/analytics';
+import { ReportLink } from '../components/ReportLink';
+import { getYouTubeId, getYouTubeThumbnail } from '../lib/youtube';
+import type { Lesson, LessonChapter, Series, Category } from '../types';
 
 type TabType = 'video' | 'audio' | 'transcript';
 
+const TAB_LABELS: Record<TabType, string> = {
+  video: 'مشاهدة',
+  audio: 'استماع',
+  transcript: 'قراءة',
+};
+
+const FONT_SIZE_KEY = 'transcript_font_size';
+const DEFAULT_FONT_SIZE = 20;
+const MIN_FONT_SIZE = 16;
+const MAX_FONT_SIZE = 30;
+
+// Seconds before the next lesson starts, and how often the position is written to this browser
+const AUTO_NEXT_SECONDS = 5;
+const SAVE_EVERY_SECONDS = 5;
+
+function readStoredFontSize(): number {
+  try {
+    const stored = parseInt(localStorage.getItem(FONT_SIZE_KEY) || '', 10);
+    if (stored >= MIN_FONT_SIZE && stored <= MAX_FONT_SIZE) return stored;
+  } catch {}
+  return DEFAULT_FONT_SIZE;
+}
+
+function excerpt(text: string | null | undefined, max = 160): string {
+  const clean = (text || '').replace(/\s+/g, ' ').trim();
+  return clean.length > max ? `${clean.slice(0, max).trim()}…` : clean;
+}
+
+// What search engines read for a video lesson, including the chapters as key moments
+function buildVideoJsonLd(
+  lesson: Lesson,
+  series: Series,
+  videoId: string,
+  chapters: LessonChapter[],
+  pageUrl: string
+): Record<string, unknown> {
+  const thumbnail = getYouTubeThumbnail(lesson.youtube_url);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: lesson.title,
+    description: excerpt(lesson.transcript) || `${series.title} - الشيخ أشرف مازن`,
+    thumbnailUrl: thumbnail ? [thumbnail] : undefined,
+    uploadDate: lesson.published_at || lesson.created_at,
+    inLanguage: 'ar',
+    url: pageUrl,
+    embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}`,
+    contentUrl: `https://www.youtube.com/watch?v=${videoId}`,
+    hasPart: chapters.map((c) => ({
+      '@type': 'Clip',
+      name: c.title,
+      startOffset: c.seconds,
+      url: `${pageUrl}?t=${c.seconds}`,
+    })),
+  };
+}
+
 export const LessonView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [series, setSeries] = useState<Series | null>(null);
   const [category, setCategory] = useState<Category | null>(null);
   const [seriesLessons, setSeriesLessons] = useState<Lesson[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>('video');
-  const [fontSize, setFontSize] = useState<number>(18);
+  const [fontSize, setFontSize] = useState<number>(readStoredFontSize);
   const [isCopied, setIsCopied] = useState(false);
   const [isShareCopied, setIsShareCopied] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [resumeAt, setResumeAt] = useState(0);
+  const [position, setPosition] = useState({ seconds: 0, duration: 0 });
+  const [countdown, setCountdown] = useState<number | null>(null);
+
+  const mediaRef = useRef<MediaHandle>(null);
+  const lastSavedRef = useRef(0);
+
+  // Statistics. Listening is measured by the audio engine itself; watching and reading are measured here
+  const lessonId = lesson?.id;
+  const videoMeter = useMemo(() => (lessonId ? createPlaybackMeter('video', `lesson:${lessonId}`) : null), [lessonId]);
+  useEffect(() => {
+    if (!lessonId || activeTab !== 'transcript') return;
+    trackView('read', `lesson:${lessonId}`);
+    return trackReading(`lesson:${lessonId}`);
+  }, [lessonId, activeTab]);
 
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const bookmarked = lesson ? isBookmarked(lesson.id) : false;
@@ -61,6 +127,9 @@ export const LessonView: React.FC = () => {
       if (!id) return;
       try {
         setLoading(true);
+        setPosition({ seconds: 0, duration: 0 });
+        setCountdown(null);
+        lastSavedRef.current = 0;
         // Increment views once per browser session
         incrementLessonViews(id);
 
@@ -89,15 +158,13 @@ export const LessonView: React.FC = () => {
           setSeries(s);
           setCategory(cat);
           setSeriesLessons(pubLessons);
+          setResumeAt(getResumeSeconds(l.id));
+          saveRecentLesson({ id: l.id, title: l.title, seriesTitle: s?.title });
 
-          // Default tab logic: if no video but has audio, switch to audio; if only transcript, switch to transcript
-          if (!l.youtube_url && l.audio_url) {
-            setActiveTab('audio');
-          } else if (!l.youtube_url && !l.audio_url && l.transcript) {
-            setActiveTab('transcript');
-          } else {
-            setActiveTab('video');
-          }
+          // Open on the first kind of media the lesson actually has
+          if (l.youtube_url) setActiveTab('video');
+          else if (l.audio_url) setActiveTab('audio');
+          else setActiveTab('transcript');
         }
       } catch (err) {
         console.error('Failed to load lesson:', err);
@@ -107,12 +174,68 @@ export const LessonView: React.FC = () => {
     }
 
     loadLessonData();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     return () => {
       isMounted = false;
     };
   }, [id]);
+
+  // Previous and next published lessons in this series
+  const currentIndex = seriesLessons.findIndex((l) => l.id === lesson?.id);
+  const prevLesson = currentIndex > 0 ? seriesLessons[currentIndex - 1] : null;
+  const nextLesson =
+    currentIndex !== -1 && currentIndex < seriesLessons.length - 1 ? seriesLessons[currentIndex + 1] : null;
+
+  // Auto-next: count down on the page, then move on unless the visitor cancels
+  useEffect(() => {
+    if (countdown === null) return;
+    if (!nextLesson) {
+      setCountdown(null);
+      return;
+    }
+    if (countdown === 0) {
+      navigate(`/lesson/${nextLesson.id}`);
+      return;
+    }
+    const timer = window.setTimeout(() => setCountdown((c) => (c === null ? null : c - 1)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [countdown, nextLesson, navigate]);
+
+  // Title, description and video data for search engines and shared links
+  useEffect(() => {
+    if (!lesson || !series) return;
+    const previousTitle = document.title;
+    document.title = `${lesson.title} - الشيخ أشرف مازن`;
+
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    const previousDescription = meta?.content ?? '';
+    if (meta) meta.content = excerpt(lesson.transcript) || `${series.title} - الشيخ أشرف مازن`;
+
+    let script: HTMLScriptElement | null = null;
+    const videoId = getYouTubeId(lesson.youtube_url);
+    if (videoId) {
+      script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify(
+        buildVideoJsonLd(lesson, series, videoId, lesson.chapters ?? [], window.location.href)
+      );
+      document.head.appendChild(script);
+    }
+
+    return () => {
+      document.title = previousTitle;
+      if (meta) meta.content = previousDescription;
+      script?.remove();
+    };
+  }, [lesson, series]);
+
+  const changeFontSize = (next: number) => {
+    const clamped = Math.min(Math.max(next, MIN_FONT_SIZE), MAX_FONT_SIZE);
+    setFontSize(clamped);
+    try {
+      localStorage.setItem(FONT_SIZE_KEY, String(clamped));
+    } catch {}
+  };
 
   const handleCopyTranscript = () => {
     if (!lesson?.transcript) return;
@@ -124,11 +247,13 @@ export const LessonView: React.FC = () => {
 
   const handleShare = () => {
     if (navigator.share) {
-      navigator.share({
-        title: `${lesson?.title} - الشيخ أشرف مازن`,
-        text: `درس ${lesson?.title} من ${series?.title}`,
-        url: window.location.href,
-      }).catch(() => {});
+      navigator
+        .share({
+          title: `${lesson?.title} - الشيخ أشرف مازن`,
+          text: `درس ${lesson?.title} من ${series?.title}`,
+          url: window.location.href,
+        })
+        .catch(() => {});
     } else {
       navigator.clipboard.writeText(window.location.href);
       setIsShareCopied(true);
@@ -136,480 +261,415 @@ export const LessonView: React.FC = () => {
     }
   };
 
+  // Playback reports its position here: the transcript follows it, and it is saved every few seconds
+  const handleMediaTime = (seconds: number, duration: number) => {
+    setPosition((prev) =>
+      Math.floor(prev.seconds) === Math.floor(seconds) && prev.duration === duration ? prev : { seconds, duration }
+    );
+    if (lesson && Math.abs(seconds - lastSavedRef.current) >= SAVE_EVERY_SECONDS) {
+      saveLessonPosition(lesson.id, seconds, duration);
+      lastSavedRef.current = seconds;
+    }
+  };
+
+  // The video player reports through here: the same page memory as the audio, plus the video statistics
+  const handleVideoTime = (seconds: number, duration: number) => {
+    if (lesson) trackView('video', `lesson:${lesson.id}`);
+    videoMeter?.update(seconds);
+    handleMediaTime(seconds, duration);
+  };
+
+  const handleMediaEnded = () => {
+    if (!lesson) return;
+    markLessonWatched(lesson.id);
+    if (nextLesson) setCountdown(AUTO_NEXT_SECONDS);
+  };
+
+  const seekTo = (seconds: number) => mediaRef.current?.seek(seconds);
+
+  // The transcript has no timestamps, so the current paragraph is estimated from how far the media has played
+  const paragraphs = useMemo(
+    () =>
+      (lesson?.transcript || '')
+        .split(/\n+/)
+        .map((p) => p.trim())
+        .filter(Boolean),
+    [lesson?.transcript]
+  );
+  const activeParagraph =
+    position.duration > 0 && paragraphs.length > 0
+      ? Math.min(paragraphs.length - 1, Math.floor((position.seconds / position.duration) * paragraphs.length))
+      : -1;
+
+  // Opening the transcript brings the paragraph being read into view
+  useEffect(() => {
+    if (activeTab !== 'transcript' || activeParagraph < 0) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document
+      .getElementById(`para-${activeParagraph}`)
+      ?.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+    // Only when the tab changes; following playback should not keep scrolling the page
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-6">
-        <div className="h-6 w-64 bg-stone-200 dark:bg-[#151f1a] rounded animate-pulse" />
-        <div className="h-32 bg-stone-200 dark:bg-[#151f1a] rounded-2xl animate-pulse" />
-        <div className="aspect-video bg-stone-200 dark:bg-[#151f1a] rounded-3xl animate-pulse" />
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-6" aria-busy="true">
+        <div className="h-5 w-56 bg-stone-200 dark:bg-stone-900 rounded" />
+        <div className="h-10 w-3/4 bg-stone-200 dark:bg-stone-900 rounded" />
+        <div className="aspect-video bg-stone-200 dark:bg-stone-900 rounded-2xl" />
       </div>
     );
   }
 
   if (!lesson || !series) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-        <div className="p-12 rounded-3xl bg-white dark:bg-[#151f1a] border border-stone-200 dark:border-[#22302a] shadow-sm space-y-4">
-          <h2 className="font-amiri text-3xl font-bold text-stone-900 dark:text-stone-100">
-            الدرس غير متاح
-          </h2>
-          <p className="text-stone-500 dark:text-stone-400">
-            عذراً، هذا الدرس غير موجود أو أنه لم يُنشر بعد للعموم.
-          </p>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-800 text-white font-semibold text-sm"
-          >
-            <span>العودة للرئيسية</span>
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
-        </div>
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-20 space-y-4">
+        <h1 className="font-amiri text-3xl font-bold text-stone-900 dark:text-stone-100">الدرس غير متاح</h1>
+        <p className="text-stone-600 dark:text-stone-400">هذا الدرس غير موجود، أو لم يُنشر بعد.</p>
+        <Link to="/" className="inline-flex items-center min-h-11 font-semibold text-emerald-800 dark:text-emerald-300 hover:underline">
+          العودة للرئيسية
+        </Link>
       </div>
     );
   }
 
-  // Find previous and next published lessons in this series
-  const currentIndex = seriesLessons.findIndex((l) => l.id === lesson.id);
-  const prevLesson = currentIndex > 0 ? seriesLessons[currentIndex - 1] : null;
-  const nextLesson =
-    currentIndex !== -1 && currentIndex < seriesLessons.length - 1
-      ? seriesLessons[currentIndex + 1]
-      : null;
+  const videoId = getYouTubeId(lesson.youtube_url);
+  const availableTabs: TabType[] = [
+    ...(videoId ? (['video'] as const) : []),
+    ...(lesson.audio_url ? (['audio'] as const) : []),
+    ...(lesson.transcript?.trim() ? (['transcript'] as const) : []),
+  ];
+  const shownTab = availableTabs.includes(activeTab) ? activeTab : availableTabs[0];
+  const isMediaTab = shownTab === 'video' || shownTab === 'audio';
 
-  const embedUrl = getYouTubeEmbedUrl(lesson.youtube_url);
-  const catTheme = getCategoryColorTheme(category?.color);
+  const chapters = lesson.chapters ?? [];
+  const currentChapter = position.duration > 0 ? activeChapterIndex(chapters, position.seconds) : -1;
+  const watched = isLessonWatched(lesson.id);
+
+  const metaLine = [
+    getArabicLessonOrdinal(lesson.lesson_number),
+    formatArabicDate(lesson.published_at),
+    typeof lesson.views === 'number' && lesson.views > 0 ? formatArabicCount(lesson.views, COUNT_FORMS.view) : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  const actionButton =
+    'press inline-flex items-center gap-2 h-11 px-4 rounded-xl text-sm font-semibold bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-200';
+
+  const watchedIds = new Set(seriesLessons.filter((l) => isLessonWatched(l.id)).map((l) => l.id));
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
-      {/* Share Toast Notification */}
+    <article className="w-full px-4 sm:px-6 lg:px-8 py-5 sm:py-10 space-y-5 sm:space-y-8">
       {isShareCopied && (
-        <div className="fixed top-20 right-1/2 translate-x-1/2 z-50 bg-stone-900 text-stone-100 dark:bg-amber-400 dark:text-stone-950 px-5 py-2.5 rounded-2xl shadow-xl text-xs sm:text-sm font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
-          <Check className="w-4 h-4 text-emerald-400 dark:text-stone-950" />
-          <span>تم نسخ رابط الدرس إلى الحافظة بنجاح</span>
+        <div
+          role="status"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-900 text-stone-100 dark:bg-stone-100 dark:text-stone-900 px-5 py-3 rounded-xl shadow-lg text-sm font-semibold" /* taste-skill-ignore: floating toast overlay */
+        >
+          تم نسخ رابط الدرس
         </div>
       )}
 
-      {/* Breadcrumbs */}
-      <nav className="flex items-center flex-wrap gap-1.5 sm:gap-2 text-xs text-stone-500 dark:text-stone-400">
-        <Link to="/" className="hover:text-emerald-700 dark:hover:text-amber-300">
-          الرئيسية
-        </Link>
-        <ChevronRight className="w-3.5 h-3.5 rotate-180" />
-        {category && (
-          <>
-            <Link
-              to={`/category/${category.slug}`}
-              className="hover:text-emerald-700 dark:hover:text-amber-300"
-            >
-              {category.name}
-            </Link>
-            <ChevronRight className="w-3.5 h-3.5 rotate-180" />
-          </>
-        )}
-        <Link
-          to={`/series/${series.slug}`}
-          className="hover:text-emerald-700 dark:hover:text-amber-300"
-        >
-          {series.title}
-        </Link>
-        <ChevronRight className="w-3.5 h-3.5 rotate-180" />
-        <span className="text-emerald-800 dark:text-amber-400 font-semibold truncate max-w-[180px] sm:max-w-none">
+      <header data-reveal className="space-y-3 sm:space-y-4">
+        <nav aria-label="مسار التصفح" className="flex items-center flex-wrap gap-1 text-sm text-stone-600 dark:text-stone-400">
+          <Link to="/" className="inline-flex items-center min-h-11 hover:text-emerald-800 dark:hover:text-emerald-300">
+            الرئيسية
+          </Link>
+          {category && (
+            <>
+              <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+              <Link to={`/category/${category.slug}`} className="inline-flex items-center min-h-11 hover:text-emerald-800 dark:hover:text-emerald-300">
+                {category.name}
+              </Link>
+            </>
+          )}
+          <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+          <Link to={`/series/${series.slug}`} className="inline-flex items-center min-h-11 hover:text-emerald-800 dark:hover:text-emerald-300">
+            {series.title}
+          </Link>
+        </nav>
+
+        <h1 className="font-amiri text-3xl sm:text-5xl font-bold leading-snug text-emerald-950 dark:text-stone-100 text-balance">
           {lesson.title}
-        </span>
-      </nav>
+        </h1>
 
-      {/* Colored Header Banner with Islamic Portal Style */}
-      <div className="rounded-2xl overflow-hidden border border-stone-200/90 dark:border-[#22302a] shadow-sm">
-        <div
-          className={`${catTheme.headerBg} p-5 sm:p-7 relative text-white border-b-4 border-amber-400`}
-        >
-          {/* Subtle Arabesque Pattern */}
-          <div
-            className="absolute inset-0 opacity-[0.06] pointer-events-none select-none"
-            style={{
-              backgroundImage: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.9) 1.5px, transparent 1.5px)`,
-              backgroundSize: '16px 16px',
-            }}
-          />
-
-          <div className="relative z-10 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="flex items-center flex-wrap gap-2">
-                <span className="px-2.5 py-1 rounded-lg font-amiri font-bold text-xs sm:text-sm bg-white/20 text-white border border-white/20">
-                  {getArabicLessonOrdinal(lesson.lesson_number)}
-                </span>
-                {category && (
-                  <Link
-                    to={`/category/${category.slug}`}
-                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-400/25 text-amber-200 border border-amber-400/40 hover:bg-amber-400/40 transition-colors"
-                  >
-                    <span>{category.name}</span>
-                  </Link>
-                )}
-                <Link
-                  to={`/series/${series.slug}`}
-                  className="text-xs font-semibold text-white/90 hover:text-amber-300 transition-colors"
-                >
-                  من سلسلة: {series.title}
-                </Link>
-              </div>
-
-              {/* Views, Date, Bookmark, Share */}
-              <div className="flex items-center gap-3">
-                {typeof lesson.views === 'number' && (
-                  <span className="flex items-center gap-1 text-xs text-amber-300 font-cairo">
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>{formatArabicViews(lesson.views)} مشاهدة</span>
-                  </span>
-                )}
-                {lesson.published_at && (
-                  <span className="hidden sm:flex items-center gap-1 text-xs text-white/80 font-cairo">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span>{formatArabicDate(lesson.published_at)}</span>
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => toggleBookmark(lesson.id)}
-                  title={bookmarked ? 'إزالة الدرس من المحفوظات' : 'حفظ الدرس في المفضلة'}
-                  className={`p-1.5 sm:p-2 rounded-lg transition-all ${
-                    bookmarked
-                      ? 'bg-amber-400 text-stone-950 shadow-xs'
-                      : 'bg-white/15 text-white hover:bg-white/25'
-                  }`}
-                >
-                  <Bookmark className={`w-4 h-4 ${bookmarked ? 'fill-stone-950' : ''}`} />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  title="مشاركة الدرس"
-                  className="p-1.5 sm:p-2 rounded-lg bg-white/15 text-white hover:bg-white/25 transition-colors"
-                >
-                  <Share2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            <h1 className="font-amiri text-2xl sm:text-3xl md:text-4xl font-bold text-white drop-shadow-xs leading-snug">
-              {lesson.title}
-            </h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="text-stone-600 dark:text-stone-400">{metaLine}</p>
+            {watched && (
+              <span className="inline-flex items-center gap-1 h-7 px-2.5 rounded-full bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 text-xs font-semibold">
+                <Check className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>تمّت متابعته</span>
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => toggleBookmark(lesson.id)}
+              aria-pressed={bookmarked}
+              className={actionButton}
+            >
+              <Bookmark className={`w-4 h-4 ${bookmarked ? 'fill-current text-amber-600 dark:text-amber-400' : ''}`} />
+              <span>{bookmarked ? 'محفوظ' : 'حفظ'}</span>
+            </button>
+            <button type="button" onClick={handleShare} className={actionButton}>
+              <Share2 className="w-4 h-4" />
+              <span>مشاركة</span>
+            </button>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Main Grid: Player Column (8 cols) + Series Lessons Side List (4 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Main Column */}
-        <div className="lg:col-span-8 space-y-6">
-          {/* Tabs Switcher: فيديو / استماع / قراءة */}
-          <div className="p-1 bg-stone-200/60 dark:bg-[#1a261f] rounded-2xl flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => setActiveTab('video')}
-              className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl font-semibold text-xs sm:text-sm transition-all min-h-[44px] ${
-                activeTab === 'video'
-                  ? 'bg-emerald-800 text-white shadow-md'
-                  : 'text-stone-700 dark:text-stone-300 hover:bg-stone-300/50 dark:hover:bg-stone-700/50'
-              }`}
-            >
-              <Video className="w-4 h-4" />
-              <span>فيديو مرئي</span>
-              {lesson.youtube_url && (
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              )}
-            </button>
+      {/* Media: tabs only when the lesson has more than one form */}
+      <section aria-label="محتوى الدرس" data-reveal style={{ '--reveal-delay': '80ms' } as React.CSSProperties} className="space-y-3 sm:space-y-4">
+        {availableTabs.length > 1 && (
+          <div role="tablist" aria-label="طريقة متابعة الدرس" className="inline-flex p-1 rounded-2xl bg-stone-100 dark:bg-stone-900">
+            {availableTabs.map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                id={`tab-${tab}`}
+                aria-selected={shownTab === tab}
+                aria-controls="lesson-panel"
+                onClick={() => setActiveTab(tab)}
+                className={`h-11 px-5 rounded-lg text-sm font-semibold transition-colors ${
+                  shownTab === tab
+                    ? 'bg-white dark:bg-stone-800 text-emerald-800 dark:text-emerald-300'
+                    : 'text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-stone-100'
+                }`}
+              >
+                {TAB_LABELS[tab]}
+              </button>
+            ))}
+          </div>
+        )}
 
-            <button
-              type="button"
-              onClick={() => setActiveTab('audio')}
-              className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl font-semibold text-xs sm:text-sm transition-all min-h-[44px] ${
-                activeTab === 'audio'
-                  ? 'bg-emerald-800 text-white shadow-md'
-                  : 'text-stone-700 dark:text-stone-300 hover:bg-stone-300/50 dark:hover:bg-stone-700/50'
-              }`}
-            >
-              <Headphones className="w-4 h-4" />
-              <span>استماع صوتي</span>
-              {lesson.audio_url && <span className="w-2 h-2 rounded-full bg-blue-400" />}
-            </button>
+        <div
+          id="lesson-panel"
+          role={availableTabs.length > 1 ? 'tabpanel' : undefined}
+          aria-labelledby={availableTabs.length > 1 ? `tab-${shownTab}` : undefined}
+        >
+          {!shownTab && (
+            <p className="py-10 text-stone-600 dark:text-stone-400">لم يُرفع تسجيل ولا تفريغ لهذا الدرس بعد.</p>
+          )}
 
+          {shownTab === 'video' && videoId && (
+            <VideoPlayer
+              ref={mediaRef}
+              youtubeUrl={lesson.youtube_url}
+              title={lesson.title}
+              startAt={resumeAt}
+              onTimeUpdate={handleVideoTime}
+              onEnded={handleMediaEnded}
+            />
+          )}
+
+          {shownTab === 'audio' && (
+            <AudioPlayer
+              ref={mediaRef}
+              track={{ id: lesson.id, title: lesson.title, subtitle: series.title, src: lesson.audio_url, href: `/lesson/${lesson.id}` }}
+              startAt={resumeAt}
+              onTimeUpdate={handleMediaTime}
+              onEnded={handleMediaEnded}
+            />
+          )}
+
+          {shownTab === 'transcript' && (
+            <div className="card px-4 py-5 sm:px-10 sm:py-10 space-y-5 sm:space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-1" role="group" aria-label="حجم الخط">
+                  <button
+                    type="button"
+                    onClick={() => changeFontSize(fontSize - 2)}
+                    disabled={fontSize <= MIN_FONT_SIZE}
+                    aria-label="تصغير الخط"
+                    className="press w-11 h-11 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-bold disabled:opacity-40"
+                  >
+                    أ−
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => changeFontSize(fontSize + 2)}
+                    disabled={fontSize >= MAX_FONT_SIZE}
+                    aria-label="تكبير الخط"
+                    className="press w-11 h-11 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-bold text-lg disabled:opacity-40"
+                  >
+                    أ+
+                  </button>
+                </div>
+                <button type="button" onClick={handleCopyTranscript} className={actionButton}>
+                  {isCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  <span aria-live="polite">{isCopied ? 'تم النسخ' : 'نسخ النص'}</span>
+                </button>
+              </div>
+
+              <div
+                className="max-w-[65ch] mx-auto font-amiri text-stone-900 dark:text-stone-100 leading-[2] space-y-4"
+                style={{ fontSize: `${fontSize}px` }}
+              >
+                {paragraphs.map((paragraph, i) => (
+                  <p
+                    key={i}
+                    id={`para-${i}`}
+                    className={`whitespace-pre-wrap rounded-lg transition-colors ${
+                      i === activeParagraph ? '-mx-3 px-3 py-2 bg-amber-100/70 dark:bg-amber-400/15' : ''
+                    }`}
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Chapters: jump straight to a part of the lesson */}
+      {isMediaTab && chapters.length > 0 && (
+        <section aria-labelledby="chapters-heading" className="card p-4 sm:p-5 space-y-3">
+          <h2 id="chapters-heading" className="flex items-center gap-2 font-semibold text-stone-900 dark:text-stone-100">
+            <Clock className="w-5 h-5 text-emerald-800 dark:text-amber-400" aria-hidden="true" />
+            <span>فصول الدرس</span>
+          </h2>
+          <ol className="space-y-1">
+            {chapters.map((chapter, i) => (
+              <li key={`${chapter.seconds}-${i}`}>
+                <button
+                  type="button"
+                  onClick={() => seekTo(chapter.seconds)}
+                  aria-current={i === currentChapter ? 'true' : undefined}
+                  className={`w-full flex items-baseline gap-4 px-3 py-2.5 rounded-xl text-start transition-colors ${
+                    i === currentChapter
+                      ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 font-semibold'
+                      : 'text-stone-800 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'
+                  }`}
+                >
+                  <span className="shrink-0 w-16 text-sm text-stone-600 dark:text-stone-400 tabular-nums">
+                    {formatAudioTime(chapter.seconds)}
+                  </span>
+                  <span>{chapter.title}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {/* The paragraph being read, estimated from playback, with a way into the full text */}
+      {isMediaTab && activeParagraph >= 0 && paragraphs.length > 0 && (
+        <section aria-labelledby="reading-now-heading" className="card p-4 sm:p-6 space-y-2 sm:space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 id="reading-now-heading" className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
+              الفقرة الحالية من التفريغ <span className="font-normal text-stone-500 dark:text-stone-400">(تقريبية)</span>
+            </h2>
             <button
               type="button"
               onClick={() => setActiveTab('transcript')}
-              className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl font-semibold text-xs sm:text-sm transition-all min-h-[44px] ${
-                activeTab === 'transcript'
-                  ? 'bg-emerald-800 text-white shadow-md'
-                  : 'text-stone-700 dark:text-stone-300 hover:bg-stone-300/50 dark:hover:bg-stone-700/50'
-              }`}
+              className="link-grow inline-flex items-center min-h-11 text-sm font-semibold text-emerald-800 dark:text-emerald-300"
             >
-              <FileText className="w-4 h-4" />
-              <span>تفريغ مكتوب</span>
-              {lesson.transcript && <span className="w-2 h-2 rounded-full bg-emerald-400" />}
+              اقرأ التفريغ كاملاً
             </button>
           </div>
+          <p className="font-amiri text-lg leading-loose text-stone-900 dark:text-stone-100 line-clamp-3">
+            {paragraphs[activeParagraph]}
+          </p>
+        </section>
+      )}
 
-          {/* Tab 1: Video */}
-          {activeTab === 'video' && (
-            <div className="space-y-4">
-              {embedUrl ? (
-                <div className="relative aspect-video w-full rounded-2xl overflow-hidden shadow-xl bg-stone-900 border border-stone-200 dark:border-[#22302a]">
-                  <iframe
-                    src={embedUrl}
-                    title={lesson.title}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              ) : (
-                <div className="p-12 text-center rounded-2xl bg-white dark:bg-[#151f1a] border border-stone-200 dark:border-[#22302a] space-y-3">
-                  <Video className="w-12 h-12 text-stone-400 mx-auto" />
-                  <h4 className="font-amiri text-xl font-bold text-stone-700 dark:text-stone-300">
-                    التسجيل المرئي غير متوفر لهذا الدرس حالياً
-                  </h4>
-                  <p className="text-sm text-stone-500 dark:text-stone-400">
-                    يمكنك الاستماع للتسجيل الصوتي أو مطالعة التفريغ المكتوب من التبويبات أعلاه.
-                  </p>
-                  {lesson.audio_url && (
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('audio')}
-                      className="px-5 py-2 text-xs font-semibold rounded-xl bg-emerald-800 text-white"
-                    >
-                      الانتقال للاستماع الصوتي
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Tab 2: Audio */}
-          {activeTab === 'audio' && (
-            <div className="space-y-6">
-              <AudioPlayer src={lesson.audio_url} title={lesson.title} />
-            </div>
-          )}
-
-          {/* Tab 3: Transcript */}
-          {activeTab === 'transcript' && (
-            <div className="bg-white dark:bg-[#151f1a] rounded-2xl p-6 sm:p-10 border border-stone-200 dark:border-[#22302a] shadow-xs space-y-6">
-              <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-stone-100 dark:border-[#22302a] text-xs">
-                <span className="font-bold text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
-                  <FileText className="w-4 h-4 text-emerald-700 dark:text-amber-400" />
-                  <span>التفريغ النصي المكتوب</span>
-                </span>
-
-                <div className="flex items-center gap-3">
-                  {/* Font Sizing Controls */}
-                  <div className="flex items-center gap-1 bg-stone-100 dark:bg-[#1a261f] p-1 rounded-xl">
-                    <button
-                      type="button"
-                      onClick={() => setFontSize((prev) => Math.max(prev - 2, 14))}
-                      title="تصغير الخط"
-                      className="p-1.5 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200"
-                    >
-                      <ZoomOut className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFontSize(18)}
-                      title="إعادة ضبط حجم الخط الافتراضي"
-                      className="px-2 py-1 text-xs font-semibold text-stone-700 dark:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-700 rounded"
-                    >
-                      {fontSize}px
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFontSize((prev) => Math.min(prev + 2, 28))}
-                      title="تكبير الخط"
-                      className="p-1.5 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200"
-                    >
-                      <ZoomIn className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Copy Transcript Button */}
-                  {lesson.transcript && (
-                    <button
-                      type="button"
-                      onClick={handleCopyTranscript}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 dark:border-[#22302a] hover:bg-stone-100 dark:hover:bg-[#1a261f] text-stone-700 dark:text-stone-300 transition-colors"
-                    >
-                      {isCopied ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-emerald-600" />
-                          <span className="text-emerald-600 font-semibold">تم النسخ</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5" />
-                          <span>نسخ النص</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {lesson.transcript ? (
-                <div
-                  className="font-amiri text-stone-800 dark:text-[#e8efe9] leading-[2.4] whitespace-pre-wrap selection:bg-emerald-100 dark:selection:bg-emerald-950/80 p-4 sm:p-6 rounded-xl bg-stone-50/50 dark:bg-[#1a261f]/40 border border-stone-100 dark:border-[#22302a]"
-                  style={{ fontSize: `${fontSize}px` }}
-                >
-                  {lesson.transcript}
-                </div>
-              ) : (
-                <div className="p-10 text-center text-stone-500 dark:text-stone-400 font-cairo">
-                  لا يتوفر تفريغ مكتوب لهذا الدرس بعد.
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Next / Previous Lesson Bar */}
-          <div className="pt-6 border-t border-stone-200 dark:border-[#22302a]">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {prevLesson ? (
-                <Link
-                  to={`/lesson/${prevLesson.id}`}
-                  className="group p-4 rounded-xl bg-white dark:bg-[#151f1a] border border-stone-200 dark:border-[#22302a] hover:border-emerald-700 dark:hover:border-amber-500 transition-all shadow-xs flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-stone-100 dark:bg-[#1a261f] text-stone-600 dark:text-stone-300 group-hover:bg-emerald-800 group-hover:text-white transition-colors">
-                      <ArrowRight className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <span className="text-[11px] font-semibold text-stone-400 dark:text-stone-500 block">
-                        الدرس السابق ({getArabicLessonOrdinal(prevLesson.lesson_number)})
-                      </span>
-                      <span className="font-amiri text-base font-bold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-amber-400 line-clamp-1 transition-colors">
-                        {prevLesson.title}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ) : (
-                <div className="p-4 rounded-xl border border-dashed border-stone-200 dark:border-[#22302a] text-stone-400 text-center flex items-center justify-center text-xs">
-                  هذا هو الدرس الأول في السلسلة
-                </div>
-              )}
-
-              {nextLesson ? (
-                <Link
-                  to={`/lesson/${nextLesson.id}`}
-                  className="group p-4 rounded-xl bg-white dark:bg-[#151f1a] border border-stone-200 dark:border-[#22302a] hover:border-emerald-700 dark:hover:border-amber-500 transition-all shadow-xs flex items-center justify-between text-left"
-                >
-                  <div>
-                    <span className="text-[11px] font-semibold text-stone-400 dark:text-stone-500 block">
-                      الدرس القادم ({getArabicLessonOrdinal(nextLesson.lesson_number)})
-                    </span>
-                    <span className="font-amiri text-base font-bold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-amber-400 line-clamp-1 transition-colors">
-                      {nextLesson.title}
-                    </span>
-                  </div>
-                  <div className="p-2 rounded-lg bg-stone-100 dark:bg-[#1a261f] text-stone-600 dark:text-stone-300 group-hover:bg-emerald-800 group-hover:text-white transition-colors">
-                    <ArrowLeft className="w-4 h-4" />
-                  </div>
-                </Link>
-              ) : (
-                <div className="p-4 rounded-xl border border-dashed border-stone-200 dark:border-[#22302a] text-stone-400 text-center flex items-center justify-center text-xs">
-                  هذا هو الدرس الأخير حتى الآن في السلسلة
-                </div>
-              )}
-            </div>
+      {/* Auto-next: the next lesson starts unless the visitor cancels */}
+      {countdown !== null && nextLesson && (
+        <section aria-label="الدرس التالي" className="card p-5 flex flex-wrap items-center justify-between gap-4">
+          <div className="space-y-1 min-w-0">
+            <p className="text-sm text-stone-600 dark:text-stone-400">
+              الدرس التالي بعد {new Intl.NumberFormat('ar-EG').format(countdown)} ثوانٍ
+            </p>
+            <p className="font-semibold text-stone-900 dark:text-stone-100">{nextLesson.title}</p>
           </div>
-        </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setCountdown(null)}
+              className="press inline-flex items-center h-11 px-4 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold"
+            >
+              إلغاء
+            </button>
+            <Link
+              to={`/lesson/${nextLesson.id}`}
+              className="press inline-flex items-center h-11 px-5 rounded-xl bg-emerald-800 hover:bg-emerald-900 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-semibold"
+            >
+              ابدأ الآن
+            </Link>
+          </div>
+        </section>
+      )}
 
-        {/* Side Column: "دروس السلسلة" Panel */}
-        <div className="lg:col-span-4 space-y-6">
-          <PortalPanel
-            title={`دروس السلسلة (${seriesLessons.length})`}
-            icon={<Layers className="w-4 h-4" />}
-            headerBg={catTheme.headerBg}
-            actionLink={`/series/${series.slug}`}
-            actionText="كامل السلسلة"
-          >
-            <div className="max-h-[600px] overflow-y-auto divide-y divide-stone-100 dark:divide-[#22302a]/70 -mx-1 pr-1">
-              {seriesLessons.map((item) => {
-                const isCurrent = item.id === lesson.id;
-                return (
+      {(prevLesson || nextLesson) && (
+        <nav aria-label="التنقل بين دروس السلسلة" data-reveal className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+          {prevLesson ? (
+            <Link
+              to={`/lesson/${prevLesson.id}`}
+              className="card block p-4 sm:p-5"
+            >
+              <span className="block text-sm text-stone-600 dark:text-stone-400">السابق</span>
+              <span className="block mt-1 font-semibold text-stone-900 dark:text-stone-100">{prevLesson.title}</span>
+            </Link>
+          ) : (
+            <span className="hidden sm:block" />
+          )}
+          {nextLesson && (
+            <Link
+              to={`/lesson/${nextLesson.id}`}
+              className="card block p-4 sm:p-5 sm:text-left"
+            >
+              <span className="block text-sm text-stone-600 dark:text-stone-400">التالي</span>
+              <span className="block mt-1 font-semibold text-stone-900 dark:text-stone-100">{nextLesson.title}</span>
+            </Link>
+          )}
+        </nav>
+      )}
+
+      {seriesLessons.length > 1 && (
+        <section aria-labelledby="series-lessons-heading" data-reveal className="space-y-3 sm:space-y-4">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 id="series-lessons-heading" className="font-amiri text-2xl sm:text-3xl font-bold text-emerald-950 dark:text-stone-100">
+              دروس {series.title}
+            </h2>
+            <span className="text-sm text-stone-600 dark:text-stone-400">
+              {formatArabicCount(seriesLessons.length, COUNT_FORMS.lesson)}
+            </span>
+          </div>
+          <ol className="card p-2 sm:p-3">
+            {seriesLessons.map((item) => {
+              const isCurrent = item.id === lesson.id;
+              return (
+                <li key={item.id}>
                   <Link
-                    key={item.id}
                     to={`/lesson/${item.id}`}
-                    className={`flex items-center justify-between py-2.5 px-2 rounded-lg transition-colors group gap-2 ${
+                    aria-current={isCurrent ? 'page' : undefined}
+                    className={`flex items-baseline gap-3 sm:gap-4 px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl transition-colors ${
                       isCurrent
-                        ? 'bg-amber-400/15 border-r-4 border-amber-500 font-bold'
-                        : 'hover:bg-stone-50 dark:hover:bg-[#1a261f]'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 font-semibold'
+                        : 'text-stone-800 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'
                     }`}
                   >
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      {isCurrent ? (
-                        <span className="w-5 h-5 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center shrink-0">
-                          <Play className="w-2.5 h-2.5 fill-stone-950" />
-                        </span>
-                      ) : (
-                        <span className="w-5 h-5 rounded bg-stone-100 dark:bg-[#1a261f] text-stone-500 text-[11px] font-mono flex items-center justify-center shrink-0">
-                          {item.lesson_number}
-                        </span>
-                      )}
-                      <div className="min-w-0">
-                        <h4
-                          className={`font-amiri text-sm truncate ${
-                            isCurrent
-                              ? 'text-emerald-900 dark:text-amber-300 font-bold'
-                              : 'text-stone-800 dark:text-stone-200 group-hover:text-emerald-800 dark:group-hover:text-amber-300'
-                          }`}
-                        >
-                          {item.title}
-                        </h4>
-                        <div className="flex items-center gap-2 text-[10px] text-stone-400 font-cairo">
-                          <span>{getArabicLessonOrdinal(item.lesson_number)}</span>
-                          {typeof item.views === 'number' && (
-                            <span>• {formatArabicViews(item.views)} مشاهدة</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1 shrink-0 text-xs">
-                      {item.youtube_url && (
-                        <Video className="w-3.5 h-3.5 text-stone-400" />
-                      )}
-                      {item.audio_url && (
-                        <Headphones className="w-3.5 h-3.5 text-stone-400" />
-                      )}
-                      {item.transcript && (
-                        <FileText className="w-3.5 h-3.5 text-stone-400" />
-                      )}
-                    </div>
+                    <span className="w-8 shrink-0 text-stone-500 dark:text-stone-400 tabular-nums">
+                      {new Intl.NumberFormat('ar-EG').format(item.lesson_number)}
+                    </span>
+                    <span className="flex-1 min-w-0">{item.title}</span>
+                    {watchedIds.has(item.id) && (
+                      <Check className="w-4 h-4 shrink-0 self-center text-emerald-700 dark:text-emerald-400" aria-label="تمّت متابعته" />
+                    )}
                   </Link>
-                );
-              })}
-            </div>
-          </PortalPanel>
-
-          {/* Quick link to return to category */}
-          {category && (
-            <div className="p-4 rounded-xl bg-white dark:bg-[#151f1a] border border-stone-200 dark:border-[#22302a] flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-emerald-700 dark:text-amber-400" />
-                <span className="font-semibold text-stone-700 dark:text-stone-300">
-                  قسم: {category.name}
-                </span>
-              </div>
-              <Link
-                to={`/category/${category.slug}`}
-                className="text-emerald-800 dark:text-amber-400 font-semibold hover:underline flex items-center gap-1"
-              >
-                <span>تصفح القسم</span>
-                <ArrowLeft className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+      )}
+      <ReportLink />
+    </article>
   );
 };
