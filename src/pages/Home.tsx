@@ -20,7 +20,7 @@ import { useHomeData } from './home/useHomeData';
 
 export const Home: React.FC = () => {
   const library = useYoutubeLibrary();
-  const { categories, featuredList, latestList, viewedList, sermonList, settings } = useHomeData();
+  const { categories, featuredList, latestList, viewedList, sermonList, settings, loaded: dataLoaded } = useHomeData();
   const { content, loaded } = useSiteContent();
   const [recentLesson] = useState(getRecentLesson);
 
@@ -45,17 +45,25 @@ export const Home: React.FC = () => {
 
       {/* The quotes stay pinned under the top bar while the page scrolls, full width.
           On a short screen (a phone held sideways) they scroll away, so the pinned bars never fill the view */}
-      {loaded && content.quotes.length > 0 && (
+      {/* Until the sayings arrive the strip's space is held by an empty band of the same height, so the page doesn't jump */}
+      {(!loaded || content.quotes.length > 0) && (
         <div className="sticky [@media(max-height:500px)]:static top-16 sm:top-[72px] z-30 bg-stone-50 dark:bg-stone-950 px-4 sm:px-6 lg:px-8 pt-1 pb-2 sm:py-2">
-          <QuoteTicker items={content.quotes} />
+          {loaded ? (
+            <QuoteTicker items={content.quotes} />
+          ) : (
+            <div aria-hidden="true" className="flex items-stretch rounded-xl bg-mushaf text-gold-soft overflow-hidden border-b-2 border-gold">
+              <span className="shrink-0 flex items-center px-2.5 py-2 sm:px-5 sm:py-3 text-xs sm:text-base bg-gold text-mushaf-deep font-bold">أقوال وأحاديث</span>
+              <span className="py-2 sm:py-3 font-amiri text-base sm:text-xl">&nbsp;</span>
+            </div>
+          )}
         </div>
       )}
 
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <FeaturedColumn placed={placed} latestItems={latestItems} categoryOptions={categoryOptions} />
+          <FeaturedColumn placed={placed} latestItems={latestItems} categoryOptions={categoryOptions} loading={!dataLoaded} />
 
-          <SciencesColumn placed={placed} activeCategories={activeCategories} />
+          <SciencesColumn placed={placed} activeCategories={activeCategories} loading={!dataLoaded} />
 
           <SideColumn placed={placed} activeCategories={activeCategories} recentLesson={recentLesson} recentResume={recentResume} recentDuration={recentDuration} visibleLibrary={visibleLibrary} />
 

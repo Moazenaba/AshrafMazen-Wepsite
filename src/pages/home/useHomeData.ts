@@ -20,6 +20,7 @@ export function useHomeData() {
   const [viewedList, setViewedList] = useState<LessonWithRelations[]>([]);
   const [sermonList, setSermonList] = useState<LessonWithRelations[]>([]);
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -38,12 +39,15 @@ export function useHomeData() {
         setViewedList(viewed);
         setSermonList(sermons);
       })
-      .catch((err) => console.error('Error loading home data:', err));
+      .catch((err) => console.error('Error loading home data:', err))
+      .finally(() => {
+        if (isMounted) setLoaded(true);
+      });
 
     return () => {
       isMounted = false;
     };
   }, []);
 
-  return { categories, featuredList, latestList, viewedList, sermonList, settings };
+  return { categories, featuredList, latestList, viewedList, sermonList, settings, loaded };
 }

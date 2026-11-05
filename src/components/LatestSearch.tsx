@@ -26,9 +26,27 @@ const MAX_SHOWN = 3;
 const arabicNumber = (n: number) => new Intl.NumberFormat('ar-EG').format(n);
 
 // The newest items, with a search box for the title and a filter for the category. At most three are shown.
-export const LatestSearch: React.FC<{ items: LatestItem[]; categories: LatestCategory[]; className?: string }> = ({
+// Placeholder rows while the list loads: same size as the real rows, so the page doesn't jump
+// Same rows as the LatestSearch list
+const LatestRowsSkeleton: React.FC<{ rows: number }> = ({ rows }) => (
+  <ul aria-hidden="true" className="space-y-2 text-stone-500">
+    {Array.from({ length: rows }, (_, i) => (
+      <li key={i} className="flex items-start gap-3 sm:gap-4 p-2 sm:p-3 rounded-lg bg-stone-50 dark:bg-stone-900">
+        <span className="block aspect-video w-20 sm:w-32 shrink-0 rounded-xl bg-stone-200 dark:bg-stone-700" />
+        <span className="min-w-0 flex-1 space-y-2 pt-1">
+          <span className="block rounded bg-current opacity-15 motion-safe:animate-pulse h-4 w-11/12" />
+          <span className="block rounded bg-current opacity-15 motion-safe:animate-pulse h-4 w-3/5" />
+          <span className="block rounded bg-current opacity-15 motion-safe:animate-pulse h-3 w-2/5" />
+        </span>
+      </li>
+    ))}
+  </ul>
+);
+
+export const LatestSearch: React.FC<{ items: LatestItem[]; categories: LatestCategory[]; loading?: boolean; className?: string }> = ({
   items,
   categories,
+  loading = false,
   className = '',
 }) => {
   const [query, setQuery] = useState('');
@@ -86,7 +104,9 @@ export const LatestSearch: React.FC<{ items: LatestItem[]; categories: LatestCat
           {arabicNumber(visible.length)} من {arabicNumber(filtered.length)}
         </p>
 
-        {visible.length === 0 ? (
+        {loading ? (
+          <LatestRowsSkeleton rows={MAX_SHOWN} />
+        ) : visible.length === 0 ? (
           <p className="text-stone-600 dark:text-stone-400">لا يوجد ما يطابق البحث.</p>
         ) : (
           <ul className="space-y-2">
