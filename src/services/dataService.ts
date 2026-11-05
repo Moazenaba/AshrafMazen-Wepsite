@@ -1,9 +1,12 @@
 import { supabase } from '../lib/supabase';
 import { translateSupabaseError } from '../utils/supabaseErrors';
+import { deleteFromR2, isR2Url, r2DownloadUrl, uploadToR2 } from './r2';
 import type {
   Category,
   Series,
   Lesson,
+  LessonChapter,
+  Book,
   AdminUser,
   SocialLink,
   SocialPlatform,
@@ -14,6 +17,7 @@ export type {
   Category,
   Series,
   Lesson,
+  Book,
   AdminUser,
   SocialLink,
   SocialPlatform,
@@ -34,6 +38,70 @@ export function slugify(text: string): string {
     .toLowerCase()
     .replace(/[\s\-_]+/g, '-')
     .replace(/[^\w\u0621-\u064A0-9\-]/g, '');
+}
+
+/**
+ * ============================================================================
+ * LESSON EXTRAS: the featured lessons and each lesson's chapters
+ * ============================================================================
+ * Kept as one JSON record ("lesson_extras") in site_settings rather than as columns of the lessons
+ * table, so they work without changing the database. Saving a lesson writes its extras here.
+ */
+
+interface LessonExtras {
+  featured: string[];
+  chapters: Record<string, LessonChapter[]>;
+}
+
+const LESSON_EXTRAS_KEY = 'lesson_extras';
+
+async function readLessonExtras(): Promise<LessonExtras> {
+  const empty: LessonExtras = { featured: [], chapters: {} };
+  const { data, error } = await supabase.from('site_settings').select('value').eq('key', LESSON_EXTRAS_KEY).maybeSingle();
+  if (error || !data?.value) return empty;
+  try {
+    const parsed = JSON.parse(data.value);
+    return {
+      featured: Array.isArray(parsed?.featured) ? parsed.featured : [],
+      chapters: parsed?.chapters && typeof parsed.chapters === 'object' ? parsed.chapters : {},
+    };
+  } catch {
+    return empty;
+  }
+}
+
+async function writeLessonExtras(extras: LessonExtras): Promise<void> {
+  const { error } = await supabase
+    .from('site_settings')
+    .upsert([{ key: LESSON_EXTRAS_KEY, value: JSON.stringify(extras) }], { onConflict: 'key' });
+  if (error) throw new Error(translateSupabaseError(error));
+}
+
+// Records a lesson's featured flag and chapters, when the form sent them
+async function saveLessonExtras(lessonId: string, data: Partial<Lesson>): Promise<void> {
+  if (data.featured === undefined && data.chapters === undefined) return;
+  const extras = await readLessonExtras();
+  if (data.featured !== undefined) {
+    extras.featured = extras.featured.filter((id) => id !== lessonId);
+    if (data.featured) extras.featured.unshift(lessonId);
+  }
+  if (data.chapters !== undefined) {
+    if (data.chapters && data.chapters.length) extras.chapters[lessonId] = data.chapters;
+    else delete extras.chapters[lessonId];
+  }
+  await writeLessonExtras(extras);
+}
+
+function withExtras<T extends Lesson>(lesson: T, extras: LessonExtras): T {
+  return { ...lesson, featured: extras.featured.includes(lesson.id), chapters: extras.chapters[lesson.id] || [] };
+}
+
+// The columns the lessons table really has; the extras above are kept out of what is written to it
+function lessonRow(data: Partial<Lesson>): Record<string, unknown> {
+  const { featured: _featured, chapters: _chapters, ...row } = data as Record<string, unknown>;
+  void _featured;
+  void _chapters;
+  return row;
 }
 
 /**
@@ -191,7 +259,8 @@ export async function getLesson(
 
     const { data, error } = await query.maybeSingle();
     if (error) throw new Error(translateSupabaseError(error));
-    return data || null;
+    if (!data) return null;
+    return withExtras(data as Lesson, await readLessonExtras());
   } catch (err) {
     console.error('getLesson error:', err);
     throw err;
@@ -253,14 +322,13 @@ export async function getLatestLessons(limit = 6): Promise<LessonWithRelations[]
 
 export async function getFeaturedLessons(limit = 5): Promise<LessonWithRelations[]> {
   try {
-    // Try fetching with featured = true first
-    const { data: lessons, error } = await supabase
-      .from('lessons')
-      .select('*')
-      .eq('status', 'published')
-      .eq('featured', true)
-      .order('published_at', { ascending: false })
-      .limit(limit);
+    // The lessons the admin pinned, most recently pinned first
+    const { featured } = await readLessonExtras();
+    const ids = featured.slice(0, limit);
+    const { data: found, error } = ids.length
+      ? await supabase.from('lessons').select('*').eq('status', 'published').in('id', ids)
+      : { data: [] as Lesson[], error: null };
+    const lessons = (found || []).sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)).map((l) => ({ ...l, featured: true }));
 
     if (!error && lessons && lessons.length > 0) {
       const allSeries = await getAllSeries();
@@ -279,7 +347,7 @@ export async function getFeaturedLessons(limit = 5): Promise<LessonWithRelations
       });
     }
   } catch {
-    // column featured does not exist, fall back smoothly
+    // Nothing pinned can be read: the latest lessons stand in
   }
   return getLatestLessons(limit);
 }
@@ -402,23 +470,6 @@ export async function getCategoriesWithPortalData(recentLimit = 5): Promise<Cate
   }
 }
 
-export async function getSiteSetting(key: string, defaultVal: string): Promise<string> {
-  try {
-    const { data, error } = await supabase
-      .from('settings')
-      .select('value')
-      .eq('key', key)
-      .maybeSingle();
-
-    if (!error && data?.value) {
-      return data.value;
-    }
-  } catch {
-    // settings table may not exist
-  }
-  return defaultVal;
-}
-
 export async function searchLessons(query: string): Promise<LessonWithRelations[]> {
   if (!query || !query.trim()) return [];
   try {
@@ -498,8 +549,7 @@ export async function getAllLessonsAdmin(): Promise<LessonWithRelations[]> {
     if (error) throw new Error(translateSupabaseError(error));
     if (!lessons) return [];
 
-    const allSeries = await getAllSeries();
-    const allCategories = await getCategories();
+    const [allSeries, allCategories, extras] = await Promise.all([getAllSeries(), getCategories(), readLessonExtras()]);
     const seriesMap = new Map(allSeries.map((s) => [s.id, s]));
     const catMap = new Map(allCategories.map((c) => [c.id, c]));
 
@@ -507,7 +557,7 @@ export async function getAllLessonsAdmin(): Promise<LessonWithRelations[]> {
       const s = seriesMap.get(l.series_id) || null;
       const c = s ? catMap.get(s.category_id) || null : null;
       return {
-        ...l,
+        ...withExtras(l as Lesson, extras),
         series: s,
         category: c,
       };
@@ -675,6 +725,7 @@ export async function createLesson(lessonData: Partial<Lesson>): Promise<Lesson>
     .single();
 
   if (error) throw new Error(translateSupabaseError(error));
+  await saveLessonExtras(data.id, { featured: Boolean(lessonData.featured), chapters: lessonData.chapters || [] });
   return data;
 }
 
@@ -682,7 +733,7 @@ export async function updateLesson(
   id: string,
   lessonData: Partial<Lesson>
 ): Promise<Lesson> {
-  const payload: any = { ...lessonData };
+  const payload: any = lessonRow(lessonData);
   if (payload.status === 'published' && !payload.published_at) {
     payload.published_at = new Date().toISOString();
   }
@@ -695,13 +746,287 @@ export async function updateLesson(
     .single();
 
   if (error) throw new Error(translateSupabaseError(error));
+  await saveLessonExtras(id, lessonData);
   return data;
 }
 
 export async function deleteLesson(id: string): Promise<boolean> {
   const { error } = await supabase.from('lessons').delete().eq('id', id);
   if (error) throw new Error(translateSupabaseError(error));
+  try {
+    await saveLessonExtras(id, { featured: false, chapters: [] });
+  } catch (err) {
+    console.error('Lesson extras were not cleared:', err);
+  }
   return true;
+}
+
+/**
+ * ============================================================================
+ * AUDIO LIBRARY: every published lesson that has a recording
+ * ============================================================================
+ */
+
+export async function getAudioLessons(): Promise<LessonWithRelations[]> {
+  const { data: lessons, error } = await supabase
+    .from('lessons')
+    .select('*')
+    .eq('status', 'published')
+    .neq('audio_url', '')
+    .not('audio_url', 'is', null)
+    .order('published_at', { ascending: false });
+
+  if (error) throw new Error(translateSupabaseError(error));
+  if (!lessons || lessons.length === 0) return [];
+
+  const [allSeries, allCategories] = await Promise.all([getAllSeries(), getCategories()]);
+  const seriesMap = new Map(allSeries.map((s) => [s.id, s]));
+  const catMap = new Map(allCategories.map((c) => [c.id, c]));
+  return lessons.map((l) => {
+    const s = seriesMap.get(l.series_id) || null;
+    return { ...l, series: s, category: s ? catMap.get(s.category_id) || null : null };
+  });
+}
+
+/**
+ * ============================================================================
+ * THE LIBRARY: books and written works as PDF files
+ * ============================================================================
+ * The list is kept as one JSON record ("library_books") in the site_settings table, which the admin already
+ * writes to and visitors already read, so the library needs no new table or database setup. The PDF files
+ * and covers go to the site's existing storage buckets.
+ */
+
+export interface BookWithCategory extends Book {
+  category?: Category | null;
+}
+
+const LIBRARY_KEY = 'library_books';
+
+async function readLibrary(): Promise<Book[]> {
+  const { data, error } = await supabase.from('site_settings').select('value').eq('key', LIBRARY_KEY).maybeSingle();
+  if (error) throw new Error(translateSupabaseError(error));
+  if (!data?.value) return [];
+  try {
+    const list = JSON.parse(data.value);
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
+async function writeLibrary(books: Book[]): Promise<void> {
+  const { error } = await supabase
+    .from('site_settings')
+    .upsert([{ key: LIBRARY_KEY, value: JSON.stringify(books) }], { onConflict: 'key' });
+  if (error) throw new Error(translateSupabaseError(error));
+}
+
+const byShelfOrder = (a: Book, b: Book) =>
+  (a.sort_order || 0) - (b.sort_order || 0) || (b.published_at || b.created_at).localeCompare(a.published_at || a.created_at);
+
+async function attachBookCategories(books: Book[]): Promise<BookWithCategory[]> {
+  if (books.length === 0) return [];
+  const catMap = new Map((await getCategories()).map((c) => [c.id, c]));
+  return books.map((b) => ({ ...b, category: b.category_id ? catMap.get(b.category_id) || null : null }));
+}
+
+export async function getPublishedBooks(): Promise<BookWithCategory[]> {
+  const books = (await readLibrary()).filter((b) => b.status === 'published').sort(byShelfOrder);
+  return attachBookCategories(books);
+}
+
+export async function getBook(id: string, includeDrafts = false): Promise<BookWithCategory | null> {
+  const book = (await readLibrary()).find((b) => b.id === id && (includeDrafts || b.status === 'published'));
+  return book ? (await attachBookCategories([book]))[0] : null;
+}
+
+export async function getAllBooksAdmin(): Promise<BookWithCategory[]> {
+  return attachBookCategories((await readLibrary()).sort(byShelfOrder));
+}
+
+function cleanBook(bookData: Partial<Book>, base: Book): Book {
+  const status = bookData.status ?? base.status;
+  return {
+    ...base,
+    title: (bookData.title ?? base.title).trim(),
+    author: (bookData.author ?? base.author ?? '').trim(),
+    description: (bookData.description ?? base.description ?? '').trim(),
+    category_id: bookData.category_id !== undefined ? bookData.category_id || null : base.category_id,
+    file_url: (bookData.file_url ?? base.file_url).trim(),
+    cover_url: bookData.cover_url !== undefined ? (bookData.cover_url ? bookData.cover_url.trim() : null) : base.cover_url,
+    pages: bookData.pages !== undefined ? (bookData.pages ? Number(bookData.pages) : null) : base.pages,
+    sort_order: bookData.sort_order !== undefined ? Number(bookData.sort_order) || 0 : base.sort_order,
+    status,
+    published_at: status === 'published' ? base.published_at || new Date().toISOString() : base.published_at,
+  };
+}
+
+export async function createBook(bookData: Partial<Book>): Promise<Book> {
+  if (!(bookData.title || '').trim()) throw new Error('يرجى إدخال عنوان الكتاب.');
+  if (!(bookData.file_url || '').trim()) throw new Error('يرجى رفع ملف الكتاب (PDF) أو إدخال رابطه.');
+  const id =
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  const base: Book = {
+    id,
+    title: '',
+    author: '',
+    description: '',
+    category_id: null,
+    file_url: '',
+    cover_url: null,
+    pages: null,
+    sort_order: 0,
+    status: 'published',
+    published_at: null,
+    created_at: new Date().toISOString(),
+  };
+  const book = cleanBook(bookData, base);
+  const books = await readLibrary();
+  await writeLibrary([...books, book]);
+  return book;
+}
+
+export async function updateBook(id: string, bookData: Partial<Book>): Promise<Book> {
+  const books = await readLibrary();
+  const index = books.findIndex((b) => b.id === id);
+  if (index === -1) throw new Error('هذا الكتاب لم يعد موجوداً.');
+  const book = cleanBook(bookData, books[index]);
+  if (!book.title) throw new Error('يرجى إدخال عنوان الكتاب.');
+  if (!book.file_url) throw new Error('يرجى رفع ملف الكتاب (PDF) أو إدخال رابطه.');
+  books[index] = book;
+  await writeLibrary(books);
+  return book;
+}
+
+// Deletes the book and the files it uploaded; a file that cannot be removed does not block the delete
+export async function deleteBook(book: Pick<Book, 'id' | 'file_url' | 'cover_url'>): Promise<boolean> {
+  const books = await readLibrary();
+  await writeLibrary(books.filter((b) => b.id !== book.id));
+  for (const url of [book.file_url, book.cover_url]) {
+    if (isR2Url(url)) await deleteFromR2(url as string);
+  }
+  return true;
+}
+
+const BOOK_FILE_RULES = {
+  pdf: { extensions: ['pdf'], maxMb: 100, message: 'يرجى اختيار ملف بصيغة PDF.' },
+  cover: { extensions: ['jpg', 'jpeg', 'png', 'webp'], maxMb: 5, message: 'يرجى اختيار صورة غلاف بصيغة jpg أو png أو webp.' },
+} as const;
+
+export async function uploadBookFile(file: File, kind: 'pdf' | 'cover'): Promise<string> {
+  const rules = BOOK_FILE_RULES[kind];
+  const extension = (file.name.split('.').pop() || '').toLowerCase();
+  if (!(rules.extensions as readonly string[]).includes(extension)) throw new Error(rules.message);
+  if (file.size > rules.maxMb * 1024 * 1024) throw new Error(`حجم الملف أكبر من ${rules.maxMb} ميجابايت.`);
+
+  return uploadToR2(file, kind);
+}
+
+// A link that downloads the file with the book's title as its name; a file hosted elsewhere is linked as it is
+export function bookDownloadUrl(book: Pick<Book, 'file_url' | 'title'>): string {
+  if (!isR2Url(book.file_url)) return book.file_url;
+  const name = `${book.title.replace(/[\\/:*?"<>|]+/g, ' ').trim() || 'book'}.pdf`;
+  return r2DownloadUrl(book.file_url, name);
+}
+
+/**
+ * ============================================================================
+ * THE CHANNEL'S VIDEOS: what the admin hid or renamed
+ * ============================================================================
+ * The playlists and videos come from the YouTube channel (the bundled library plus the RSS merge in
+ * api/youtube-library.ts). The admin cannot edit YouTube, but can hide a playlist or a video from the site and
+ * give a video or playlist a different title here. Kept as one JSON record ("youtube_overrides") in site_settings.
+ */
+
+export interface YoutubeOverrides {
+  hiddenPlaylists: string[];
+  hiddenVideos: string[];
+  videoTitles: Record<string, string>;
+  playlistTitles: Record<string, string>;
+  // Playlists added by the admin; api/youtube-library.ts reads their videos from YouTube's feed
+  extraPlaylists: { id: string; title: string }[];
+}
+
+const YOUTUBE_OVERRIDES_KEY = 'youtube_overrides';
+
+export async function getYoutubeOverrides(): Promise<YoutubeOverrides> {
+  const { data, error } = await supabase.from('site_settings').select('value').eq('key', YOUTUBE_OVERRIDES_KEY).maybeSingle();
+  if (error) throw new Error(translateSupabaseError(error));
+  try {
+    const parsed = JSON.parse(data?.value || '{}');
+    return {
+      hiddenPlaylists: Array.isArray(parsed.hiddenPlaylists) ? parsed.hiddenPlaylists : [],
+      hiddenVideos: Array.isArray(parsed.hiddenVideos) ? parsed.hiddenVideos : [],
+      videoTitles: parsed.videoTitles && typeof parsed.videoTitles === 'object' ? parsed.videoTitles : {},
+      playlistTitles: parsed.playlistTitles && typeof parsed.playlistTitles === 'object' ? parsed.playlistTitles : {},
+      extraPlaylists: Array.isArray(parsed.extraPlaylists) ? parsed.extraPlaylists : [],
+    };
+  } catch {
+    return { hiddenPlaylists: [], hiddenVideos: [], videoTitles: {}, playlistTitles: {}, extraPlaylists: [] };
+  }
+}
+
+export async function saveYoutubeOverrides(overrides: YoutubeOverrides): Promise<void> {
+  const { error } = await supabase
+    .from('site_settings')
+    .upsert([{ key: YOUTUBE_OVERRIDES_KEY, value: JSON.stringify(overrides) }], { onConflict: 'key' });
+  if (error) throw new Error(translateSupabaseError(error));
+}
+
+/**
+ * ============================================================================
+ * VISITOR CONTRIBUTIONS: suggestions, corrections and removal requests
+ * ============================================================================
+ * Visitors have no accounts. They send a request (api/submit), it waits as "pending" in the submissions table,
+ * and nothing on the site changes until an admin approves it here.
+ */
+
+export type SubmissionKind = 'book' | 'audio' | 'video' | 'correction' | 'removal';
+export type SubmissionStatus = 'pending' | 'approved' | 'rejected';
+
+export interface Submission {
+  id: string;
+  kind: SubmissionKind;
+  title: string;
+  url: string;
+  author: string;
+  details: string;
+  target: string;
+  contact: string;
+  status: SubmissionStatus;
+  admin_note: string;
+  created_at: string;
+  reviewed_at: string | null;
+}
+
+export async function getSubmissions(status?: SubmissionStatus): Promise<Submission[]> {
+  let query = supabase.from('submissions').select('*').order('created_at', { ascending: false }).limit(300);
+  if (status) query = query.eq('status', status);
+  const { data, error } = await query;
+  if (error) throw new Error(translateSupabaseError(error));
+  return data || [];
+}
+
+export async function getPendingSubmissionsCount(): Promise<number> {
+  const { count, error } = await supabase.from('submissions').select('id', { count: 'exact', head: true }).eq('status', 'pending');
+  if (error) return 0;
+  return count || 0;
+}
+
+export async function reviewSubmission(id: string, status: SubmissionStatus, adminNote = ''): Promise<void> {
+  const { error } = await supabase
+    .from('submissions')
+    .update({ status, admin_note: adminNote.trim().slice(0, 1000), reviewed_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) throw new Error(translateSupabaseError(error));
+}
+
+export async function deleteSubmission(id: string): Promise<void> {
+  const { error } = await supabase.from('submissions').delete().eq('id', id);
+  if (error) throw new Error(translateSupabaseError(error));
 }
 
 /**
@@ -720,25 +1045,7 @@ export async function uploadAudioFile(file: File): Promise<string> {
     throw new Error('صيغة الملف غير مدعومة. يرجى اختيار ملف صوتي بصيغة (mp3, m4a, wav, ogg).');
   }
 
-  // Unique sanitized filename
-  const uniqueId =
-    typeof crypto !== 'undefined' && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-  const filename = `${uniqueId}.${extension}`;
-
-  const { data, error } = await supabase.storage.from('audio').upload(filename, file, {
-    cacheControl: '3600',
-    upsert: false,
-  });
-
-  if (error) {
-    console.error('Audio upload error:', error);
-    throw new Error(translateSupabaseError(error));
-  }
-
-  const { data: urlData } = supabase.storage.from('audio').getPublicUrl(data.path);
-  return urlData.publicUrl;
+  return uploadToR2(file, 'audio');
 }
 
 /**
@@ -867,7 +1174,6 @@ let cachedSiteSettings: SiteSettings | null = null;
 let cachedActiveSocialLinks: SocialLink[] | null = null;
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
-  banner_prefix: 'الموقع الرسمي لفضيلة الشيخ',
   banner_name: 'أبو عبد الرحمن أشرف بن طه بن مازن',
   banner_logo_url: '',
   about_sheikh:
@@ -887,7 +1193,6 @@ export async function getSiteSettings(forceRefresh = false): Promise<SiteSetting
       });
 
       cachedSiteSettings = {
-        banner_prefix: settingsMap.banner_prefix || DEFAULT_SITE_SETTINGS.banner_prefix,
         banner_name: settingsMap.banner_name || DEFAULT_SITE_SETTINGS.banner_name,
         banner_logo_url: settingsMap.banner_logo_url || '',
         about_sheikh: settingsMap.about_sheikh || DEFAULT_SITE_SETTINGS.about_sheikh,
@@ -936,24 +1241,7 @@ export async function uploadBrandingLogo(file: File): Promise<string> {
     throw new Error('حجم الصورة كبير جداً. الحد الأقصى المسموح به هو 2 ميجابايت.');
   }
 
-  const uniqueId =
-    typeof crypto !== 'undefined' && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-  const filename = `logo-${uniqueId}.${extension}`;
-
-  const { data, error } = await supabase.storage.from('branding').upload(filename, file, {
-    cacheControl: '3600',
-    upsert: false,
-  });
-
-  if (error) {
-    console.error('Branding logo upload error:', error);
-    throw new Error(translateSupabaseError(error));
-  }
-
-  const { data: urlData } = supabase.storage.from('branding').getPublicUrl(data.path);
-  return urlData.publicUrl;
+  return uploadToR2(file, 'logo');
 }
 
 /**

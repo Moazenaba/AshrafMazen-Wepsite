@@ -44,8 +44,14 @@ import {
 import { formatArabicDate, getArabicLessonOrdinal, getCategoryColorTheme } from '../../utils/helpers';
 import { CategoryModal, SeriesModal, LessonModal, DeleteConfirmModal } from '../../components/admin/AdminModals';
 import { BrandingManager } from '../../components/admin/BrandingManager';
+import { BooksManager } from '../../components/admin/BooksManager';
+import { StatsPanel } from '../../components/admin/StatsPanel';
+import { SubmissionsManager } from '../../components/admin/SubmissionsManager';
+import { YoutubeManager } from '../../components/admin/YoutubeManager';
+import { SystemStatus } from '../../components/admin/SystemStatus';
+import { getPendingSubmissionsCount } from '../../services/dataService';
 import { ThemeToggle } from '../../components/ThemeToggle';
-import type { Category, Series, Lesson, AdminUser, LessonStatus } from '../../types';
+import type { Category, Series, Lesson, AdminUser, LessonStatus, LessonChapter } from '../../types';
 
 interface LessonAdminItem extends Lesson {
   series?: Series | null;
@@ -57,11 +63,16 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type AdminTab = 'lessons' | 'series' | 'categories' | 'branding' | 'system';
+type AdminTab = 'stats' | 'requests' | 'videos' | 'lessons' | 'series' | 'categories' | 'books' | 'branding' | 'system';
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<AdminTab>('lessons');
+  const [booksCount, setBooksCount] = useState<number | null>(null);
+  const [pendingRequests, setPendingRequests] = useState<number | null>(null);
+  useEffect(() => {
+    getPendingSubmissionsCount().then(setPendingRequests).catch(() => {});
+  }, []);
   const [categories, setCategories] = useState<Category[]>([]);
   const [seriesList, setSeriesList] = useState<Series[]>([]);
   const [lessons, setLessons] = useState<LessonAdminItem[]>([]);
@@ -269,6 +280,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
     youtube_url: string;
     audio_url: string;
     transcript: string;
+    chapters: LessonChapter[];
+    featured: boolean;
     status: LessonStatus;
   }) => {
     try {
@@ -325,7 +338,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
       {/* Missing DB Setup / Error Banner */}
       {dbError && (
         <div className="bg-amber-500/15 border-b border-amber-500/30 text-amber-900 dark:text-amber-200 px-4 py-3 text-xs sm:text-sm font-medium flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 max-w-5xl mx-auto w-full">
+          <div className="flex items-center gap-2 w-full w-full">
             <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
             <span>
               <strong>إعداد قاعدة البيانات غير مكتمل:</strong> يرجى التأكد من إنشاء الجداول المطلوبة وتفعيل سياسات الأمان أو مراجعة الاتصال.
@@ -343,7 +356,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
 
       {/* Top Admin Header */}
       <div className="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-800 text-amber-300 flex items-center justify-center font-bold">
               <ShieldCheck className="w-6 h-6" />
@@ -353,7 +366,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
                 <h1 className="font-amiri text-2xl font-bold text-stone-900 dark:text-stone-100">
                   لوحة إدارة موقع الشيخ أشرف مازن
                 </h1>
-                <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold border border-emerald-200 dark:border-emerald-800/40">
+                <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold border border-emerald-200 dark:border-emerald-800/40">
                   مدير الموقع
                 </span>
               </div>
@@ -403,7 +416,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
         </div>
 
         {/* Stats Row */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 border-t border-stone-100 dark:border-stone-800 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-4 border-t border-stone-100 dark:border-stone-800 grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="p-3 bg-stone-50 dark:bg-stone-800/40 rounded-xl border border-stone-200 dark:border-stone-700">
             <span className="text-xs text-stone-500 dark:text-stone-400 block font-medium">الأقسام الشرعية</span>
             <span className="text-xl font-bold text-stone-900 dark:text-stone-100">{categories.length}</span>
@@ -423,7 +436,40 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
         </div>
 
         {/* Admin Navigation Tabs */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-2 overflow-x-auto border-t border-stone-100 dark:border-stone-800">
+        <div className="w-full px-4 sm:px-6 lg:px-8 flex gap-2 overflow-x-auto border-t border-stone-100 dark:border-stone-800">
+          <button
+            type="button"
+            onClick={() => setActiveTab('stats')}
+            className={`py-3 px-4 font-semibold text-sm border-b-2 whitespace-nowrap transition-all ${
+              activeTab === 'stats'
+                ? 'border-emerald-800 text-emerald-800 dark:border-amber-400 dark:text-amber-300'
+                : 'border-transparent text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+            }`}
+          >
+            الإحصائيات
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('requests')}
+            className={`py-3 px-4 font-semibold text-sm border-b-2 whitespace-nowrap transition-all ${
+              activeTab === 'requests'
+                ? 'border-emerald-800 text-emerald-800 dark:border-amber-400 dark:text-amber-300'
+                : 'border-transparent text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+            }`}
+          >
+            الطلبات{pendingRequests ? ` (${pendingRequests})` : ''}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('videos')}
+            className={`py-3 px-4 font-semibold text-sm border-b-2 whitespace-nowrap transition-all ${
+              activeTab === 'videos'
+                ? 'border-emerald-800 text-emerald-800 dark:border-amber-400 dark:text-amber-300'
+                : 'border-transparent text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+            }`}
+          >
+            فيديوهات القناة
+          </button>
           <button
             type="button"
             onClick={() => setActiveTab('lessons')}
@@ -459,6 +505,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
           </button>
           <button
             type="button"
+            onClick={() => setActiveTab('books')}
+            className={`py-3 px-4 font-semibold text-sm border-b-2 whitespace-nowrap transition-all ${
+              activeTab === 'books'
+                ? 'border-emerald-800 text-emerald-800 dark:border-amber-400 dark:text-amber-300'
+                : 'border-transparent text-stone-500 hover:text-stone-800 dark:hover:text-stone-200'
+            }`}
+          >
+            المكتبة{booksCount !== null ? ` (${booksCount})` : ''}
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveTab('branding')}
             className={`py-3 px-4 font-semibold text-sm border-b-2 whitespace-nowrap transition-all ${
               activeTab === 'branding'
@@ -483,7 +540,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
       </div>
 
       {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         {/* ========================================================================= */}
         {/* TAB 1: LESSONS MANAGEMENT */}
         {/* ========================================================================= */}
@@ -611,7 +668,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
                             {lesson.category && (() => {
                               const catTheme = getCategoryColorTheme(lesson.category.color);
                               return (
-                                <span className={`inline-flex items-center gap-1 mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-md border ${catTheme.badgeBg} ${catTheme.badgeText} ${catTheme.badgeBorder}`}>
+                                <span className={`inline-flex items-center gap-1 mt-1 text-xs font-semibold px-2 py-0.5 rounded-md border ${catTheme.badgeBg} ${catTheme.badgeText} ${catTheme.badgeBorder}`}>
                                   <span className={`w-1.5 h-1.5 rounded-full ${catTheme.dot}`} />
                                   <span>{lesson.category.name}</span>
                                 </span>
@@ -645,12 +702,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
                           </td>
                           <td className="py-3.5 px-4">
                             {lesson.status === 'published' ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold border border-emerald-300 dark:border-emerald-800">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-xs font-bold border border-emerald-300 dark:border-emerald-800">
                                 <CheckCircle2 className="w-3 h-3" />
                                 <span>منشور</span>
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 text-[11px] font-bold border border-amber-300 dark:border-amber-800">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 text-xs font-bold border border-amber-300 dark:border-amber-800">
                                 <Clock className="w-3 h-3" />
                                 <span>مسودة</span>
                               </span>
@@ -954,6 +1011,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
         {/* ========================================================================= */}
         {/* TAB 4: BRANDING & SOCIAL MEDIA LINKS */}
         {/* ========================================================================= */}
+        {activeTab === 'stats' && <StatsPanel lessons={lessons} />}
+
+        {activeTab === 'requests' && <SubmissionsManager onCountChange={setPendingRequests} />}
+
+        {activeTab === 'videos' && <YoutubeManager />}
+
+        {activeTab === 'books' && <BooksManager categories={categories} onCountChange={setBooksCount} />}
+
         {activeTab === 'branding' && <BrandingManager />}
 
         {/* ========================================================================= */}
@@ -961,31 +1026,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
         {/* ========================================================================= */}
         {activeTab === 'system' && (
           <div className="max-w-3xl space-y-6">
-            <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 sm:p-8 border border-stone-200 dark:border-stone-800 shadow-sm space-y-4">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <h3 className="font-amiri text-2xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-emerald-600 dark:text-amber-400" />
-                  <span>حالة الاتصال بقاعدة بيانات Supabase</span>
-                </h3>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 text-xs font-bold border border-emerald-300 dark:border-emerald-800">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>متصل بالسحابة (Supabase)</span>
-                </span>
-              </div>
-              <p className="text-sm text-stone-600 dark:text-stone-300 leading-relaxed font-cairo">
-                تم ربط المشروع بنجاح مع قاعدة بيانات <strong>Supabase PostgreSQL</strong> السحابية، حيث يتم تخزين وتحديث كافة الأقسام، السلاسل العلمية، والدروس وحسابات الإدارة مباشرة وبشكل دائم وموثوق.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs font-mono" dir="ltr">
-                <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
-                  <span className="text-stone-400 block text-[11px]">Database Provider</span>
-                  <span className="text-emerald-700 dark:text-emerald-300 font-bold">Supabase (PostgreSQL 17)</span>
-                </div>
-                <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
-                  <span className="text-stone-400 block text-[11px]">Connection Host</span>
-                  <span className="text-stone-800 dark:text-stone-200 truncate block">aws-0-eu-west-2.pooler.supabase.com:6543</span>
-                </div>
-              </div>
-            </div>
+            <SystemStatus />
 
             <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 sm:p-8 border border-stone-200 dark:border-stone-800 shadow-sm space-y-4">
               <h3 className="font-amiri text-2xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">

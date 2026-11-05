@@ -32,26 +32,6 @@ function saveBookmarkedLessonIds(ids: string[]): void {
 }
 
 /**
- * Check if a specific lesson is currently bookmarked
- */
-export function isLessonBookmarked(lessonId: string): boolean {
-  if (!lessonId) return false;
-  const ids = getBookmarkedLessonIds();
-  return ids.includes(lessonId);
-}
-
-/**
- * Add a lesson to bookmarks
- */
-export function addBookmark(lessonId: string): void {
-  if (!lessonId) return;
-  const ids = getBookmarkedLessonIds();
-  if (!ids.includes(lessonId)) {
-    saveBookmarkedLessonIds([lessonId, ...ids]);
-  }
-}
-
-/**
  * Remove a lesson from bookmarks
  */
 export function removeBookmark(lessonId: string): void {

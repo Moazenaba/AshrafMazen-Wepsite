@@ -1,25 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, BookOpen, Search, User, LogIn, ShieldCheck, Bookmark } from 'lucide-react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Menu, X, Search, LogIn } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useBookmarks } from '../services/bookmarkService';
 import { supabase } from '../lib/supabase';
-import { checkCurrentAdmin } from '../services/dataService';
+import { checkCurrentAdmin, getSiteSettings, DEFAULT_SITE_SETTINGS } from '../services/dataService';
+import type { SiteSettings } from '../types';
 
+// One header for the public site: the sheikh's name as the wordmark, a few plain links, search and theme.
+// The admin area is reached by its URL; a "لوحة التحكم" link appears only for a signed-in admin.
 export const Navbar: React.FC = () => {
   const { count: bookmarkCount } = useBookmarks();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
   const location = useLocation();
 
   useEffect(() => {
     let isMounted = true;
 
-    // Check if current user is an authenticated admin in the database
+    getSiteSettings()
+      .then((data) => {
+        if (isMounted) setSettings(data);
+      })
+      .catch(() => {});
+
     checkCurrentAdmin().then((admin) => {
-      if (isMounted) {
-        setIsAdmin(!!admin);
-      }
+      if (isMounted) setIsAdmin(!!admin);
     });
 
     const {
@@ -28,8 +35,8 @@ export const Navbar: React.FC = () => {
       if (session?.user) {
         const admin = await checkCurrentAdmin();
         if (isMounted) setIsAdmin(!!admin);
-      } else {
-        if (isMounted) setIsAdmin(false);
+      } else if (isMounted) {
+        setIsAdmin(false);
       }
     });
 
@@ -39,195 +46,151 @@ export const Navbar: React.FC = () => {
     };
   }, []);
 
+  // Close the mobile menu on every navigation, including a tap on the link to the page already shown
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname, location.hash, location.key]);
+
+  // A soft shadow appears once the page scrolls under the sticky header /* taste-skill-ignore: the sticky bar is the one surface allowed a shadow */
+  const [isScrolled, setIsScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const bookmarksLabel = bookmarkCount > 0 ? `المحفوظات (${bookmarkCount})` : 'المحفوظات';
+
+  // The three kinds of content first (watch, listen, read), then the subjects and what the visitor saved
   const navLinks = [
-    { label: 'الرئيسية', path: '/' },
-    { label: 'العلوم الشرعية', path: '/#categories' },
-    { label: 'أحدث الدروس', path: '/#latest' },
-    { label: 'البحث', path: '/search' },
+    { label: 'المرئيات', to: '/videos' },
+    { label: 'الصوتيات', to: '/audio' },
+    { label: 'المكتبة', to: '/books' },
+    { label: 'الأقسام', to: { pathname: '/', hash: '#categories' } },
+    { label: bookmarksLabel, to: '/bookmarks' },
+    ...(isAdmin ? [{ label: 'لوحة التحكم', to: '/admin' }] : []),
   ];
 
-  const isActive = (path: string) => {
-    if (path.startsWith('/#')) return false;
-    return location.pathname === path;
-  };
+  const linkClass = (active: boolean) =>
+    `whitespace-nowrap inline-flex items-center h-11 px-3 rounded-lg text-sm font-semibold transition-colors ${
+      active
+        ? 'text-emerald-800 dark:text-emerald-300'
+        : 'text-stone-700 dark:text-stone-300 hover:text-emerald-800 dark:hover:text-emerald-300'
+    }`;
+
+  const { banner_name, banner_logo_url } = settings;
 
   return (
-    <header className="sticky top-0 z-40 bg-stone-50/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-stone-200/80 dark:border-stone-800/80 transition-colors">
-      <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
-          {/* Logo & Sheikh Branding */}
-          <Link
-            to="/"
-            className="group flex items-center gap-2.5 sm:gap-3.5 focus:outline-none shrink-0"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-emerald-800 dark:bg-emerald-700 text-amber-300 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform border border-amber-500/30">
-              <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
-            </div>
-            <div>
-              <span className="font-amiri text-xl sm:text-2xl font-bold tracking-tight text-emerald-950 dark:text-emerald-100 group-hover:text-emerald-800 dark:group-hover:text-amber-300 transition-colors block leading-none">
-                الشيخ أشرف مازن
+    <header
+      className={`sticky top-0 z-40 bg-stone-50/95 dark:bg-stone-950/95 transition-shadow duration-300 ${
+        isScrolled ? 'shadow-[0_1px_0_var(--border-subtle),0_8px_24px_-12px_rgb(60_40_10_/_0.18)]' : '' /* taste-skill-ignore: sticky bar, shown only once the page scrolls under it */
+      }`}
+    >
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-3 h-16 sm:h-[72px]">
+          {/* Wordmark: uploaded logo, or the sheikh's name in Ruqaa */}
+          <Link to="/" className="min-w-0 shrink rounded-lg min-h-11 flex items-center" aria-label="الصفحة الرئيسية">
+            {banner_logo_url ? (
+              <img
+                src={banner_logo_url}
+                alt={banner_name || 'الشيخ أشرف مازن'}
+                className="h-10 sm:h-12 w-auto max-w-full object-contain"
+              />
+            ) : (
+              // One line on every width: the size follows the screen, and a very narrow phone ends it with an ellipsis
+              <span
+                className="block truncate font-ruqaa font-bold leading-snug text-emerald-950 dark:text-emerald-100"
+                style={{ fontSize: 'clamp(0.9375rem, 0.2rem + 3.9vw, 1.75rem)' }}
+              >
+                {banner_name || 'الشيخ أشرف مازن'}
               </span>
-              <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-medium mt-0.5">
-                الموقع العلمي والرسمي
-              </p>
-            </div>
+            )}
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1.5 lg:gap-3">
-            {navLinks.map((item) => {
-              if (item.path.startsWith('/#')) {
-                return (
-                  <a
-                    key={item.path}
-                    href={item.path}
-                    className="px-3.5 py-2 text-sm font-semibold rounded-xl text-stone-700 dark:text-stone-300 hover:text-emerald-800 dark:hover:text-amber-300 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30 transition-all"
-                  >
-                    {item.label}
-                  </a>
-                );
-              }
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`px-3.5 py-2 text-sm font-semibold rounded-xl transition-all ${
-                    isActive(item.path)
-                      ? 'bg-emerald-800 text-white shadow-sm'
-                      : 'text-stone-700 dark:text-stone-300 hover:text-emerald-800 dark:hover:text-amber-300 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30'
-                  }`}
-                >
-                  {item.label}
+          {/* Desktop navigation */}
+          <nav className="hidden lg:flex items-center gap-1" aria-label="القائمة الرئيسية">
+            {navLinks.map((item) =>
+              typeof item.to === 'string' ? (
+                <NavLink key={item.label} to={item.to} className={({ isActive }) => linkClass(isActive)}>
+                  <span className="link-grow pb-0.5">{item.label}</span>
+                </NavLink>
+              ) : (
+                <Link key={item.label} to={item.to} className={linkClass(false)}>
+                  <span className="link-grow pb-0.5">{item.label}</span>
                 </Link>
-              );
-            })}
+              )
+            )}
           </nav>
 
-          {/* Right Action Icons: Search, Bookmarks, Dark Mode, Admin Button */}
-          <div className="flex items-center gap-1 sm:gap-2.5">
+          <div className="flex items-center gap-1 shrink-0">
             <Link
               to="/search"
-              aria-label="بحث في الدروس"
+              aria-label="البحث في الدروس"
               title="البحث في الدروس"
-              className="p-2 sm:p-2.5 min-w-[38px] min-h-[38px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center rounded-xl text-stone-600 dark:text-stone-300 hover:text-emerald-800 dark:hover:text-amber-300 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 transition-colors"
+              className="w-11 h-11 flex items-center justify-center rounded-lg text-stone-600 dark:text-stone-300 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors"
             >
-              <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+              <Search className="w-5 h-5" />
             </Link>
 
-            {/* Bookmarks Link */}
-            <Link
-              to="/bookmarks"
-              aria-label="الدروس المحفوظة"
-              title="الدروس المحفوظة"
-              className={`relative p-2 sm:p-2.5 min-w-[38px] min-h-[38px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center rounded-xl transition-colors ${
-                location.pathname === '/bookmarks'
-                  ? 'bg-emerald-800 text-white shadow-xs'
-                  : 'text-stone-600 dark:text-stone-300 hover:text-emerald-800 dark:hover:text-amber-300 hover:bg-stone-200/60 dark:hover:bg-stone-800/60'
-              }`}
-            >
-              <Bookmark className={`w-4 h-4 sm:w-5 sm:h-5 ${bookmarkCount > 0 ? 'fill-amber-400 text-amber-500 dark:text-amber-400' : ''}`} />
-              {bookmarkCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-stone-950 font-mono text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs">
-                  {bookmarkCount > 9 ? '+9' : bookmarkCount}
-                </span>
-              )}
-            </Link>
+            <span className="hidden lg:inline-flex">
+              <ThemeToggle size="lg" />
+            </span>
 
-            {/* Dark Mode Toggle */}
-            <ThemeToggle />
-
-            {/* Admin / Control Panel Action Button */}
             <Link
               to="/admin"
-              rel="nofollow"
-              aria-label={isAdmin ? 'لوحة التحكم' : 'إدارة الموقع'}
-              title={isAdmin ? 'لوحة التحكم' : 'إدارة الموقع'}
-              className="inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-xl bg-emerald-900/90 hover:bg-emerald-800 text-amber-300 hover:text-amber-200 border border-amber-500/30 dark:border-amber-400/25 text-xs sm:text-sm font-semibold transition-all shadow-xs focus:outline-hidden focus:ring-2 focus:ring-amber-400/50 min-h-[38px] sm:min-h-[44px]"
+              aria-label="دخول الإدارة"
+              title="دخول الإدارة"
+              className="w-11 h-11 hidden sm:flex items-center justify-center rounded-lg text-stone-600 dark:text-stone-300 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors"
             >
-              {isAdmin ? (
-                <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
-              ) : (
-                <LogIn className="w-4 h-4 text-amber-400 shrink-0" />
-              )}
-              <span className="whitespace-nowrap hidden xs:inline">{isAdmin ? 'لوحة التحكم' : 'إدارة الموقع'}</span>
+              <LogIn className="w-5 h-5" />
             </Link>
 
-            {/* Mobile Menu Button */}
             <button
               type="button"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 min-w-[38px] min-h-[38px] flex items-center justify-center md:hidden rounded-xl text-stone-700 dark:text-stone-200 hover:bg-stone-200/60 dark:hover:bg-stone-800/60 focus:outline-none"
-              aria-label="القائمة"
+              onClick={() => setIsMobileMenuOpen((open) => !open)}
+              className="w-11 h-11 flex items-center justify-center lg:hidden rounded-lg text-stone-700 dark:text-stone-200"
+              aria-label={isMobileMenuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-menu"
             >
-              {isMobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown Drawer */}
+      {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-stone-200 dark:border-stone-800 bg-stone-50/95 dark:bg-stone-950/95 backdrop-blur-lg px-4 pt-3 pb-6 space-y-2.5 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
-          {navLinks.map((item) => {
-            if (item.path.startsWith('/#')) {
-              return (
-                <a
-                  key={item.path}
-                  href={item.path}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center min-h-[44px] px-4 py-2.5 text-base font-semibold rounded-xl text-stone-700 dark:text-stone-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 active:bg-emerald-100 dark:active:bg-emerald-900/40 transition-colors"
-                >
-                  {item.label}
-                </a>
-              );
-            }
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center min-h-[44px] px-4 py-2.5 text-base font-semibold rounded-xl transition-colors ${
-                  isActive(item.path)
-                    ? 'bg-emerald-800 text-white shadow-sm'
-                    : 'text-stone-700 dark:text-stone-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 active:bg-emerald-100 dark:active:bg-emerald-900/40'
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-
-          <Link
-            to="/bookmarks"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className={`flex items-center justify-between min-h-[44px] px-4 py-2.5 text-base font-semibold rounded-xl transition-colors ${
-              location.pathname === '/bookmarks'
-                ? 'bg-emerald-800 text-white shadow-sm'
-                : 'text-stone-700 dark:text-stone-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 active:bg-emerald-100 dark:active:bg-emerald-900/40'
-            }`}
-          >
-            <span className="flex items-center gap-2">
-              <Bookmark className="w-4 h-4 text-amber-500 fill-amber-400/20" />
-              <span>الدروس المحفوظة</span>
-            </span>
-            {bookmarkCount > 0 && (
-              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500 text-stone-950">
-                {bookmarkCount}
-              </span>
-            )}
-          </Link>
-
-          <Link
-            to="/admin"
-            rel="nofollow"
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="flex items-center gap-2.5 min-h-[44px] px-4 py-2.5 text-base font-semibold rounded-xl text-amber-700 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-400/10 hover:bg-amber-500/20 dark:hover:bg-amber-400/20 border border-amber-500/20 dark:border-amber-400/20 pt-3 mt-2"
-          >
-            {isAdmin ? <ShieldCheck className="w-5 h-5 text-amber-500" /> : <LogIn className="w-5 h-5 text-amber-500" />}
-            <span>{isAdmin ? 'لوحة التحكم الإدارية' : 'إدارة الموقع'}</span>
-          </Link>
-        </div>
+        <nav
+          id="mobile-menu"
+          aria-label="القائمة الرئيسية"
+          className="lg:hidden bg-stone-100 dark:bg-stone-900 px-4 py-3 space-y-1"
+        >
+          {navLinks.map((item) => (
+            <Link
+              key={item.label}
+              to={item.to}
+              className="flex items-center min-h-[48px] px-3 rounded-lg text-base font-semibold text-stone-800 dark:text-stone-100"
+            >
+              {item.label}
+            </Link>
+          ))}
+          {/* On phones the admin sign-in lives here, so the top bar keeps room for the name */}
+          {!isAdmin && (
+            <Link
+              to="/admin"
+              className="sm:hidden flex items-center gap-2 min-h-[48px] px-3 rounded-lg text-base font-semibold text-stone-800 dark:text-stone-100"
+            >
+              <LogIn className="w-5 h-5" aria-hidden="true" />
+              دخول الإدارة
+            </Link>
+          )}
+          <div className="flex items-center justify-between min-h-[48px] px-3">
+            <span className="text-base font-semibold text-stone-800 dark:text-stone-100">المظهر</span>
+            <ThemeToggle size="lg" />
+          </div>
+        </nav>
       )}
     </header>
   );

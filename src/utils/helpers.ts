@@ -1,11 +1,13 @@
 /**
- * Arabic Ordinals generator for lesson numbers:
- * 1 -> الدرس الأول
- * 2 -> الدرس الثاني
- * ...
+ * Small formatting helpers shared by the public pages and the admin.
  */
-export function getArabicLessonOrdinal(num: number): string {
+
+/**
+ * "الدرس الأول", "الدرس الثاني"... for a lesson number
+ */
+export function getArabicLessonOrdinal(num: number | null | undefined): string {
   if (!num || isNaN(num)) return 'الدرس';
+
   const ordinals: Record<number, string> = {
     1: 'الدرس الأول',
     2: 'الدرس الثاني',
@@ -55,99 +57,42 @@ export function getArabicLessonOrdinal(num: number): string {
     100: 'الدرس المائة',
   };
 
-  if (ordinals[num]) {
-    return ordinals[num];
-  }
-
-  // Fallback for higher numbers
-  return `الدرس رقم ${num}`;
+  return ordinals[num] ? ordinals[num] : `الدرس رقم ${num}`;
 }
 
 /**
- * Converts any standard YouTube URL (watch?v=, youtu.be, shorts, embed) into an embeddable URL
- */
-export function getYouTubeEmbedUrl(url: string | null | undefined): string | null {
-  if (!url || typeof url !== 'string') return null;
-  const cleanUrl = url.trim();
-  if (!cleanUrl) return null;
-
-  try {
-    // Check if it's already an embed URL
-    if (cleanUrl.includes('youtube.com/embed/')) {
-      const match = cleanUrl.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/);
-      if (match && match[1]) {
-        return `https://www.youtube.com/embed/${match[1]}?rel=0`;
-      }
-      return cleanUrl;
-    }
-
-    // youtu.be/VIDEO_ID
-    const shortMatch = cleanUrl.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
-    if (shortMatch && shortMatch[1]) {
-      return `https://www.youtube.com/embed/${shortMatch[1]}?rel=0`;
-    }
-
-    // youtube.com/watch?v=VIDEO_ID
-    const watchMatch = cleanUrl.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
-    if (watchMatch && watchMatch[1]) {
-      return `https://www.youtube.com/embed/${watchMatch[1]}?rel=0`;
-    }
-
-    // youtube.com/shorts/VIDEO_ID
-    const shortsMatch = cleanUrl.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/);
-    if (shortsMatch && shortsMatch[1]) {
-      return `https://www.youtube.com/embed/${shortsMatch[1]}?rel=0`;
-    }
-
-    // Direct 11 character ID provided
-    if (/^[a-zA-Z0-9_-]{11}$/.test(cleanUrl)) {
-      return `https://www.youtube.com/embed/${cleanUrl}?rel=0`;
-    }
-  } catch {
-    return null;
-  }
-
-  return null;
-}
-
-/**
- * Format date in Arabic locale
+ * A date in Arabic: "٣ نوفمبر ٢٠٢٦"
  */
 export function formatArabicDate(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
   try {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
     return new Intl.DateTimeFormat('ar-EG', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    }).format(d);
+    }).format(date);
   } catch {
     return dateStr;
   }
 }
 
 /**
- * Formats seconds into MM:SS or HH:MM:SS
+ * Seconds as a clock: "05:30" or "1:05:30"
  */
 export function formatAudioTime(seconds: number): string {
   if (!seconds || isNaN(seconds) || seconds < 0) return '00:00';
-  const totalSecs = Math.floor(seconds);
-  const hrs = Math.floor(totalSecs / 3600);
-  const mins = Math.floor((totalSecs % 3600) / 60);
-  const secs = totalSecs % 60;
-
+  const total = Math.floor(seconds);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
   const pad = (n: number) => n.toString().padStart(2, '0');
-
-  if (hrs > 0) {
-    return `${hrs}:${pad(mins)}:${pad(secs)}`;
-  }
-  return `${pad(mins)}:${pad(secs)}`;
+  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
 }
 
 /**
- * Category Color Palette definitions for distinct visual organizing
+ * The colours a category can take in the admin (its badges, dots and cards)
  */
 export interface CategoryColorTheme {
   id: string;
@@ -161,7 +106,6 @@ export interface CategoryColorTheme {
   dot: string;
   iconBg: string;
   headerBg: string;
-  headerGradient: string;
 }
 
 export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
@@ -177,7 +121,6 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     dot: 'bg-emerald-500 dark:bg-emerald-400',
     iconBg: 'bg-emerald-100/80 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300',
     headerBg: 'bg-emerald-800 dark:bg-[#12281d]',
-    headerGradient: 'from-emerald-900 via-emerald-800 to-teal-900',
   },
   amber: {
     id: 'amber',
@@ -191,7 +134,6 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     dot: 'bg-amber-500 dark:bg-amber-400',
     iconBg: 'bg-amber-100/80 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
     headerBg: 'bg-amber-800 dark:bg-[#2b1f0c]',
-    headerGradient: 'from-amber-900 via-amber-800 to-stone-900',
   },
   sky: {
     id: 'sky',
@@ -205,7 +147,6 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     dot: 'bg-sky-500 dark:bg-sky-400',
     iconBg: 'bg-sky-100/80 text-sky-800 dark:bg-sky-900/50 dark:text-sky-300',
     headerBg: 'bg-sky-800 dark:bg-[#0c2233]',
-    headerGradient: 'from-sky-900 via-sky-800 to-cyan-950',
   },
   indigo: {
     id: 'indigo',
@@ -219,7 +160,6 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     dot: 'bg-indigo-500 dark:bg-indigo-400',
     iconBg: 'bg-indigo-100/80 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300',
     headerBg: 'bg-indigo-800 dark:bg-[#181a38]',
-    headerGradient: 'from-indigo-950 via-indigo-900 to-slate-900',
   },
   teal: {
     id: 'teal',
@@ -233,7 +173,6 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     dot: 'bg-teal-500 dark:bg-teal-400',
     iconBg: 'bg-teal-100/80 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300',
     headerBg: 'bg-teal-800 dark:bg-[#0d2624]',
-    headerGradient: 'from-teal-900 via-teal-800 to-emerald-950',
   },
   rose: {
     id: 'rose',
@@ -247,7 +186,6 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     dot: 'bg-rose-500 dark:bg-rose-400',
     iconBg: 'bg-rose-100/80 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300',
     headerBg: 'bg-rose-800 dark:bg-[#301019]',
-    headerGradient: 'from-rose-950 via-rose-900 to-stone-900',
   },
   violet: {
     id: 'violet',
@@ -261,7 +199,6 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     dot: 'bg-violet-500 dark:bg-violet-400',
     iconBg: 'bg-violet-100/80 text-violet-800 dark:bg-violet-900/50 dark:text-violet-300',
     headerBg: 'bg-violet-800 dark:bg-[#201236]',
-    headerGradient: 'from-violet-950 via-violet-900 to-indigo-950',
   },
   slate: {
     id: 'slate',
@@ -275,11 +212,10 @@ export const CATEGORY_PALETTES: Record<string, CategoryColorTheme> = {
     dot: 'bg-slate-500 dark:bg-slate-400',
     iconBg: 'bg-slate-100/80 text-slate-800 dark:bg-slate-800/60 dark:text-slate-300',
     headerBg: 'bg-slate-800 dark:bg-[#1a2128]',
-    headerGradient: 'from-slate-900 via-slate-800 to-stone-900',
   },
 };
 
-export function getCategoryColorTheme(colorKey?: string): CategoryColorTheme {
+export function getCategoryColorTheme(colorKey: string | null | undefined): CategoryColorTheme {
   if (colorKey && CATEGORY_PALETTES[colorKey]) {
     return CATEGORY_PALETTES[colorKey];
   }
@@ -287,9 +223,35 @@ export function getCategoryColorTheme(colorKey?: string): CategoryColorTheme {
 }
 
 /**
- * Formats a view count number in Arabic numerals/locale
+ * A number in Arabic-Indic digits: "١٢٣٤"
  */
-export function formatArabicViews(views?: number): string {
-  const count = typeof views === 'number' && !isNaN(views) ? views : 0;
-  return new Intl.NumberFormat('ar-EG').format(count);
+export function formatArabicViews(views: number | null | undefined): string {
+  const safe = typeof views === 'number' && !isNaN(views) ? views : 0;
+  return new Intl.NumberFormat('ar-EG').format(safe);
+}
+
+/**
+ * The grammatical forms of the words that are counted
+ */
+export const COUNT_FORMS = {
+  lesson: { one: 'درس واحد', two: 'درسان', few: 'دروس', many: 'درسًا' },
+  series: { one: 'سلسلة واحدة', two: 'سلسلتان', few: 'سلاسل', many: 'سلسلة' },
+  view: { one: 'مشاهدة واحدة', two: 'مشاهدتان', few: 'مشاهدات', many: 'مشاهدة' },
+};
+
+/**
+ * A counted noun with Arabic number agreement: "درس واحد" / "درسان" / "٥ دروس" / "١١ درسًا"
+ */
+export function formatArabicCount(
+  count: number,
+  forms: { one: string; two: string; few: string; many: string }
+): string {
+  const n = Math.max(0, Math.floor(count || 0));
+  if (n === 1) return forms.one;
+  if (n === 2) return forms.two;
+  const formatted = new Intl.NumberFormat('ar-EG').format(n);
+  const lastTwo = n % 100;
+  if (lastTwo >= 3 && lastTwo <= 10) return `${formatted} ${forms.few}`;
+  if (lastTwo >= 11 && lastTwo <= 99) return `${formatted} ${forms.many}`;
+  return `${formatted} ${forms.one.split(' ')[0]}`;
 }

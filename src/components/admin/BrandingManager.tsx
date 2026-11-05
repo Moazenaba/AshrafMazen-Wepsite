@@ -33,7 +33,6 @@ import type { SiteSettings, SocialLink, SocialPlatform } from '../../types';
 export const BrandingManager: React.FC = () => {
   // Banner Settings State
   const [settings, setSettings] = useState<SiteSettings>({
-    banner_prefix: 'الموقع الرسمي لفضيلة الشيخ',
     banner_name: 'أبو عبد الرحمن أشرف بن طه بن مازن',
     banner_logo_url: null,
   });
@@ -126,10 +125,9 @@ export const BrandingManager: React.FC = () => {
       });
     } catch (err: any) {
       console.error('Failed to upload logo:', err);
-      setDbIncomplete(true);
       setSettingsMessage({
         type: 'error',
-        text: 'تعذر رفع الشعار. تحقق من وجود مساحة التخزين "branding" في سوبر بيز.',
+        text: err?.message || 'تعذر رفع الشعار. حاول مرة أخرى.',
       });
     } finally {
       setUploadingLogo(false);
@@ -335,23 +333,6 @@ export const BrandingManager: React.FC = () => {
 
         <form onSubmit={handleSaveSettings} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Banner Prefix */}
-            <div>
-              <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
-                النص التمهيدي أعلى الاسم (اللقب / الصفة)
-              </label>
-              <input
-                type="text"
-                value={settings.banner_prefix}
-                onChange={(e) => setSettings({ ...settings, banner_prefix: e.target.value })}
-                placeholder="الموقع الرسمي لفضيلة الشيخ"
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:focus:ring-amber-400 transition-all"
-              />
-              <span className="text-[11px] text-stone-400 mt-1 block">
-                افتراضي: "الموقع الرسمي لفضيلة الشيخ"
-              </span>
-            </div>
-
             {/* Banner Full Name */}
             <div>
               <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
@@ -364,7 +345,7 @@ export const BrandingManager: React.FC = () => {
                 placeholder="أبو عبد الرحمن أشرف بن طه بن مازن"
                 className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:focus:ring-amber-400 transition-all font-ruqaa text-base"
               />
-              <span className="text-[11px] text-stone-400 mt-1 block">
+              <span className="text-xs text-stone-400 mt-1 block">
                 افتراضي: "أبو عبد الرحمن أشرف بن طه بن مازن"
               </span>
             </div>
@@ -397,7 +378,7 @@ export const BrandingManager: React.FC = () => {
                   <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 block">
                     الشعار الحالي مفعل
                   </span>
-                  <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate max-w-md font-mono">
+                  <p className="text-xs text-stone-500 dark:text-stone-400 truncate max-w-md font-mono">
                     {settings.banner_logo_url}
                   </p>
                 </div>
@@ -532,19 +513,6 @@ export const BrandingManager: React.FC = () => {
               </div>
             ) : (
               <div className="min-h-[80px] flex flex-col items-center justify-center py-2 relative z-10">
-                {settings.banner_prefix && (
-                  <div className="flex items-center justify-center gap-2 mb-1.5">
-                    <span className="w-8 h-px bg-amber-500/60" />
-                    <span
-                      className={`text-xs font-semibold ${
-                        previewTheme === 'dark' ? 'text-amber-400' : 'text-amber-800'
-                      }`}
-                    >
-                      {settings.banner_prefix}
-                    </span>
-                    <span className="w-8 h-px bg-amber-500/60" />
-                  </div>
-                )}
                 <h2
                   className={`font-ruqaa font-bold text-2xl sm:text-3xl ${
                     previewTheme === 'dark' ? 'text-emerald-100' : 'text-emerald-950'
@@ -552,11 +520,6 @@ export const BrandingManager: React.FC = () => {
                 >
                   {settings.banner_name || 'أبو عبد الرحمن أشرف بن طه بن مازن'}
                 </h2>
-                <div className="flex items-center justify-center gap-2 mt-1.5 text-amber-500">
-                  <span className="w-16 h-px bg-gradient-to-r from-transparent to-amber-500" />
-                  <span className="text-xs">✦</span>
-                  <span className="w-16 h-px bg-gradient-to-l from-transparent to-amber-500" />
-                </div>
               </div>
             )}
           </div>
@@ -647,7 +610,7 @@ export const BrandingManager: React.FC = () => {
                           >
                             <ArrowDown className="w-3.5 h-3.5" />
                           </button>
-                          <span className="font-mono text-[11px] text-stone-400 px-1">
+                          <span className="font-mono text-xs text-stone-400 px-1">
                             #{index + 1}
                           </span>
                         </div>
@@ -674,7 +637,7 @@ export const BrandingManager: React.FC = () => {
                           href={link.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-stone-600 dark:text-stone-300 hover:text-emerald-700 dark:hover:text-amber-400 font-mono text-[11px] inline-flex items-center gap-1.5 transition-colors"
+                          className="text-stone-600 dark:text-stone-300 hover:text-emerald-700 dark:hover:text-amber-400 font-mono text-xs inline-flex items-center gap-1.5 transition-colors"
                         >
                           <span className="truncate">{link.url}</span>
                           <ExternalLink className="w-3 h-3 shrink-0" />
@@ -686,7 +649,7 @@ export const BrandingManager: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleToggleActive(link)}
-                          className={`px-3 py-1 rounded-full text-[11px] font-bold transition-colors ${
+                          className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
                             link.is_active
                               ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300/40'
                               : 'bg-stone-200 text-stone-600 dark:bg-stone-800 dark:text-stone-400 border border-stone-300/40'
@@ -776,7 +739,7 @@ export const BrandingManager: React.FC = () => {
                           >
                             <IconComp className="w-3 h-3" />
                           </div>
-                          <span className="text-[11px] truncate w-full text-center">{config.name}</span>
+                          <span className="text-xs truncate w-full text-center">{config.name}</span>
                         </button>
                       );
                     })}
