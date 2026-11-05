@@ -35,7 +35,9 @@ export const BookView: React.FC = () => {
   useEffect(() => {
     if (!id) return;
     setLoading(true);
+    // A published book for everyone; failing that, a draft, which only an admin can read (a preview)
     getBook(id)
+      .then((found) => found ?? getBook(id, true).catch(() => null))
       .then(setBook)
       .catch(() => setBook(null))
       .finally(() => setLoading(false));
@@ -44,7 +46,7 @@ export const BookView: React.FC = () => {
   // Statistics: one view per visit, and the time the book is open and in view counts as reading time
   const [views, setViews] = useState<number | null>(null);
   useEffect(() => {
-    if (!book) return;
+    if (!book || book.status !== 'published') return;
     const key = `book:${book.id}`;
     trackView('read', key);
     let active = true;

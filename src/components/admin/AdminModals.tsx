@@ -4,6 +4,7 @@ import type { Category, Series, Lesson, LessonStatus, LessonChapter } from '../.
 import { CATEGORY_PALETTES } from '../../utils/helpers';
 import { parseChaptersText, formatChaptersText } from '../../utils/chapters';
 import { uploadAudioFile } from '../../services/dataService';
+import { getYouTubeId } from '../../lib/youtube';
 
 interface CategoryModalProps {
   isOpen: boolean;
@@ -391,7 +392,15 @@ interface LessonModalProps {
   seriesList: Series[];
   categories: Category[];
   initialData?: Lesson | null;
+  // A new lesson's starting values (for example from a visitor's suggestion); ignored when editing
+  prefill?: Partial<Lesson> | null;
+  // Every lesson, to number a new one after the last of its series and to refuse a number already taken
+  lessons?: Pick<Lesson, 'id' | 'series_id' | 'lesson_number'>[];
 }
+
+// The number after the last lesson of a series (1 for an empty series)
+const nextLessonNumber = (lessons: Pick<Lesson, 'series_id' | 'lesson_number'>[], seriesId: string) =>
+  lessons.filter((l) => l.series_id === seriesId).reduce((max, l) => Math.max(max, Number(l.lesson_number) || 0), 0) + 1;
 
 export const LessonModal: React.FC<LessonModalProps> = ({
   isOpen,
@@ -400,6 +409,8 @@ export const LessonModal: React.FC<LessonModalProps> = ({
   seriesList,
   categories,
   initialData,
+  prefill = null,
+  lessons = [],
 }) => {
   const [seriesId, setSeriesId] = useState('');
   const [lessonNumber, setLessonNumber] = useState<number>(1);
@@ -428,19 +439,21 @@ export const LessonModal: React.FC<LessonModalProps> = ({
       setFeatured(Boolean(initialData.featured));
       setStatus(initialData.status);
     } else {
+      const firstSeries = prefill?.series_id || seriesList[0]?.id || '';
       setChaptersText('');
       setFeatured(false);
-      setSeriesId(seriesList[0]?.id || '');
-      setLessonNumber(1);
-      setTitle('');
-      setYoutubeUrl('');
-      setAudioUrl('');
+      setSeriesId(firstSeries);
+      setLessonNumber(nextLessonNumber(lessons, firstSeries));
+      setTitle(prefill?.title || '');
+      setYoutubeUrl(prefill?.youtube_url || '');
+      setAudioUrl(prefill?.audio_url || '');
       setAudioInputType('url');
-      setTranscript('');
-      setStatus('published');
+      setTranscript(prefill?.transcript || '');
+      setStatus(prefill?.status || 'published');
     }
     setError('');
-  }, [initialData, isOpen, seriesList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData, isOpen, seriesList, prefill]);
 
   if (!isOpen) return null;
 
@@ -477,12 +490,26 @@ export const LessonModal: React.FC<LessonModalProps> = ({
       setError('يرجى اختيار السلسلة العلمية');
       return;
     }
+    const number = Number(lessonNumber) || 1;
+    const taken = lessons.find((l) => l.series_id === seriesId && Number(l.lesson_number) === number && l.id !== initialData?.id);
+    if (taken) {
+      setError(`رقم الدرس ${number} مستخدم في هذه السلسلة. الرقم التالي المتاح: ${nextLessonNumber(lessons, seriesId)}.`);
+      return;
+    }
+    if (youtubeUrl.trim() && !getYouTubeId(youtubeUrl)) {
+      setError('رابط يوتيوب غير صحيح. الصق رابط الفيديو كما يظهر في يوتيوب (youtube.com/watch?v=... أو youtu.be/...).');
+      return;
+    }
+    if (status === 'published' && !youtubeUrl.trim() && !audioUrl.trim() && !transcript.trim()) {
+      setError('لا يمكن نشر درس بلا فيديو ولا صوت ولا تفريغ. أضف واحداً منها، أو احفظه مسودة.');
+      return;
+    }
 
     try {
       setLoading(true);
       await onSave({
         series_id: seriesId,
-        lesson_number: Number(lessonNumber) || 1,
+        lesson_number: number,
         title: title.trim(),
         youtube_url: youtubeUrl.trim(),
         audio_url: audioUrl.trim(),
@@ -543,7 +570,11 @@ export const LessonModal: React.FC<LessonModalProps> = ({
                 <select
                   required
                   value={seriesId}
-                  onChange={(e) => setSeriesId(e.target.value)}
+                  onChange={(e) => {
+                    setSeriesId(e.target.value);
+                    // A new lesson follows the last lesson of the series it is moved to
+                    if (!initialData) setLessonNumber(nextLessonNumber(lessons, e.target.value));
+                  }}
                   className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-emerald-700 focus:outline-none"
                 >
                   {seriesList.map((s) => (
@@ -805,6 +836,8 @@ interface DeleteConfirmModalProps {
   message: string;
   onConfirm: () => Promise<void>;
   onClose: () => void;
+  // When set, the item cannot be deleted yet: the reason is shown and there is no confirm button
+  blocked?: boolean;
 }
 
 export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
@@ -813,16 +846,26 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   message,
   onConfirm,
   onClose,
+  blocked = false,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (isOpen) setError('');
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleConfirm = async () => {
     try {
       setLoading(true);
+      setError('');
       await onConfirm();
       onClose();
+    } catch (err: any) {
+      // The reason the delete failed stays in the window, next to the action that caused it
+      setError(err?.message || 'تعذّر الحذف. حاول مرة أخرى.');
     } finally {
       setLoading(false);
     }
@@ -844,6 +887,12 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
           </p>
         </div>
 
+        {error && (
+          <p role="alert" className="p-3 rounded-xl bg-red-50 dark:bg-red-950/50 text-sm text-red-700 dark:text-red-300 font-semibold text-center">
+            {error}
+          </p>
+        )}
+
         <div className="flex items-center justify-center gap-3 pt-4 border-t border-stone-100 dark:border-stone-800">
           <button
             type="button"
@@ -851,16 +900,16 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
             disabled={loading}
             className="px-5 py-2.5 rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 font-semibold text-sm"
           >
-            تراجع
+            {blocked ? 'حسناً' : 'تراجع'}
           </button>
-          <button
+          {!blocked && <button
             type="button"
             onClick={handleConfirm}
             disabled={loading}
             className="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-sm transition-colors disabled:opacity-50"
           >
             {loading ? 'جاري الحذف...' : 'تأكيد الحذف'}
-          </button>
+          </button>}
         </div>
       </div>
     </div>

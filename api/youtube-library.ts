@@ -2,10 +2,12 @@
 // The saved library (src/data/youtube-library.ts) is the base. Once every 6 hours this function asks
 // YouTube's RSS feeds for each playlist's newest videos, merges any new ones in, and keeps the result.
 // Visitors get the stored copy with CDN caching, so YouTube and the server see almost no load.
-import { YOUTUBE_LIBRARY, type LibraryPlaylist, type LibraryVideo } from '../src/data/youtube-library';
+import { YOUTUBE_LIBRARY, type LibraryPlaylist, type LibraryVideo } from '../src/data/youtube-library.js'; // Node on Vercel needs the extension
 
 const TTL_MS = 6 * 60 * 60 * 1000;
-let cache: { at: number; body: string } | null = null;
+// One stored library per set of admin-added playlists: adding or removing one builds a new library at once
+// instead of waiting for the 6 hours to pass. The site asks with ?p=<those playlist ids>, so the CDN copy changes too.
+const cache = new Map<string, { at: number; body: string }>();
 
 const decode = (text: string) =>
   text
@@ -63,9 +65,7 @@ async function extraPlaylists(): Promise<{ id: string; title: string }[]> {
   }
 }
 
-async function build(): Promise<string> {
-  const known = new Set(YOUTUBE_LIBRARY.map((p) => p.id));
-  const extras = (await extraPlaylists()).filter((p) => !known.has(p.id));
+async function build(extras: { id: string; title: string }[]): Promise<string> {
   const extraVideos = new Map<string, LibraryVideo[]>();
   await Promise.all(
     extras.map(async (playlist) => {
@@ -91,14 +91,20 @@ async function build(): Promise<string> {
 }
 
 export default async function handler(req: any, res: any) {
-  if (!cache || Date.now() - cache.at > TTL_MS) {
+  const known = new Set(YOUTUBE_LIBRARY.map((p) => p.id));
+  const extras = (await extraPlaylists()).filter((p) => !known.has(p.id));
+  const signature = extras.map((p) => `${p.id}:${p.title}`).sort().join('|');
+  let entry = cache.get(signature);
+  if (!entry || Date.now() - entry.at > TTL_MS) {
     try {
-      cache = { at: Date.now(), body: await build() };
+      entry = { at: Date.now(), body: await build(extras) };
+      if (cache.size > 20) cache.clear();
+      cache.set(signature, entry);
     } catch {
       // Keep the copy we already have; if there is none, the site shows its saved library
     }
   }
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Cache-Control', 's-maxage=21600, stale-while-revalidate=86400');
-  res.status(200).send(cache?.body ?? JSON.stringify({ updatedAt: null, playlists: YOUTUBE_LIBRARY }));
+  res.status(200).send(entry?.body ?? JSON.stringify({ updatedAt: null, playlists: YOUTUBE_LIBRARY }));
 }

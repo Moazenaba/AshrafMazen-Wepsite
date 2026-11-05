@@ -25,15 +25,24 @@ const STATUS_STYLE: Record<SubmissionStatus, string> = {
 };
 
 // The admin's "الطلبات" tab. Visitors cannot change anything on the site themselves: what they send waits here,
-// and only an approval acts on it. Accepting a suggested book adds it to the library; every other kind is
-// marked accepted and the admin makes the change in the matching tab.
-export const SubmissionsManager: React.FC<{ onCountChange?: (pending: number) => void }> = ({ onCountChange }) => {
+// and only an approval acts on it:
+//   - a suggested book is added to the library as a draft (the admin completes and publishes it there);
+//   - a suggested recording or video opens the lesson form, filled in; the request is accepted once that lesson is saved;
+//   - a correction or a removal links to the page concerned; the admin makes the change, then marks it done.
+export const SubmissionsManager: React.FC<{
+  onCountChange?: (pending: number) => void;
+  // Opens the lesson form filled in from this request; the dashboard marks the request accepted after the save
+  onCreateLesson?: (item: Submission) => void;
+  // Changes when the dashboard accepted a request itself, so the list reloads
+  refreshKey?: number;
+}> = ({ onCountChange, onCreateLesson, refreshKey = 0 }) => {
   const [filter, setFilter] = useState<SubmissionStatus>('pending');
   const [items, setItems] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [notice, setNotice] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -50,17 +59,26 @@ export const SubmissionsManager: React.FC<{ onCountChange?: (pending: number) =>
 
   useEffect(() => {
     load();
-  }, [load]);
+  }, [load, refreshKey]);
 
   const act = async (item: Submission, action: 'approve' | 'reject' | 'delete') => {
     try {
       setBusy(item.id);
       setError(null);
+      setNotice(null);
       if (action === 'delete') {
         await deleteSubmission(item.id);
       } else if (action === 'approve') {
+        if ((item.kind === 'audio' || item.kind === 'video') && onCreateLesson) {
+          // Nothing is accepted yet: the lesson form opens, and saving the lesson accepts the request
+          onCreateLesson(item);
+          return;
+        }
         if (item.kind === 'book') {
-          await createBook({ title: item.title, author: item.author, description: item.details, file_url: item.url, status: 'published' });
+          // The request's id becomes the book's id, so approving twice (after a failure) adds the book once.
+          // It starts as a draft: a visitor's link is often not a direct PDF, and it has no cover or category yet.
+          await createBook({ id: item.id, title: item.title, author: item.author, description: item.details, file_url: item.url, status: 'draft' });
+          setNotice(`أُضيف «${item.title}» إلى المكتبة كمسودة. افتحه من تبويب «المكتبة» وتأكد أن الرابط ملف PDF، ثم انشره.`);
         }
         await reviewSubmission(item.id, 'approved', notes[item.id] || '');
       } else {
@@ -103,6 +121,12 @@ export const SubmissionsManager: React.FC<{ onCountChange?: (pending: number) =>
           ))}
         </div>
       </div>
+
+      {notice && (
+        <p role="status" className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 text-sm font-semibold">
+          {notice}
+        </p>
+      )}
 
       {error && (
         <p role="alert" className="p-4 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-300 text-sm font-semibold">
@@ -148,6 +172,18 @@ export const SubmissionsManager: React.FC<{ onCountChange?: (pending: number) =>
                   ))}
                 </dl>
 
+                {item.target && /^(https?:\/\/|\/)/.test(item.target) && (
+                  <a
+                    href={item.target}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="inline-flex items-center gap-2 me-4 text-sm font-semibold text-emerald-800 dark:text-emerald-300 hover:underline"
+                  >
+                    <ExternalLink className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    افتح الصفحة المقصودة
+                  </a>
+                )}
+
                 {item.url && (
                   <a
                     href={item.url}
@@ -181,7 +217,11 @@ export const SubmissionsManager: React.FC<{ onCountChange?: (pending: number) =>
                         className="inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-sm font-semibold disabled:opacity-60"
                       >
                         {busy === item.id ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Check className="w-4 h-4" aria-hidden="true" />}
-                        {item.kind === 'book' ? 'قبول وإضافة للمكتبة' : 'قبول'}
+                        {item.kind === 'book'
+                          ? 'قبول وإضافته للمكتبة كمسودة'
+                          : item.kind === 'audio' || item.kind === 'video'
+                            ? 'قبول وإنشاء درس'
+                            : 'تم التنفيذ'}
                       </button>
                       <button
                         type="button"

@@ -59,6 +59,14 @@ export function applyOverrides(library: LibraryPlaylist[], o: YoutubeOverrides |
     .filter((p) => p.videos.length > 0);
 }
 
+// The playlists the admin added, as the backend's cache key: a new one gives a new address, so neither the
+// server's stored copy nor the CDN's can keep showing the library without it
+const extrasKey = (o: YoutubeOverrides | null) =>
+  (o?.extraPlaylists ?? [])
+    .map((p) => `${p.id}:${p.title}`)
+    .sort()
+    .join('|');
+
 // The library from the backend, which keeps it cached and up to date with YouTube's newest videos.
 // The bundled library is loaded alongside it and shown while the backend answers; if the backend is not
 // reachable (for example during local development), the bundled library stays.
@@ -75,18 +83,24 @@ function useRawLibrary(): LibraryPlaylist[] {
       })
       .catch(() => {});
 
-    fetch(LIBRARY_URL)
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data: { playlists?: LibraryPlaylist[] } | null) => {
-        if (!data?.playlists?.length) return;
-        cached = data.playlists;
-        fromBackend = true;
-        if (active) setLibrary(data.playlists);
-      })
-      .catch(() => {});
+    const fetchLibrary = () =>
+      loadOverrides()
+        .then(() => fetch(`${LIBRARY_URL}?p=${encodeURIComponent(extrasKey(overrides))}`))
+        .then((response) => (response.ok ? response.json() : null))
+        .then((data: { playlists?: LibraryPlaylist[] } | null) => {
+          if (!data?.playlists?.length) return;
+          cached = data.playlists;
+          fromBackend = true;
+          if (active) setLibrary(data.playlists);
+        })
+        .catch(() => {});
 
+    fetchLibrary();
+    // The admin saved new settings (perhaps a new playlist): ask again with the new key
+    window.addEventListener(OVERRIDES_EVENT, fetchLibrary);
     return () => {
       active = false;
+      window.removeEventListener(OVERRIDES_EVENT, fetchLibrary);
     };
   }, []);
 
