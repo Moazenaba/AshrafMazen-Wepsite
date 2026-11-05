@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getActiveSocialLinks, type SocialLink } from '../services/dataService';
 import { SocialIcons } from './SocialIcons';
-
-const CONTACT_EMAIL = 'info@sheikh-mazen.org';
+import { useSiteContent } from '../hooks/useSiteContent';
+import { phoneLink } from '../services/data/siteContentRules';
 
 // A short close: the name, where to go next, how to reach the sheikh, and the closing du'a.
 export const Footer: React.FC = () => {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const { content } = useSiteContent();
+  const { email, phone, copyright, dua } = content.contact;
 
   useEffect(() => {
     getActiveSocialLinks()
@@ -53,14 +55,21 @@ export const Footer: React.FC = () => {
           <Link to="/bookmarks" className={linkClass}>
             المحفوظات
           </Link>
-          <a href={`mailto:${CONTACT_EMAIL}`} className={linkClass} dir="ltr">
-            {CONTACT_EMAIL}
-          </a>
+          {email && (
+            <a href={`mailto:${email}`} className={linkClass} dir="ltr">
+              {email}
+            </a>
+          )}
+          {phone && (
+            <a href={`tel:${phoneLink(phone)}`} className={linkClass} dir="ltr">
+              {phone}
+            </a>
+          )}
         </nav>
 
         <div className="flex flex-col sm:flex-row justify-between gap-2 pt-4 text-emerald-100/85">
-          <p>© {new Intl.NumberFormat('ar-EG', { useGrouping: false }).format(new Date().getFullYear())} جميع المواد العلمية متاحة للنشر في سبيل الله.</p>
-          <p className="text-amber-200">نسأل الله الإخلاص والقبول في القول والعمل</p>
+          {copyright && <p>© {new Intl.NumberFormat('ar-EG', { useGrouping: false }).format(new Date().getFullYear())} {copyright}</p>}
+          {dua && <p className="text-amber-200">{dua}</p>}
         </div>
       </div>
     </footer>

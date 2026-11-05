@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2, Layers, Eye } from 'lucide-react';
 import { getCategoryColorTheme } from '../../../utils/helpers';
 import { type Category, type Series } from '../../../types';
 import { type LessonAdminItem } from './types';
+import { MoveButtons } from '../../../components/admin/MoveButtons';
 
 interface SeriesTabProps {
   seriesList: Series[];
@@ -12,9 +13,12 @@ interface SeriesTabProps {
   onAdd: () => void;
   onEdit: (series: Series) => void;
   onDelete: (series: Series) => void;
+  onMove: (series: Series, step: -1 | 1) => void;
+  canMove: (series: Series, step: -1 | 1) => boolean;
+  moving?: boolean;
 }
 
-export const SeriesTab: React.FC<SeriesTabProps> = ({ seriesList, categories, lessons, onAdd, onEdit, onDelete }) => {
+export const SeriesTab: React.FC<SeriesTabProps> = ({ seriesList, categories, lessons, onAdd, onEdit, onDelete, onMove, canMove, moving }) => {
   return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -101,6 +105,7 @@ export const SeriesTab: React.FC<SeriesTabProps> = ({ seriesList, categories, le
                     </Link>
 
                     <div className="flex items-center gap-1">
+                      <MoveButtons name={series.title} canUp={canMove(series, -1)} canDown={canMove(series, 1)} busy={moving} onMove={(step) => onMove(series, step)} />
                       <button
                         type="button"
                         onClick={() => onEdit(series)}

@@ -1,7 +1,9 @@
 // The admin's library tab: every book with its status, and the window to add, edit or remove one.
 import React, { useCallback, useEffect, useState } from 'react';
 import { BookOpen, Edit3, ExternalLink, Loader2, Plus, Trash2 } from 'lucide-react';
-import { deleteBook, getAllBooksAdmin, type BookWithCategory } from '../../services/dataService';
+import { deleteBook, getAllBooksAdmin, updateBook, type BookWithCategory } from '../../services/dataService';
+import { useReorder } from '../../pages/admin/dashboard/hooks/useReorder';
+import { MoveButtons } from './MoveButtons';
 import { type Category } from '../../types';
 import { BookCover } from '../BookCover';
 import { BookModal } from './books/BookModal';
@@ -33,6 +35,8 @@ export const BooksManager: React.FC<{ categories: Category[]; onCountChange?: (c
   useEffect(() => {
     load();
   }, [load]);
+
+  const order = useReorder({ items: books, save: (id, sort_order) => updateBook(id, { sort_order }), reload: load });
 
   const confirmDelete = async () => {
     if (!deleting) return;
@@ -103,6 +107,7 @@ export const BooksManager: React.FC<{ categories: Category[]; onCountChange?: (c
                 </span>
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                <MoveButtons name={book.title} canUp={order.canMove(book, -1)} canDown={order.canMove(book, 1)} busy={order.busy} onMove={(step) => order.move(book, step)} />
                 <a href={book.file_url} target="_blank" rel="noopener noreferrer" aria-label={`فتح ملف ${book.title}`} title="فتح الملف" className="w-10 h-10 flex items-center justify-center rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800">
                   <ExternalLink className="w-4 h-4" aria-hidden="true" />
                 </a>

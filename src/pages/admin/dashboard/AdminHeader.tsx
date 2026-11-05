@@ -24,6 +24,7 @@ const tabLabels = (c: HeaderCounts): { id: AdminTab; label: string }[] => [
   { id: 'series', label: `إدارة السلاسل (${c.series})` },
   { id: 'categories', label: `إدارة الأقسام (${c.categories})` },
   { id: 'books', label: `المكتبة${c.books !== null ? ` (${c.books})` : ''}` },
+  { id: 'quotes', label: 'الأحاديث والأقوال' },
   { id: 'branding', label: 'إدارة الواجهة والتواصل' },
   { id: 'system', label: 'البيانات والتكامل' },
 ];
