@@ -1,9 +1,12 @@
 // Admin: create, update and delete lessons (and their recordings on R2).
+import type { LessonWithRelations } from './shared';
+import { attachRelations } from './relations';
+import { rowsOrThrow } from './db';
 import { supabase } from '../../lib/supabase';
 import { translateSupabaseError } from '../../utils/supabaseErrors';
 import { deleteFromR2, isR2Url } from '../r2';
 import type { Lesson } from '../../types';
-import { lessonRow, saveLessonExtras } from './extras';
+import { lessonRow, readLessonExtras, saveLessonExtras, withExtras } from './extras';
 
 // Lessons CRUD
 export async function createLesson(lessonData: Partial<Lesson>): Promise<Lesson> {
@@ -87,4 +90,11 @@ export async function deleteLesson(id: string): Promise<boolean> {
     console.error('Lesson extras were not cleared:', err);
   }
   return true;
+}
+
+// Every lesson, drafts included, with its series, category, featured flag and chapters
+export async function getAllLessonsAdmin(): Promise<LessonWithRelations[]> {
+  const lessons = rowsOrThrow<Lesson>(await supabase.from('lessons').select('*').order('lesson_number', { ascending: true }));
+  const extras = await readLessonExtras();
+  return (await attachRelations(lessons)).map((l) => withExtras(l, extras));
 }

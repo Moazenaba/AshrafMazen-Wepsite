@@ -30,21 +30,32 @@ Admin screens without a login: run `npm run dev`, open `/dev/admin` (fake in-mem
 ```
 api/            Vercel functions: submit.ts (visitor requests), r2.ts + _r2.ts (file links/upload/delete), youtube-library.ts
                 imports inside api/ need the ".js" extension (Node on Vercel)
-src/services/   dataService.ts = barrel. Real code in data/: shared(types, slugify) extras catalog lessons catalogAdmin
-                lessonsAdmin audio books youtube submissions auth settings social
+src/App.tsx     the shell only (theme, audio, top bar, footer). hooks/ (useScrollToHash, useScrollReveal, useVersionReload,
+                usePageAnalytics) · routes/ (AppRoutes, lazyPages)
+src/services/   dataService.ts = barrel over data/: db (rows helper) shared extras catalog relations lessons lessonLists
+                lessonSearch portal lessonsAdmin catalogAdmin audio audioUpload books youtube submissions auth settings social
                 analytics.ts (views, watch time) · r2.ts (upload/delete in browser) · bookmarkService · progressService
-src/pages/      One file per route. Big pages keep their parts in a folder beside them:
-                lesson/ (useLessonData, ChapterList, ReadingNow, AutoNextBanner, LessonNav, SeriesLessonsList, seo)
-                home/ (Panel, LessonRow, ContentKinds, FeaturedCard, ContinueCard)
-                admin/AdminDashboard.tsx + admin/dashboard/ (AdminHeader, LessonsTab, SeriesTab, CategoriesTab,
-                ChangePasswordModal, types) · admin/AdminLogin · AdminResetPassword · AdminPage (auth gate)
-src/components/ shared UI. admin/: modals/ (Category, Series, Lesson, DeleteConfirm), branding/ (BannerSettings, SocialLinks),
+src/pages/      One file per route; a big page keeps its parts in a folder beside it, split as hooks (behaviour) + components (view):
+                lesson/ (useLessonData, useLessonTabs, useLessonPlayback, useTranscriptReading, useTranscriptFont, useShare,
+                  useLessonSeo, siblings, seo + LessonHeader, LessonMediaPanel, TranscriptPanel, ChapterList, ReadingNow,
+                  AutoNextBanner, LessonNav, SeriesLessonsList, LessonStates)
+                home/ (useHomeData, placeLessons, latestFeed, sermons, todayLine + HeroSection, FeaturedColumn, SciencesColumn,
+                  SideColumn, ChannelPlaylists, AboutSection, Panel, cards)
+                admin/AdminDashboard.tsx (composition only) + admin/dashboard/ (hooks/: useAdminData, useEditor, useDeleteConfirm,
+                  useSubmissionsBadge, useCategoryActions, useSeriesActions, useLessonActions; AdminHeader, tabs, DataErrorBanner,
+                  SystemTab, ChangePasswordModal) · AdminLogin · AdminResetPassword · AdminPage (auth gate)
+src/components/ shared UI. admin/: modals/ (Category, Series, DeleteConfirm, Lesson + lesson/ = lessonForm rules, useLessonForm,
+                field groups), branding/ (BannerSettings, SocialLinks + their windows), books/ (BookModal), stats/ (useStats, format),
                 BooksManager, SubmissionsManager, YoutubeManager, StatsPanel, SystemStatus
 src/lib/        supabase client, youtube helpers, youtubeLibrary (bundled + live + admin overrides)
-src/utils/      helpers (Arabic numbers/dates, category colors, normalizeArabic), chapters, supabaseErrors
+src/utils/      helpers.ts = barrel: arabicNumbers, timeFormat, categoryTheme, arabicSearch; chapters, supabaseErrors
 src/dev/        AdminHarness (fake data for /dev/admin)
 docs/           migrations/ (run in order, see its README), TROUBLESHOOTING.md, audit/03-logic-review.md (open issues)
 ```
+
+Design rules used here: one responsibility per file; screens get data and actions from hooks and only render;
+rules that must be tested without a screen are plain functions (for example `lessonForm.ts`, `placeLessons.ts`);
+a component receives only the props it uses; the same query/attach logic is written once (`db.ts`, `relations.ts`).
 
 ## Where to change what
 
