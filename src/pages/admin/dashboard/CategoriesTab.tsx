@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Plus, Edit2, Trash2, Layers, Eye } from 'lucide-react';
 import { getCategoryColorTheme } from '../../../utils/helpers';
 import { type Category, type Series } from '../../../types';
+import { MoveButtons } from '../../../components/admin/MoveButtons';
 
 interface CategoriesTabProps {
   categories: Category[];
@@ -10,9 +11,12 @@ interface CategoriesTabProps {
   onAdd: () => void;
   onEdit: (category: Category) => void;
   onDelete: (category: Category) => void;
+  onMove: (category: Category, step: -1 | 1) => void;
+  canMove: (category: Category, step: -1 | 1) => boolean;
+  moving?: boolean;
 }
 
-export const CategoriesTab: React.FC<CategoriesTabProps> = ({ categories, seriesList, onAdd, onEdit, onDelete }) => {
+export const CategoriesTab: React.FC<CategoriesTabProps> = ({ categories, seriesList, onAdd, onEdit, onDelete, onMove, canMove, moving }) => {
   return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -91,6 +95,7 @@ export const CategoriesTab: React.FC<CategoriesTabProps> = ({ categories, series
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="flex items-center justify-center gap-2">
+                        <MoveButtons name={cat.name} canUp={canMove(cat, -1)} canDown={canMove(cat, 1)} busy={moving} onMove={(step) => onMove(cat, step)} />
                         <Link
                           to={`/category/${cat.slug}`}
                           target="_blank"

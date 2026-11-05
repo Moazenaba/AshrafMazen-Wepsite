@@ -2,7 +2,7 @@
 // This file only puts the pieces together; behaviour is in ./dashboard/hooks, screens in ./dashboard and components/admin.
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { logout } from '../../services/dataService';
+import { logout, updateCategory, updateSeries } from '../../services/dataService';
 import { CategoryModal, SeriesModal, LessonModal, DeleteConfirmModal } from '../../components/admin/AdminModals';
 import { BrandingManager } from '../../components/admin/BrandingManager';
 import { BooksManager } from '../../components/admin/BooksManager';
@@ -11,6 +11,8 @@ import { SubmissionsManager } from '../../components/admin/SubmissionsManager';
 import { YoutubeManager } from '../../components/admin/YoutubeManager';
 import type { AdminUser, Category, Series } from '../../types';
 import { AdminHeader } from './dashboard/AdminHeader';
+import { useReorder } from './dashboard/hooks/useReorder';
+import { QuotesManager } from '../../components/admin/QuotesManager';
 import { CategoriesTab } from './dashboard/CategoriesTab';
 import { ChangePasswordModal } from './dashboard/ChangePasswordModal';
 import { DataErrorBanner } from './dashboard/DataErrorBanner';
@@ -48,6 +50,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
 
   // What saving and deleting do for each kind of item
   const categoryActions = useCategoryActions({ editor: categoryEditor, series: seriesList, ask: deleteConfirm.ask, reload });
+  const categoryOrder = useReorder({ items: categories, save: (id, sort_order) => updateCategory(id, { sort_order }), reload });
+  const seriesOrder = useReorder({ items: seriesList, groupOf: (s) => s.category_id, save: (id, sort_order) => updateSeries(id, { sort_order }), reload });
   const seriesActions = useSeriesActions({ editor: seriesEditor, lessons, ask: deleteConfirm.ask, reload });
   const lessonActions = useLessonActions({ ask: deleteConfirm.ask, reload, onRequestAccepted: requests.markHandled });
 
@@ -102,6 +106,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
             onAdd={seriesEditor.openNew}
             onEdit={seriesEditor.openEdit}
             onDelete={seriesActions.requestDelete}
+            onMove={seriesOrder.move}
+            canMove={seriesOrder.canMove}
+            moving={seriesOrder.busy}
           />
         )}
 
@@ -112,6 +119,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
             onAdd={categoryEditor.openNew}
             onEdit={categoryEditor.openEdit}
             onDelete={categoryActions.requestDelete}
+            onMove={categoryOrder.move}
+            canMove={categoryOrder.canMove}
+            moving={categoryOrder.busy}
           />
         )}
 
@@ -122,6 +132,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
         {activeTab === 'videos' && <YoutubeManager />}
 
         {activeTab === 'books' && <BooksManager categories={categories} onCountChange={setBooksCount} />}
+
+        {activeTab === 'quotes' && <QuotesManager />}
 
         {activeTab === 'branding' && <BrandingManager />}
 

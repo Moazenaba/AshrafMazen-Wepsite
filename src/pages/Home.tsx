@@ -5,7 +5,7 @@ import { getLessonProgress, getResumeSeconds } from '../services/progressService
 import { getRecentLesson } from '../services/recentLessonService';
 import { useYoutubeLibrary } from '../lib/youtubeLibrary';
 import { QuoteTicker } from '../components/QuoteTicker';
-import { TICKER_QUOTES } from '../constants/tickerQuotes';
+import { useSiteContent } from '../hooks/useSiteContent';
 import { HeroSection } from './home/HeroSection';
 import { FeaturedColumn } from './home/FeaturedColumn';
 import { SciencesColumn } from './home/SciencesColumn';
@@ -21,6 +21,7 @@ import { useHomeData } from './home/useHomeData';
 export const Home: React.FC = () => {
   const library = useYoutubeLibrary();
   const { categories, featuredList, latestList, viewedList, sermonList, settings } = useHomeData();
+  const { content, loaded } = useSiteContent();
   const [recentLesson] = useState(getRecentLesson);
 
   const placed = useMemo(
@@ -40,13 +41,15 @@ export const Home: React.FC = () => {
   return (
     <div className="pb-8 sm:pb-20">
       {/* The hero: the name, and beneath it one hadith set in the script of the books of knowledge */}
-      <HeroSection displayName={displayName} todayLine={todayLine()} />
+      <HeroSection displayName={displayName} todayLine={todayLine()} hero={content.hero} />
 
       {/* The quotes stay pinned under the top bar while the page scrolls, full width.
           On a short screen (a phone held sideways) they scroll away, so the pinned bars never fill the view */}
-      <div className="sticky [@media(max-height:500px)]:static top-16 sm:top-[72px] z-30 bg-stone-50 dark:bg-stone-950 px-4 sm:px-6 lg:px-8 pt-1 pb-2 sm:py-2">
-        <QuoteTicker items={TICKER_QUOTES} />
-      </div>
+      {loaded && content.quotes.length > 0 && (
+        <div className="sticky [@media(max-height:500px)]:static top-16 sm:top-[72px] z-30 bg-stone-50 dark:bg-stone-950 px-4 sm:px-6 lg:px-8 pt-1 pb-2 sm:py-2">
+          <QuoteTicker items={content.quotes} />
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
