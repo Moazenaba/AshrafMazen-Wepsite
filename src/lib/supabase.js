@@ -30,17 +30,11 @@ if (!isConfigured) {
   );
 }
 
-// In browser and iframe environments, direct cross-origin calls to *.supabase.co
-// can be blocked by browser iframe sandboxing, strict CSP, ad-blockers, or regional ISP filtering.
-// We maintain a resilient fetch that automatically falls back to our same-origin /supabase-proxy.
+// In development, direct calls to *.supabase.co can be blocked (iframe previews, ad-blockers), so a failed call is
+// retried through the dev server's same-origin /supabase-proxy (vite.config.ts). That proxy exists only in
+// development: on the deployed site /supabase-proxy is answered by index.html, so there the fallback stays off.
+const PROXY_AVAILABLE = Boolean(import.meta.env.DEV);
 let useProxyFallback = false;
-
-// Quick non-blocking probe to test if direct connection works in this client
-if (typeof window !== 'undefined' && supabaseUrl) {
-  fetch(`${supabaseUrl}/rest/v1/`, { method: 'HEAD', mode: 'no-cors' }).catch(() => {
-    useProxyFallback = true;
-  });
-}
 
 /**
  * Resilient fetch function for Supabase client
@@ -56,7 +50,7 @@ async function resilientFetch(input, init) {
       : '';
 
   // If already flagged to use proxy fallback for Supabase endpoints
-  if (useProxyFallback && supabaseUrl && urlStr.startsWith(supabaseUrl)) {
+  if (PROXY_AVAILABLE && useProxyFallback && supabaseUrl && urlStr.startsWith(supabaseUrl)) {
     const proxyUrl = urlStr.replace(supabaseUrl, '/supabase-proxy');
     return fetch(proxyUrl, init);
   }
@@ -73,7 +67,7 @@ async function resilientFetch(input, init) {
     return await fetch(input, init);
   } catch (err) {
     // If direct fetch throws TypeError: Failed to fetch (network error, CORS, or iframe block)
-    if (supabaseUrl && urlStr.startsWith(supabaseUrl)) {
+    if (PROXY_AVAILABLE && supabaseUrl && urlStr.startsWith(supabaseUrl)) {
       useProxyFallback = true;
       const proxyUrl = urlStr.replace(supabaseUrl, '/supabase-proxy');
       console.warn(

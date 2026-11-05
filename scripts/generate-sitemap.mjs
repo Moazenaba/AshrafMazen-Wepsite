@@ -86,6 +86,9 @@ function readChannelLibrary() {
 
 // The books list is one JSON record in site_settings (see dataService.ts)
 async function readBooks() {
+  // Published books only, through the function visitors use (the record itself is admin-only after the security migration)
+  const published = await supabase.rpc('published_books');
+  if (!published.error) return Array.isArray(published.data) ? published.data : [];
   const { data } = await supabase.from('site_settings').select('value').eq('key', 'library_books').maybeSingle();
   try {
     const list = JSON.parse(data?.value || '[]');

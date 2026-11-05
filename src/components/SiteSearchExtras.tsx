@@ -4,17 +4,11 @@ import { useYoutubeLibrary } from '../lib/youtubeLibrary';
 import { getPublishedBooks, type BookWithCategory } from '../services/dataService';
 import { LessonThumb } from './LessonThumb';
 import { BookCover } from './BookCover';
+import { normalizeArabic } from '../utils/helpers';
 
 const MAX_VIDEOS = 24;
 
-// Arabic search ignores the marks above and below letters and the stretching line, so "الأصول" finds "الاصول"
-const normalize = (text: string) =>
-  text
-    .replace(/[ً-ْـ]/g, '')
-    .replace(/[أإآ]/g, 'ا')
-    .replace(/ى/g, 'ي')
-    .replace(/ة/g, 'ه')
-    .toLowerCase();
+const normalize = normalizeArabic;
 
 // Search results beyond the lessons: the channel's videos and the library's books, found by the same words
 export const SiteSearchExtras: React.FC<{ query: string; highlight: (text: string, q: string) => React.ReactNode }> = ({ query, highlight }) => {

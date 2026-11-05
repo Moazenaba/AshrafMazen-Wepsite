@@ -39,8 +39,11 @@ import {
   updateLesson,
   deleteLesson,
   updateUserPassword,
-  logout
+  reviewSubmission,
+  logout,
+  type Submission,
 } from '../../services/dataService';
+import { getYouTubeId } from '../../lib/youtube';
 import { formatArabicDate, getArabicLessonOrdinal, getCategoryColorTheme } from '../../utils/helpers';
 import { CategoryModal, SeriesModal, LessonModal, DeleteConfirmModal } from '../../components/admin/AdminModals';
 import { BrandingManager } from '../../components/admin/BrandingManager';
@@ -92,12 +95,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
 
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
+  // A lesson started from a visitor's suggestion: its values, and the request to accept once it is saved
+  const [lessonPrefill, setLessonPrefill] = useState<Partial<Lesson> | null>(null);
+  const [fromSubmission, setFromSubmission] = useState<string | null>(null);
+  const [submissionsRefresh, setSubmissionsRefresh] = useState(0);
+
+  const openLessonFromSubmission = (item: Submission) => {
+    const isYoutube = !!getYouTubeId(item.url);
+    setEditingLesson(null);
+    setLessonPrefill({
+      title: item.title,
+      youtube_url: item.kind === 'video' || isYoutube ? item.url : '',
+      audio_url: item.kind === 'audio' && !isYoutube ? item.url : '',
+      transcript: '',
+      status: 'draft',
+    });
+    setFromSubmission(item.id);
+    setIsLessonModalOpen(true);
+  };
+
+  const closeLessonModal = () => {
+    setIsLessonModalOpen(false);
+    setLessonPrefill(null);
+    setFromSubmission(null);
+  };
 
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     title: string;
     message: string;
     onConfirm: () => Promise<void>;
+    blocked?: boolean;
   }>({
     isOpen: false,
     title: '',
@@ -131,7 +159,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
       setLessons(allLessons);
     } catch (err: any) {
       console.error('Error fetching admin data:', err);
-      setDbError('إعداد قاعدة البيانات غير مكتمل');
+      setDbError(err?.message || 'تعذّر تحميل البيانات من قاعدة البيانات.');
     } finally {
       setLoading(false);
     }
@@ -203,7 +231,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
       await loadAllData();
     } catch (err: any) {
       console.error('handleSaveCategory error:', err);
-      setDbError('إعداد قاعدة البيانات غير مكتمل');
       throw err;
     }
   };
@@ -214,15 +241,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
       isOpen: true,
       title: `حذف قسم "${cat.name}"`,
       message: hasSeries
-        ? 'تحذير: هذا القسم يحتوي على سلاسل علمية مرتبطة به. هل أنت متأكد من الحذف؟'
+        ? 'لا يمكن حذف هذا القسم لأنه يحتوي على سلاسل علمية. احذف السلاسل أو انقلها إلى قسم آخر أولاً.'
         : 'هل أنت متأكد من رغبتك في حذف هذا القسم؟ لن يمكن استرجاعه.',
+      blocked: hasSeries,
       onConfirm: async () => {
         try {
           await deleteCategory(cat.id);
           await loadAllData();
         } catch (err: any) {
           console.error('handleDeleteCategory error:', err);
-          setDbError('إعداد قاعدة البيانات غير مكتمل');
           throw err;
         }
       },
@@ -246,7 +273,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
       await loadAllData();
     } catch (err: any) {
       console.error('handleSaveSeries error:', err);
-      setDbError('إعداد قاعدة البيانات غير مكتمل');
       throw err;
     }
   };
@@ -257,15 +283,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
       isOpen: true,
       title: `حذف سلسلة "${series.title}"`,
       message: hasLessons
-        ? 'تحذير: هذه السلسلة تحتوي على دروس علمية مرتبطة بها. هل أنت متأكد من الحذف؟'
+        ? 'لا يمكن حذف هذه السلسلة لأنها تحتوي على دروس. احذف الدروس أو انقلها إلى سلسلة أخرى أولاً.'
         : 'هل أنت متأكد من رغبتك في حذف هذه السلسلة العلمية؟',
+      blocked: hasLessons,
       onConfirm: async () => {
         try {
           await deleteSeries(series.id);
           await loadAllData();
         } catch (err: any) {
           console.error('handleDeleteSeries error:', err);
-          setDbError('إعداد قاعدة البيانات غير مكتمل');
           throw err;
         }
       },
@@ -289,11 +315,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
         await updateLesson(editingLesson.id, data);
       } else {
         await createLesson(data);
+        if (fromSubmission) {
+          await reviewSubmission(fromSubmission, 'approved', 'أُنشئ منه درس');
+          setSubmissionsRefresh((n) => n + 1);
+          getPendingSubmissionsCount().then(setPendingRequests).catch(() => {});
+        }
       }
       await loadAllData();
     } catch (err: any) {
       console.error('handleSaveLesson error:', err);
-      setDbError('إعداد قاعدة البيانات غير مكتمل');
       throw err;
     }
   };
@@ -302,6 +332,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
     setDeleteModal({
       isOpen: true,
       title: `حذف درس "${lesson.title}"`,
+      blocked: false,
       message: 'هل أنت متأكد من رغبتك في حذف هذا الدرس نهائياً؟',
       onConfirm: async () => {
         try {
@@ -309,7 +340,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
           await loadAllData();
         } catch (err: any) {
           console.error('handleDeleteLesson error:', err);
-          setDbError('إعداد قاعدة البيانات غير مكتمل');
           throw err;
         }
       },
@@ -341,7 +371,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
           <div className="flex items-center gap-2 w-full w-full">
             <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
             <span>
-              <strong>إعداد قاعدة البيانات غير مكتمل:</strong> يرجى التأكد من إنشاء الجداول المطلوبة وتفعيل سياسات الأمان أو مراجعة الاتصال.
+              <strong>تعذّر تحميل بيانات اللوحة:</strong> {dbError}
             </span>
           </div>
           <button
@@ -718,11 +748,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
                           </td>
                           <td className="py-3.5 px-4">
                             <div className="flex items-center justify-center gap-2">
-                              {lesson.status === 'published' && (
+                              {(
                                 <Link
                                   to={`/lesson/${lesson.id}`}
                                   target="_blank"
-                                  title="معاينة في الموقع"
+                                  title={lesson.status === 'published' ? 'معاينة في الموقع' : 'معاينة المسودة (لا يراها الزوار)'}
                                   className="p-1.5 rounded-lg text-stone-500 hover:text-emerald-800 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-800"
                                 >
                                   <Eye className="w-4 h-4" />
@@ -1013,7 +1043,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
         {/* ========================================================================= */}
         {activeTab === 'stats' && <StatsPanel lessons={lessons} />}
 
-        {activeTab === 'requests' && <SubmissionsManager onCountChange={setPendingRequests} />}
+        {activeTab === 'requests' && <SubmissionsManager onCountChange={setPendingRequests} onCreateLesson={openLessonFromSubmission} refreshKey={submissionsRefresh} />}
 
         {activeTab === 'videos' && <YoutubeManager />}
 
@@ -1075,11 +1105,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
 
       <LessonModal
         isOpen={isLessonModalOpen}
-        onClose={() => setIsLessonModalOpen(false)}
+        onClose={closeLessonModal}
         onSave={handleSaveLesson}
         seriesList={seriesList}
         categories={categories}
         initialData={editingLesson}
+        prefill={lessonPrefill}
+        lessons={lessons}
       />
 
       <DeleteConfirmModal
@@ -1087,6 +1119,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
         title={deleteModal.title}
         message={deleteModal.message}
         onConfirm={deleteModal.onConfirm}
+        blocked={deleteModal.blocked}
         onClose={() => setDeleteModal((prev) => ({ ...prev, isOpen: false }))}
       />
 

@@ -82,7 +82,8 @@ export const SearchPage: React.FC = () => {
       setLoading(true);
       setHasSearched(true);
       try {
-        const res = await searchLessons(trimmed);
+        // A category alone (no words) lists every published lesson, and the filter below keeps that category's
+        const res = await searchLessons(trimmed, true);
         if (isMounted) {
           setResults(res);
         }
@@ -109,10 +110,8 @@ export const SearchPage: React.FC = () => {
 
   const filteredResults = results.filter((item) => {
     if (categoryFilter) {
-      const itemCatSlug = item.category?.slug;
-      if (itemCatSlug && itemCatSlug !== categoryFilter) {
-        return false;
-      }
+      // A lesson without a category belongs to no category filter
+      if (item.category?.slug !== categoryFilter) return false;
     }
     if (mediaFilter === 'video') return Boolean(item.youtube_url);
     if (mediaFilter === 'audio') return Boolean(item.audio_url);

@@ -4,9 +4,9 @@
 //   POST { action: 'status' }                       admin only: proves the keys work (writes and removes a tiny file)
 //   GET  ?file=<key>                                anyone: the file, by a redirect to a signed link (the bucket stays private)
 //   GET  ?file=<key>&download=1&name=<file name>    anyone: the same, downloaded under the book's title
-// Until the R2 settings are present it answers 501, and the admin uploads to Supabase Storage as before.
+// Until the R2 settings are present it answers 501, and the admin screens say that file uploads are not set up yet.
 import { randomUUID } from 'node:crypto';
-import { fileLink, isAdminToken, keyFromLink, presign, r2Config, type R2Config } from './_r2';
+import { fileLink, isAdminToken, keyFromLink, presign, r2Config, type R2Config } from './_r2.js'; // Node on Vercel needs the extension (the .ts file is compiled to .js)
 
 const KINDS = {
   pdf: { folder: 'library/files', extensions: ['pdf'], maxMb: 200, type: 'application/pdf' },

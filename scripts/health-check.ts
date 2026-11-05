@@ -4,7 +4,7 @@
 //   - the settings are present
 //   - the database answers, and the public tables are readable
 //   - the protected tables are NOT readable with the public key (admin_users, submissions, analytics)
-//   - visitors cannot approve their own request (and with --write: can send one, which waits for approval)
+//   - visitors cannot write requests or draft books directly (requests go through api/submit only)
 //   - Cloudflare R2: a file can be written, read back and removed
 import { existsSync, readFileSync } from 'node:fs';
 import { presign, r2Config } from '../api/_r2';
@@ -51,15 +51,22 @@ async function protectedTables() {
 }
 
 async function contributions() {
-  // Sending a real request leaves a row only an admin can delete, so it runs only when asked: npm run health -- --write
-  if (process.argv.includes('--write')) {
-    const insert = await rest('submissions', {
-      method: 'POST',
-      headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ kind: 'correction', title: 'health check (delete me)', details: 'automatic check' }),
-    });
-    report(insert.ok, 'a visitor can send a request', insert.ok ? '' : `HTTP ${insert.status}`);
-  }
+  // A row with no title can never be saved, so this writes nothing either way. Permissions are checked before the
+  // "title is required" rule, so the error tells which one stopped it: 42501 = visitors are blocked (good).
+  const direct = await rest('submissions', {
+    method: 'POST',
+    headers: { Prefer: 'return=minimal' },
+    body: JSON.stringify({ kind: 'correction', title: null }),
+  });
+  const directCode = direct.ok ? 'saved' : ((await direct.json().catch(() => ({}))) as { code?: string }).code || `HTTP ${direct.status}`;
+  report(directCode === '42501', 'visitors cannot add requests directly (only through api/submit)', directCode === '42501' ? 'refused' : `${directCode}: run docs/migrations/2026-11-05-security.sql`);
+
+  const library = await rest('site_settings?select=key&key=eq.library_books');
+  const libraryRows = library.ok ? ((await library.json()) as unknown[]).length : 0;
+  report(libraryRows === 0, 'draft books are hidden from visitors', libraryRows === 0 ? '' : 'the library record is readable: run docs/migrations/2026-11-05-security.sql');
+  const books = await rest('rpc/published_books', { method: 'POST', body: '{}' });
+  report(books.ok, 'visitors can list the published books', books.ok ? '' : `HTTP ${books.status}`);
+
   const approve = await rest('submissions', {
     method: 'POST',
     headers: { Prefer: 'return=minimal' },
@@ -99,5 +106,4 @@ try {
 }
 
 console.log(`\n${failures === 0 ? 'HEALTHY' : 'PROBLEMS FOUND'}: ${failures} failure(s), ${warnings} warning(s).`);
-if (process.argv.includes('--write')) console.log('Note: --write left one test row in the visitor requests (title "health check (delete me)"); delete it from the admin.');
 process.exit(failures === 0 ? 0 : 1);

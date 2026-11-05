@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { translateSupabaseError } from '../utils/supabaseErrors';
+import { normalizeArabic } from '../utils/helpers';
 import { deleteFromR2, isR2Url, r2DownloadUrl, uploadToR2 } from './r2';
 import type {
   Category,
@@ -470,15 +471,17 @@ export async function getCategoriesWithPortalData(recentLimit = 5): Promise<Cate
   }
 }
 
-export async function searchLessons(query: string): Promise<LessonWithRelations[]> {
-  if (!query || !query.trim()) return [];
+// Finds published lessons by their title, series or category, matching Arabic the way the video and book search
+// does (see normalizeArabic). With allowEmpty, an empty query returns every published lesson (the search page then
+// filters by category). The matching runs here rather than in the database, which cannot ignore the Arabic marks.
+export async function searchLessons(query: string, allowEmpty = false): Promise<LessonWithRelations[]> {
+  const q = (query || '').trim();
+  if (!q && !allowEmpty) return [];
   try {
-    const q = query.trim();
     const { data: lessons, error } = await supabase
       .from('lessons')
       .select('*')
       .eq('status', 'published')
-      .ilike('title', `%${q}%`)
       .order('published_at', { ascending: false });
 
     if (error) throw new Error(translateSupabaseError(error));
@@ -489,15 +492,14 @@ export async function searchLessons(query: string): Promise<LessonWithRelations[
     const seriesMap = new Map(allSeries.map((s) => [s.id, s]));
     const catMap = new Map(allCategories.map((c) => [c.id, c]));
 
-    return lessons.map((l) => {
-      const s = seriesMap.get(l.series_id) || null;
-      const c = s ? catMap.get(s.category_id) || null : null;
-      return {
-        ...l,
-        series: s,
-        category: c,
-      };
-    });
+    const needle = normalizeArabic(q);
+    return lessons
+      .map((l) => {
+        const s = seriesMap.get(l.series_id) || null;
+        const c = s ? catMap.get(s.category_id) || null : null;
+        return { ...l, series: s, category: c };
+      })
+      .filter((l) => !needle || normalizeArabic(`${l.title} ${l.series?.title || ''} ${l.category?.name || ''}`).includes(needle));
   } catch (err) {
     console.error('searchLessons error:', err);
     throw err;
@@ -631,6 +633,7 @@ export async function deleteCategory(id: string): Promise<boolean> {
 
   if (countErr) {
     console.error('Error checking series for category:', countErr);
+    throw new Error('تعذّر التأكد من أن القسم فارغ، فلم يُحذف. حاول مرة أخرى.');
   }
 
   if (existingSeries && existingSeries.length > 0) {
@@ -690,6 +693,15 @@ export async function updateSeries(
 }
 
 export async function deleteSeries(id: string): Promise<boolean> {
+  const { data: existingLessons, error: countErr } = await supabase.from('lessons').select('id').eq('series_id', id).limit(1);
+  if (countErr) {
+    console.error('Error checking lessons for series:', countErr);
+    throw new Error('تعذّر التأكد من أن السلسلة فارغة، فلم تُحذف. حاول مرة أخرى.');
+  }
+  if (existingLessons && existingLessons.length > 0) {
+    throw new Error('لا يمكن حذف هذه السلسلة لأنها تحتوي على دروس. احذف الدروس أو انقلها إلى سلسلة أخرى أولاً.');
+  }
+
   const { error } = await supabase.from('series').delete().eq('id', id);
   if (error) throw new Error(translateSupabaseError(error));
   return true;
@@ -734,8 +746,12 @@ export async function updateLesson(
   lessonData: Partial<Lesson>
 ): Promise<Lesson> {
   const payload: any = lessonRow(lessonData);
+  const { data: before } = await supabase.from('lessons').select('audio_url').eq('id', id).maybeSingle();
+  // A lesson keeps the date it was first published; only one published for the first time gets today's date
   if (payload.status === 'published' && !payload.published_at) {
-    payload.published_at = new Date().toISOString();
+    const { data: current, error: readErr } = await supabase.from('lessons').select('published_at').eq('id', id).maybeSingle();
+    if (readErr) throw new Error(translateSupabaseError(readErr));
+    if (!current?.published_at) payload.published_at = new Date().toISOString();
   }
 
   const { data, error } = await supabase
@@ -747,12 +763,26 @@ export async function updateLesson(
 
   if (error) throw new Error(translateSupabaseError(error));
   await saveLessonExtras(id, lessonData);
+  // The recording was replaced or removed: the old file on R2 is no longer used by anything
+  const oldAudio = before?.audio_url as string | undefined;
+  if (lessonData.audio_url !== undefined && oldAudio !== lessonData.audio_url) await dropLessonAudio(oldAudio);
   return data;
 }
 
+// Removes a lesson's recording from R2 unless another lesson still plays the same file
+async function dropLessonAudio(url: string | null | undefined): Promise<void> {
+  if (!url || !isR2Url(url)) return;
+  const { data, error } = await supabase.from('lessons').select('id').eq('audio_url', url).limit(1);
+  if (error || (data && data.length > 0)) return;
+  await deleteFromR2(url);
+}
+
 export async function deleteLesson(id: string): Promise<boolean> {
+  const { data: before } = await supabase.from('lessons').select('audio_url').eq('id', id).maybeSingle();
   const { error } = await supabase.from('lessons').delete().eq('id', id);
   if (error) throw new Error(translateSupabaseError(error));
+  // Its recording goes with it (a failure here is logged, never blocks the delete)
+  await dropLessonAudio(before?.audio_url as string | undefined);
   try {
     await saveLessonExtras(id, { featured: false, chapters: [] });
   } catch (err) {
@@ -794,7 +824,7 @@ export async function getAudioLessons(): Promise<LessonWithRelations[]> {
  * ============================================================================
  * The list is kept as one JSON record ("library_books") in the site_settings table, which the admin already
  * writes to and visitors already read, so the library needs no new table or database setup. The PDF files
- * and covers go to the site's existing storage buckets.
+ * and covers are kept on Cloudflare R2 (services/r2.ts).
  */
 
 export interface BookWithCategory extends Book {
@@ -822,6 +852,15 @@ async function writeLibrary(books: Book[]): Promise<void> {
   if (error) throw new Error(translateSupabaseError(error));
 }
 
+// What visitors may see of the library: published books only. Since docs/migrations/2026-11-05-security.sql the
+// library record is readable by admins only, and visitors get it through the published_books() function, which
+// leaves the drafts (and their file links) out. Before that migration runs, the record is read and filtered here.
+async function readPublishedLibrary(): Promise<Book[]> {
+  const { data, error } = await supabase.rpc('published_books');
+  if (!error) return Array.isArray(data) ? (data as Book[]) : [];
+  return (await readLibrary()).filter((b) => b.status === 'published');
+}
+
 const byShelfOrder = (a: Book, b: Book) =>
   (a.sort_order || 0) - (b.sort_order || 0) || (b.published_at || b.created_at).localeCompare(a.published_at || a.created_at);
 
@@ -832,12 +871,13 @@ async function attachBookCategories(books: Book[]): Promise<BookWithCategory[]> 
 }
 
 export async function getPublishedBooks(): Promise<BookWithCategory[]> {
-  const books = (await readLibrary()).filter((b) => b.status === 'published').sort(byShelfOrder);
+  const books = (await readPublishedLibrary()).sort(byShelfOrder);
   return attachBookCategories(books);
 }
 
 export async function getBook(id: string, includeDrafts = false): Promise<BookWithCategory | null> {
-  const book = (await readLibrary()).find((b) => b.id === id && (includeDrafts || b.status === 'published'));
+  const list = includeDrafts ? await readLibrary() : await readPublishedLibrary();
+  const book = list.find((b) => b.id === id && (includeDrafts || b.status === 'published'));
   return book ? (await attachBookCategories([book]))[0] : null;
 }
 
@@ -862,13 +902,19 @@ function cleanBook(bookData: Partial<Book>, base: Book): Book {
   };
 }
 
+// With bookData.id, a book that already has that id is returned as it is, so repeating the call adds nothing
 export async function createBook(bookData: Partial<Book>): Promise<Book> {
   if (!(bookData.title || '').trim()) throw new Error('يرجى إدخال عنوان الكتاب.');
   if (!(bookData.file_url || '').trim()) throw new Error('يرجى رفع ملف الكتاب (PDF) أو إدخال رابطه.');
+  if (bookData.id) {
+    const existing = (await readLibrary()).find((b) => b.id === bookData.id);
+    if (existing) return existing;
+  }
   const id =
-    typeof crypto !== 'undefined' && crypto.randomUUID
+    bookData.id ||
+    (typeof crypto !== 'undefined' && crypto.randomUUID
       ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      : `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
   const base: Book = {
     id,
     title: '',
@@ -896,8 +942,17 @@ export async function updateBook(id: string, bookData: Partial<Book>): Promise<B
   const book = cleanBook(bookData, books[index]);
   if (!book.title) throw new Error('يرجى إدخال عنوان الكتاب.');
   if (!book.file_url) throw new Error('يرجى رفع ملف الكتاب (PDF) أو إدخال رابطه.');
+  const previous = books[index];
   books[index] = book;
   await writeLibrary(books);
+  // A replaced PDF or cover is no longer used by anything
+  for (const [oldUrl, newUrl] of [
+    [previous.file_url, book.file_url],
+    [previous.cover_url, book.cover_url],
+  ] as const) {
+    const stillUsed = books.some((b) => b.file_url === oldUrl || b.cover_url === oldUrl);
+    if (oldUrl && oldUrl !== newUrl && !stillUsed && isR2Url(oldUrl)) await deleteFromR2(oldUrl);
+  }
   return book;
 }
 
@@ -905,14 +960,16 @@ export async function updateBook(id: string, bookData: Partial<Book>): Promise<B
 export async function deleteBook(book: Pick<Book, 'id' | 'file_url' | 'cover_url'>): Promise<boolean> {
   const books = await readLibrary();
   await writeLibrary(books.filter((b) => b.id !== book.id));
+  const remaining = books.filter((b) => b.id !== book.id);
   for (const url of [book.file_url, book.cover_url]) {
-    if (isR2Url(url)) await deleteFromR2(url as string);
+    const stillUsed = remaining.some((b) => b.file_url === url || b.cover_url === url);
+    if (!stillUsed && isR2Url(url)) await deleteFromR2(url as string);
   }
   return true;
 }
 
 const BOOK_FILE_RULES = {
-  pdf: { extensions: ['pdf'], maxMb: 100, message: 'يرجى اختيار ملف بصيغة PDF.' },
+  pdf: { extensions: ['pdf'], maxMb: 200, message: 'يرجى اختيار ملف بصيغة PDF.' },
   cover: { extensions: ['jpg', 'jpeg', 'png', 'webp'], maxMb: 5, message: 'يرجى اختيار صورة غلاف بصيغة jpg أو png أو webp.' },
 } as const;
 
@@ -1031,7 +1088,7 @@ export async function deleteSubmission(id: string): Promise<void> {
 
 /**
  * ============================================================================
- * AUDIO UPLOAD (Supabase "audio" Storage Bucket)
+ * AUDIO UPLOAD (Cloudflare R2, folder "audio/")
  * ============================================================================
  */
 
@@ -1166,7 +1223,7 @@ export async function updateUserPassword(newPassword: string): Promise<void> {
 
 /**
  * ============================================================================
- * SITE SETTINGS & BRANDING (site_settings table & "branding" bucket)
+ * SITE SETTINGS & BRANDING (site_settings table; the logo is on Cloudflare R2, folder "branding/")
  * ============================================================================
  */
 
@@ -1185,7 +1242,11 @@ export async function getSiteSettings(forceRefresh = false): Promise<SiteSetting
     return cachedSiteSettings;
   }
   try {
-    const { data, error } = await supabase.from('site_settings').select('key, value');
+    // Only the three values the header and footer show (the table also holds the library and other large records)
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('key, value')
+      .in('key', ['banner_name', 'banner_logo_url', 'about_sheikh']);
     if (!error && data) {
       const settingsMap: Record<string, string> = {};
       data.forEach((row) => {
@@ -1211,6 +1272,7 @@ export async function saveSiteSettings(settings: Partial<SiteSettings>): Promise
   const entries = Object.entries(settings).filter(([_, val]) => val !== undefined);
   if (entries.length === 0) return;
 
+  const previousLogo = (await getSiteSettings(true)).banner_logo_url;
   const rows = entries.map(([key, value]) => ({
     key,
     value: value || '',
@@ -1224,6 +1286,10 @@ export async function saveSiteSettings(settings: Partial<SiteSettings>): Promise
   // Refresh cache
   cachedSiteSettings = null;
   await getSiteSettings(true);
+  // The logo was replaced or removed: the old file on R2 is no longer used
+  if (settings.banner_logo_url !== undefined && previousLogo && previousLogo !== settings.banner_logo_url && isR2Url(previousLogo)) {
+    await deleteFromR2(previousLogo);
+  }
 }
 
 export async function uploadBrandingLogo(file: File): Promise<string> {

@@ -70,13 +70,13 @@ export const BrandingManager: React.FC = () => {
   // Delete Confirm Modal State
   const [deleteTarget, setDeleteTarget] = useState<SocialLink | null>(null);
 
-  // Database error warning
-  const [dbIncomplete, setDbIncomplete] = useState(false);
+  // The last thing that failed on this tab, in words (null while everything works)
+  const [dbIncomplete, setDbIncomplete] = useState<string | null>(null);
 
   // Load Data
   const loadBrandingData = async () => {
     try {
-      setDbIncomplete(false);
+      setDbIncomplete(null);
       setLoadingSettings(true);
       setLoadingSocial(true);
 
@@ -89,7 +89,7 @@ export const BrandingManager: React.FC = () => {
       setSocialLinks(loadedLinks);
     } catch (err: any) {
       console.error('Error loading branding data:', err);
-      setDbIncomplete(true);
+      setDbIncomplete(err?.message || 'تعذّر تحميل إعدادات الواجهة وروابط التواصل.');
     } finally {
       setLoadingSettings(false);
       setLoadingSocial(false);
@@ -156,10 +156,9 @@ export const BrandingManager: React.FC = () => {
       });
     } catch (err: any) {
       console.error('Failed to save settings:', err);
-      setDbIncomplete(true);
       setSettingsMessage({
         type: 'error',
-        text: 'إعداد قاعدة البيانات غير مكتمل: تعذر حفظ الإعدادات في جدول site_settings.',
+        text: `تعذّر حفظ الإعدادات: ${err?.message || 'حاول مرة أخرى.'}`,
       });
     } finally {
       setSavingSettings(false);
@@ -229,8 +228,7 @@ export const BrandingManager: React.FC = () => {
       await loadBrandingData();
     } catch (err: any) {
       console.error('Error saving social link:', err);
-      setDbIncomplete(true);
-      setFormUrlError('تعذر الحفظ: إعداد قاعدة البيانات غير مكتمل.');
+      setFormUrlError(`تعذّر الحفظ: ${err?.message || 'حاول مرة أخرى.'}`);
     } finally {
       setSavingSocial(false);
     }
@@ -245,7 +243,7 @@ export const BrandingManager: React.FC = () => {
       );
     } catch (err: any) {
       console.error('Failed to toggle active status:', err);
-      setDbIncomplete(true);
+      setDbIncomplete(`تعذّر تغيير حالة الرابط: ${err?.message || ''}`);
     }
   };
 
@@ -270,7 +268,7 @@ export const BrandingManager: React.FC = () => {
       await loadBrandingData();
     } catch (err: any) {
       console.error('Failed to reorder social links:', err);
-      setDbIncomplete(true);
+      setDbIncomplete(`تعذّر تغيير الترتيب: ${err?.message || ''}`);
     }
   };
 
@@ -283,7 +281,7 @@ export const BrandingManager: React.FC = () => {
       await loadBrandingData();
     } catch (err: any) {
       console.error('Failed to delete social link:', err);
-      setDbIncomplete(true);
+      setDbIncomplete(`تعذّر حذف الرابط: ${err?.message || ''}`);
     }
   };
 
@@ -294,10 +292,8 @@ export const BrandingManager: React.FC = () => {
         <div className="p-4 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-900 dark:text-amber-200 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h4 className="font-bold text-sm">إعداد قاعدة البيانات غير مكتمل</h4>
-            <p className="text-xs text-amber-800 dark:text-amber-300/90 leading-relaxed">
-              تعذر الوصول إلى جدول <code className="px-1.5 py-0.5 rounded bg-amber-500/20 font-mono">site_settings</code> أو <code className="px-1.5 py-0.5 rounded bg-amber-500/20 font-mono">social_links</code> أو مساحة التخزين <code className="px-1.5 py-0.5 rounded bg-amber-500/20 font-mono">branding</code> في Supabase. الموقع العام سيعمل بالإعدادات الافتراضية بسلاسة.
-            </p>
+            <h4 className="font-bold text-sm">حدث خطأ</h4>
+            <p className="text-xs text-amber-800 dark:text-amber-300/90 leading-relaxed">{dbIncomplete}</p>
           </div>
         </div>
       )}

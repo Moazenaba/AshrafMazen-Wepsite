@@ -55,8 +55,11 @@ export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return send(res, 405, { error: 'method-not-allowed' });
 
   const supabaseUrl = (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '').replace(/\/+$/, '');
-  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
-  if (!supabaseUrl || !anonKey) return send(res, 503, { error: 'خدمة الاستقبال غير مُعدّة بعد.' });
+  // The server's own key: once docs/migrations/2026-11-05-security.sql has run, visitors can no longer write to the
+  // submissions table directly, so every request has to pass the checks in this function. Until that key is set,
+  // the public key still works (as long as the migration has not run yet).
+  const writeKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+  if (!supabaseUrl || !writeKey) return send(res, 503, { error: 'خدمة الاستقبال غير مُعدّة بعد.' });
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
@@ -67,8 +70,9 @@ export default async function handler(req: any, res: any) {
     const kind = clean(body.kind, 20) as Kind;
     if (!KINDS.includes(kind)) return send(res, 400, { error: 'نوع الطلب غير معروف.' });
 
+    // The form always sends the moment it was opened; a request without it did not come from the form
     const sentAt = Number(body.t);
-    if (Number.isFinite(sentAt) && Date.now() - sentAt < MIN_FORM_SECONDS * 1000) {
+    if (!Number.isFinite(sentAt) || Date.now() - sentAt < MIN_FORM_SECONDS * 1000) {
       return send(res, 429, { error: 'تم إرسال النموذج بسرعة كبيرة. اقرأه ثم أعد المحاولة.' });
     }
 
@@ -98,8 +102,8 @@ export default async function handler(req: any, res: any) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        apikey: anonKey,
-        Authorization: `Bearer ${anonKey}`,
+        apikey: writeKey,
+        Authorization: `Bearer ${writeKey}`,
         Prefer: 'return=minimal',
       },
       body: JSON.stringify(row),
@@ -108,7 +112,7 @@ export default async function handler(req: any, res: any) {
       const text = await response.text();
       console.error('submission rejected by the database:', response.status, text.slice(0, 300));
       return send(res, 502, {
-        error: /row-level security|violates/i.test(text)
+        error: /too many pending/i.test(text)
           ? 'الطلبات المنتظرة وصلت الحد الأقصى حالياً. حاول لاحقاً.'
           : 'تعذّر حفظ الطلب الآن. حاول مرة أخرى بعد قليل.',
       });

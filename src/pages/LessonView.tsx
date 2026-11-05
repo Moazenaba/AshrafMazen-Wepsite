@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, Share2, Copy, Check, Bookmark, Clock } from 'lucide-react';
 import {
   getLesson,
@@ -93,6 +93,9 @@ function buildVideoJsonLd(
 export const LessonView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  // ?t=<seconds> opens the lesson at that moment (the chapter links given to search engines use it)
+  const [searchParams] = useSearchParams();
+  const linkedSecond = Math.max(0, Math.floor(Number(searchParams.get('t')) || 0));
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [series, setSeries] = useState<Series | null>(null);
   const [category, setCategory] = useState<Category | null>(null);
@@ -130,11 +133,11 @@ export const LessonView: React.FC = () => {
         setPosition({ seconds: 0, duration: 0 });
         setCountdown(null);
         lastSavedRef.current = 0;
-        // Increment views once per browser session
-        incrementLessonViews(id);
 
         // Visitors must never see lessons with status 'draft' -> includeDrafts = false
-        const l = await getLesson(id, false);
+        // Drafts are asked for too: the database returns them only to an admin (a visitor gets nothing back),
+        // so the admin can preview a lesson before publishing it
+        const l = await getLesson(id, true);
         if (!l) {
           if (isMounted) {
             setLesson(null);
@@ -142,6 +145,9 @@ export const LessonView: React.FC = () => {
           }
           return;
         }
+
+        // Counted once per browser session, and only for a lesson that exists and is published
+        if (l.status === 'published') incrementLessonViews(l.id);
 
         const [s, pubLessons] = await Promise.all([
           getSeries(l.series_id),
@@ -158,7 +164,7 @@ export const LessonView: React.FC = () => {
           setSeries(s);
           setCategory(cat);
           setSeriesLessons(pubLessons);
-          setResumeAt(getResumeSeconds(l.id));
+          setResumeAt(linkedSecond || getResumeSeconds(l.id));
           saveRecentLesson({ id: l.id, title: l.title, seriesTitle: s?.title });
 
           // Open on the first kind of media the lesson actually has
@@ -369,6 +375,12 @@ export const LessonView: React.FC = () => {
         >
           تم نسخ رابط الدرس
         </div>
+      )}
+
+      {lesson.status !== 'published' && (
+        <p role="note" className="p-4 rounded-xl bg-amber-50 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200 font-semibold">
+          معاينة مسودة: هذا الدرس غير منشور، ولا يراه إلا المشرفون.
+        </p>
       )}
 
       <header data-reveal className="space-y-3 sm:space-y-4">
