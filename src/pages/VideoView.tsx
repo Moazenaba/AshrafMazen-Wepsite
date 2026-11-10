@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import type { LibraryPlaylist, LibraryVideo } from '../data/youtube-library';
@@ -32,6 +33,7 @@ export const VideoView: React.FC = () => {
 
   const video: LibraryVideo | null = found?.video ?? null;
   const playlist: LibraryPlaylist | null = library.find((p) => p.id === listId) ?? found?.playlist ?? null;
+  usePageTitle(video?.title);
   const index = playlist && video ? playlist.videos.findIndex((v) => v.id === video.id) : -1;
   const next = playlist && index >= 0 && index < playlist.videos.length - 1 ? playlist.videos[index + 1] : null;
   const resumeAt = useMemo(() => getResumeSeconds(progressKey(videoId)), [videoId]);

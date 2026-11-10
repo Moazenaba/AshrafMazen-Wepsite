@@ -1,4 +1,5 @@
 import React from 'react';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { Link, useParams } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { useYoutubeLibrary } from '../lib/youtubeLibrary';
@@ -10,6 +11,7 @@ export const PlaylistView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const library = useYoutubeLibrary();
   const playlist = library.find((p) => p.id === id);
+  usePageTitle(playlist?.title);
 
   // The library arrives a moment after the page; until then keep the space instead of saying "not found"
   if (!playlist && library.length === 0) {

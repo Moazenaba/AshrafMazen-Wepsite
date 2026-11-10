@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { getCategoryBySlug, getSeriesByCategory, getLessonsBySeries } from '../services/dataService';
@@ -13,6 +14,7 @@ export const CategoryView: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [category, setCategory] = useState<Category | null>(null);
   const [seriesList, setSeriesList] = useState<SeriesWithCount[]>([]);
+  usePageTitle(category?.name);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

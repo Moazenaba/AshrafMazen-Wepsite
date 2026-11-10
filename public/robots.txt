@@ -2,5 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /api/
+Disallow: /bookmarks
+Disallow: /dev/
 
 Sitemap: https://ashraf-mazen.vercel.app/sitemap.xml

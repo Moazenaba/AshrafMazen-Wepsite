@@ -12,6 +12,7 @@ import { useScrollToHash } from './hooks/useScrollToHash';
 import { useScrollReveal } from './hooks/useScrollReveal';
 import { useVersionReload } from './hooks/useVersionReload';
 import { usePageAnalytics } from './hooks/usePageAnalytics';
+import { useCanonical } from './hooks/useCanonical';
 import { AppRoutes } from './routes/AppRoutes';
 
 function AppLayout() {
@@ -26,6 +27,7 @@ function AppLayout() {
   useVersionReload();
 
   usePageAnalytics(location.pathname, isAdmin);
+  useCanonical(location.pathname, isAdmin);
 
   return (
     <div

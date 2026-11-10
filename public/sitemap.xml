@@ -13,10 +13,10 @@
     <loc>https://ashraf-mazen.vercel.app/books</loc>
   </url>
   <url>
-    <loc>https://ashraf-mazen.vercel.app/search</loc>
+    <loc>https://ashraf-mazen.vercel.app/category/aqeedah</loc>
   </url>
   <url>
-    <loc>https://ashraf-mazen.vercel.app/category/aqeedah</loc>
+    <loc>https://ashraf-mazen.vercel.app/category/%D9%85%D8%B5%D8%B7%D9%84%D8%AD-%D8%A7%D9%84%D8%AD%D8%AF%D9%8A%D8%AB</loc>
   </url>
   <url>
     <loc>https://ashraf-mazen.vercel.app/category/fiqh</loc>
@@ -31,27 +31,7 @@
     <loc>https://ashraf-mazen.vercel.app/category/khutab</loc>
   </url>
   <url>
-    <loc>https://ashraf-mazen.vercel.app/category/%D9%85%D8%B5%D8%B7%D9%84%D8%AD-%D8%A7%D9%84%D8%AD%D8%AF%D9%8A%D8%AB</loc>
-  </url>
-  <url>
-    <loc>https://ashraf-mazen.vercel.app/series/test</loc>
-  </url>
-  <url>
-    <loc>https://ashraf-mazen.vercel.app/series/%D9%85%D8%B5%D8%B7%D9%84%D8%AD</loc>
-  </url>
-  <url>
     <loc>https://ashraf-mazen.vercel.app/series/%D8%AE%D8%B7%D8%A8-%D8%A7%D9%84%D8%AC%D9%85%D8%B9%D8%A9</loc>
-  </url>
-  <url>
-    <loc>https://ashraf-mazen.vercel.app/lesson/c8d2d6c5-3628-40a1-8166-def7488192ce</loc>
-    <lastmod>2026-10-27</lastmod>
-    <video:video>
-      <video:thumbnail_loc>https://i.ytimg.com/vi/pyWf1uZYg2U/hqdefault.jpg</video:thumbnail_loc>
-      <video:title>مقدمة كتاب ٢٠٠ سؤال وجواب</video:title>
-      <video:description>مقدمة كتاب ٢٠٠ سؤال وجواب</video:description>
-      <video:player_loc>https://www.youtube-nocookie.com/embed/pyWf1uZYg2U</video:player_loc>
-      <video:publication_date>2026-10-27T09:34:12.413+00:00</video:publication_date>
-    </video:video>
   </url>
   <url>
     <loc>https://ashraf-mazen.vercel.app/lesson/9bd0e144-91f6-42b2-a9db-b0e0d7348c74</loc>
@@ -66,17 +46,6 @@
   </url>
   <url>
     <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_NcmgwOimYSUQVJVK9WwM3_</loc>
-  </url>
-  <url>
-    <loc>https://ashraf-mazen.vercel.app/video/KN3BR-84F5w</loc>
-    <lastmod>2026-11-02</lastmod>
-    <video:video>
-      <video:thumbnail_loc>https://i.ytimg.com/vi/KN3BR-84F5w/hqdefault.jpg</video:thumbnail_loc>
-      <video:title>خطبة الجمعة | حقيقة التوسل |# الشيخ _ أشرف _ مازن</video:title>
-      <video:description>خطبة الجمعة | حقيقة التوسل |# الشيخ _ أشرف _ مازن</video:description>
-      <video:player_loc>https://www.youtube-nocookie.com/embed/KN3BR-84F5w</video:player_loc>
-      <video:publication_date>2026-11-02T04:34:17+00:00</video:publication_date>
-    </video:video>
   </url>
   <url>
     <loc>https://ashraf-mazen.vercel.app/video/7mVnceb1DWk</loc>
@@ -1372,6 +1341,17 @@
   </url>
   <url>
     <loc>https://ashraf-mazen.vercel.app/playlist/PLHcd1VuAeT_OaS9laiTEk1qiTT4Tvcm2E</loc>
+  </url>
+  <url>
+    <loc>https://ashraf-mazen.vercel.app/video/pyWf1uZYg2U</loc>
+    <lastmod>2025-04-26</lastmod>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/pyWf1uZYg2U/hqdefault.jpg</video:thumbnail_loc>
+      <video:title>200 سؤال وجواب(1)/تعريف مختصر بالشيخ ومنهجه فى الكتاب/# لفضيلة الشيخ أشرف -مازن</video:title>
+      <video:description>200 سؤال وجواب(1)/تعريف مختصر بالشيخ ومنهجه فى الكتاب/# لفضيلة الشيخ أشرف -مازن</video:description>
+      <video:player_loc>https://www.youtube-nocookie.com/embed/pyWf1uZYg2U</video:player_loc>
+      <video:publication_date>2025-04-26T22:50:15+00:00</video:publication_date>
+    </video:video>
   </url>
   <url>
     <loc>https://ashraf-mazen.vercel.app/video/eAsNkJ4fMOY</loc>
