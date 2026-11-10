@@ -9,6 +9,8 @@ export interface YoutubeOverrides {
   playlistTitles: Record<string, string>;
   // Playlists added by the admin; api/youtube-library.ts reads their videos from YouTube's feed
   extraPlaylists: { id: string; title: string }[];
+  // Single videos added by the admin (newest first); the site shows them as one list, «مقاطع مختارة»
+  extraVideos: { id: string; title: string }[];
 }
 
 const YOUTUBE_OVERRIDES_KEY = 'youtube_overrides';
@@ -24,9 +26,10 @@ export async function getYoutubeOverrides(): Promise<YoutubeOverrides> {
       videoTitles: parsed.videoTitles && typeof parsed.videoTitles === 'object' ? parsed.videoTitles : {},
       playlistTitles: parsed.playlistTitles && typeof parsed.playlistTitles === 'object' ? parsed.playlistTitles : {},
       extraPlaylists: Array.isArray(parsed.extraPlaylists) ? parsed.extraPlaylists : [],
+      extraVideos: Array.isArray(parsed.extraVideos) ? parsed.extraVideos : [],
     };
   } catch {
-    return { hiddenPlaylists: [], hiddenVideos: [], videoTitles: {}, playlistTitles: {}, extraPlaylists: [] };
+    return { hiddenPlaylists: [], hiddenVideos: [], videoTitles: {}, playlistTitles: {}, extraPlaylists: [], extraVideos: [] };
   }
 }
 

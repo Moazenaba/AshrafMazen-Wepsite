@@ -4,14 +4,16 @@ import { useYoutubeLibrary } from '../lib/youtubeLibrary';
 import { getPublishedBooks, type BookWithCategory } from '../services/dataService';
 import { LessonThumb } from './LessonThumb';
 import { BookCover } from './BookCover';
-import { normalizeArabic } from '../utils/helpers';
+import { searchScore } from '../utils/arabicSearch';
 
 const MAX_VIDEOS = 24;
 
-const normalize = normalizeArabic;
-
 // Search results beyond the lessons: the channel's videos and the library's books, found by the same words
-export const SiteSearchExtras: React.FC<{ query: string; highlight: (text: string, q: string) => React.ReactNode }> = ({ query, highlight }) => {
+export const SiteSearchExtras: React.FC<{ query: string; highlight: (text: string, q: string) => React.ReactNode; showBooks?: boolean }> = ({
+  query,
+  highlight,
+  showBooks = true,
+}) => {
   const library = useYoutubeLibrary();
   const [books, setBooks] = useState<BookWithCategory[]>([]);
 
@@ -21,22 +23,25 @@ export const SiteSearchExtras: React.FC<{ query: string; highlight: (text: strin
       .catch(() => {});
   }, []);
 
-  const needle = normalize(query.trim());
+  const needle = query.trim();
 
+  // Each video once (a video can sit in more than one playlist), best matches first
   const videos = useMemo(() => {
     if (!needle) return [];
-    const found: { id: string; title: string; playlistId: string; playlist: string }[] = [];
+    const found = new Map<string, { id: string; title: string; playlistId: string; playlist: string; score: number }>();
     for (const playlist of library) {
       for (const video of playlist.videos) {
-        if (normalize(video.title).includes(needle)) found.push({ id: video.id, title: video.title, playlistId: playlist.id, playlist: playlist.title });
+        if (found.has(video.id)) continue;
+        const score = searchScore(`${video.title} ${playlist.title}`, needle);
+        if (score > 0) found.set(video.id, { id: video.id, title: video.title, playlistId: playlist.id, playlist: playlist.title, score });
       }
     }
-    return found;
+    return [...found.values()].sort((a, b) => b.score - a.score);
   }, [library, needle]);
 
   const matchedBooks = useMemo(
-    () => (needle ? books.filter((b) => normalize(`${b.title} ${b.author} ${b.description}`).includes(needle)) : []),
-    [books, needle]
+    () => (needle && showBooks ? books.filter((b) => searchScore(`${b.title} ${b.author} ${b.description}`, needle) > 0) : []),
+    [books, needle, showBooks]
   );
 
   if (!needle || (videos.length === 0 && matchedBooks.length === 0)) return null;

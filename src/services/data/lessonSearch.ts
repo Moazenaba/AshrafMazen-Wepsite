@@ -1,6 +1,6 @@
 // Searching published lessons by title, series or category, in Arabic that ignores marks and letter forms.
 import type { Lesson } from '../../types';
-import { normalizeArabic } from '../../utils/helpers';
+import { searchScore } from '../../utils/arabicSearch';
 import { publishedLessons, rowsOrThrow } from './db';
 import { attachRelations } from './relations';
 import type { LessonWithRelations } from './shared';
@@ -12,7 +12,11 @@ export async function searchLessons(query: string, allowEmpty = false): Promise<
   if (!text && !allowEmpty) return [];
   const lessons = rowsOrThrow<Lesson>(await publishedLessons().order('published_at', { ascending: false }));
   const related = await attachRelations(lessons);
-  const needle = normalizeArabic(text);
-  if (!needle) return related;
-  return related.filter((l) => normalizeArabic(`${l.title} ${l.series?.title || ''} ${l.category?.name || ''}`).includes(needle));
+  if (!text) return related;
+  // Best matches first; equal matches keep the newest-first order
+  return related
+    .map((l) => ({ l, score: searchScore(`${l.title} ${l.series?.title || ''} ${l.category?.name || ''}`, text) }))
+    .filter((r) => r.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map((r) => r.l);
 }

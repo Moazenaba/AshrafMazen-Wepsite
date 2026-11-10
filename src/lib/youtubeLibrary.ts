@@ -25,7 +25,7 @@ function loadOverrides(force = false): Promise<void> {
     })
     .catch(() => {
       // Nothing saved or unreachable: the library shows as it is
-      overrides = overrides ?? { hiddenPlaylists: [], hiddenVideos: [], videoTitles: {}, playlistTitles: {}, extraPlaylists: [] };
+      overrides = overrides ?? { hiddenPlaylists: [], hiddenVideos: [], videoTitles: {}, playlistTitles: {}, extraPlaylists: [], extraVideos: [] };
     }));
 }
 
@@ -37,8 +37,18 @@ export function overridesChanged(next: YoutubeOverrides): void {
 }
 
 // The library as visitors see it: without what the admin hid, and with the titles the admin changed
+export const EXTRA_VIDEOS_LIST = 'extra-videos';
+
+// The single videos the admin added, as one list shown first
+function extraVideosPlaylist(o: YoutubeOverrides): LibraryPlaylist[] {
+  const videos = (o.extraVideos ?? []).filter((v) => v?.id && v?.title).map((v) => ({ id: v.id, title: v.title, published: '' }));
+  if (videos.length === 0) return [];
+  return [{ id: EXTRA_VIDEOS_LIST, title: 'مقاطع مختارة', count: `${videos.length} فيديو`, latestVideoId: videos[0].id, videos }];
+}
+
 export function applyOverrides(library: LibraryPlaylist[], o: YoutubeOverrides | null): LibraryPlaylist[] {
   if (!o) return library;
+  if (library.length > 0) library = [...extraVideosPlaylist(o), ...library];
   const hiddenPlaylists = new Set(o.hiddenPlaylists);
   const hiddenVideos = new Set(o.hiddenVideos);
   return library
