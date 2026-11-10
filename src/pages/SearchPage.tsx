@@ -21,12 +21,13 @@ function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-// Marks every occurrence of the query inside a title
+// Marks every word of the query inside a title (the search matches words, in any order)
 function highlight(text: string, q: string): React.ReactNode {
-  const needle = q.trim();
-  if (!needle) return text;
-  return text.split(new RegExp(`(${escapeRegExp(needle)})`, 'gi')).map((part, i) =>
-    part.toLowerCase() === needle.toLowerCase() ? (
+  const words = q.trim().split(/\s+/).filter((w) => w.length > 1);
+  if (words.length === 0) return text;
+  const lower = new Set(words.map((w) => w.toLowerCase()));
+  return text.split(new RegExp(`(${words.map(escapeRegExp).join('|')})`, 'gi')).map((part, i) =>
+    lower.has(part.toLowerCase()) ? (
       <mark key={i} className="bg-amber-200 dark:bg-amber-400/30 text-inherit rounded px-0.5">
         {part}
       </mark>
@@ -125,7 +126,7 @@ export const SearchPage: React.FC = () => {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
       <header data-reveal className="space-y-6">
-        <h1 className="font-amiri text-4xl sm:text-5xl font-bold text-emerald-950 dark:text-stone-100">البحث في الدروس</h1>
+        <h1 className="font-amiri text-4xl sm:text-5xl font-bold text-emerald-950 dark:text-stone-100">البحث في الموقع</h1>
 
         <div role="search" className="space-y-4">
           <div className="relative">
@@ -137,7 +138,7 @@ export const SearchPage: React.FC = () => {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="عنوان درس، باب، أو سلسلة..."
+              placeholder="عنوان درس أو فيديو أو كتاب، أو كلمة منه..."
               className="w-full h-14 pr-12 pl-12 rounded-2xl bg-white dark:bg-stone-900 border border-transparent focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:focus:ring-emerald-400 text-stone-900 dark:text-stone-100 placeholder-stone-500 text-base"
             />
             <Search className="w-5 h-5 text-stone-500 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -213,10 +214,12 @@ export const SearchPage: React.FC = () => {
           <div className="space-y-2 py-6">
             <p className="text-lg text-stone-800 dark:text-stone-200">
               {trimmedQuery && results.length === 0
-                ? `لا توجد دروس تطابق «${trimmedQuery}».`
+                ? `لا توجد دروس مرفوعة على الموقع تطابق «${trimmedQuery}».`
                 : 'لا توجد دروس بهذه التصفية.'}
             </p>
-            <p className="text-stone-600 dark:text-stone-400">جرّب كلمة أقصر، أو اختر «كل الأقسام» و«الكل».</p>
+            <p className="text-stone-600 dark:text-stone-400">
+              {trimmedQuery ? 'ما وُجد في فيديوهات القناة والمكتبة يظهر أسفل هذا. ' : ''}جرّب كلمة أقصر، أو اختر «كل الأقسام» و«الكل».
+            </p>
           </div>
         ) : (
           <ul className="card p-2 sm:p-3">
@@ -247,7 +250,9 @@ export const SearchPage: React.FC = () => {
       </section>
 
       {/* The channel's videos and the library's books, found by the same words */}
-      {!categoryFilter && mediaFilter === 'all' && <SiteSearchExtras query={trimmedQuery} highlight={highlight} />}
+      {!categoryFilter && (mediaFilter === 'all' || mediaFilter === 'video') && (
+        <SiteSearchExtras query={trimmedQuery} highlight={highlight} showBooks={mediaFilter === 'all'} />
+      )}
     </div>
   );
 };

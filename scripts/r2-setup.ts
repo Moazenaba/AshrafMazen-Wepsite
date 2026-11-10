@@ -24,8 +24,9 @@ const origins = [
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:4173',
+  'https://ashraf-mazen-wepsite.vercel.app',
+  'https://ashrafmazenwepsite.vercel.app',
   'https://ashraf-mazen.vercel.app',
-  'https://*.vercel.app',
   ...(process.env.R2_CORS_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean),
 ];
 
@@ -50,7 +51,7 @@ console.log(`CORS for ${origins.length} origins:`, cors.status, cors.ok ? 'ok' :
 const key = `setup-check/${Date.now()}.txt`;
 const put = await fetch(presign(cfg, 'PUT', key, 120), { method: 'PUT', body: 'ok', headers: { 'Content-Type': 'text/plain' } });
 console.log('signed upload:', put.status);
-const read = await fetch(`${cfg.publicUrl}/${key}`);
+const read = cfg.publicUrl ? await fetch(`${cfg.publicUrl}/${key}`) : { status: 'skipped (private bucket)', ok: true };
 console.log('public read:', read.status, read.ok ? '' : `(is public access enabled for ${cfg.publicUrl}?)`);
 const del = await fetch(presign(cfg, 'DELETE', key, 120), { method: 'DELETE' });
 console.log('delete:', del.status);

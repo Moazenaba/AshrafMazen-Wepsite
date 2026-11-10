@@ -2,12 +2,26 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, Eye, EyeOff, Loader2, Save } from 'lucide-react';
 import { getYoutubeOverrides, saveYoutubeOverrides, type YoutubeOverrides } from '../../services/dataService';
 import { overridesChanged, useRawYoutubeLibrary } from '../../lib/youtubeLibrary';
+import { getYouTubeId } from '../../lib/youtube';
 
-const empty: YoutubeOverrides = { hiddenPlaylists: [], hiddenVideos: [], videoTitles: {}, playlistTitles: {}, extraPlaylists: [] };
+const empty: YoutubeOverrides = { hiddenPlaylists: [], hiddenVideos: [], videoTitles: {}, playlistTitles: {}, extraPlaylists: [], extraVideos: [] };
 
-// A playlist address or just its id: https://www.youtube.com/playlist?list=PL... or PL...
+// A playlist address or just its id: https://www.youtube.com/playlist?list=PL... or PL... (a video id is 11 characters, a playlist's longer)
 const playlistIdFrom = (text: string) =>
-  text.match(/[?&]list=([A-Za-z0-9_-]{10,60})/)?.[1] || (/^[A-Za-z0-9_-]{10,60}$/.test(text.trim()) ? text.trim() : null);
+  text.match(/[?&]list=([A-Za-z0-9_-]{12,60})/)?.[1] || (/^[A-Za-z0-9_-]{12,60}$/.test(text.trim()) ? text.trim() : null);
+
+// The video's title as YouTube shows it, so the admin need not type one
+async function youtubeTitle(videoId: string): Promise<string | null> {
+  try {
+    const url = `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}`;
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const data = await response.json();
+    return typeof data?.title === 'string' && data.title.trim() ? data.title.trim() : null;
+  } catch {
+    return null;
+  }
+}
 
 // The admin's "فيديوهات القناة" tab. The playlists come from the YouTube channel; the admin cannot change YouTube,
 // but decides here what the site shows: hide a playlist or a single video, or show a different title.
@@ -38,9 +52,26 @@ export const YoutubeManager: React.FC = () => {
   const toggle = (list: 'hiddenPlaylists' | 'hiddenVideos', id: string) =>
     setDraft((d) => ({ ...d, [list]: d[list].includes(id) ? d[list].filter((x) => x !== id) : [...d[list], id] }));
 
-  const addPlaylist = () => {
-    const id = playlistIdFrom(newList.trim());
-    if (!id) return setMessage({ type: 'error', text: 'الصق رابط القائمة (فيه list=...) أو رقمها فقط.' });
+  const [adding, setAdding] = useState(false);
+
+  // One box for both: a playlist link (it has list=...) adds the whole playlist, any other video link adds that video alone
+  const addPlaylist = async () => {
+    const text = newList.trim();
+    const id = playlistIdFrom(text);
+    if (!id) {
+      const videoId = getYouTubeId(text);
+      if (!videoId) return setMessage({ type: 'error', text: 'الرابط غير مفهوم. الصق رابط فيديو من يوتيوب، أو رابط قائمة تشغيل (فيه list=...).' });
+      if (draft.extraVideos.some((v) => v.id === videoId)) return setMessage({ type: 'error', text: 'هذا الفيديو مضاف بالفعل.' });
+      setAdding(true);
+      const title = newTitle.trim() || (await youtubeTitle(videoId));
+      setAdding(false);
+      if (!title) return setMessage({ type: 'error', text: 'تعذّر جلب عنوان الفيديو من يوتيوب. اكتب عنوانه في الخانة الثانية ثم اضغط «إضافة».' });
+      setDraft((d) => ({ ...d, extraVideos: [{ id: videoId, title }, ...d.extraVideos] }));
+      setMessage({ type: 'ok', text: `أُضيف الفيديو «${title}». اضغط «حفظ التغييرات» ليظهر في الموقع ضمن «مقاطع مختارة».` });
+      setNewList('');
+      setNewTitle('');
+      return;
+    }
     if (!newTitle.trim()) return setMessage({ type: 'error', text: 'اكتب عنواناً للقائمة.' });
     if (draft.extraPlaylists.some((p) => p.id === id) || library.some((p) => p.id === id)) {
       return setMessage({ type: 'error', text: 'هذه القائمة موجودة بالفعل.' });
@@ -52,6 +83,7 @@ export const YoutubeManager: React.FC = () => {
   };
 
   const removeExtra = (id: string) => setDraft((d) => ({ ...d, extraPlaylists: d.extraPlaylists.filter((p) => p.id !== id) }));
+  const removeVideo = (id: string) => setDraft((d) => ({ ...d, extraVideos: d.extraVideos.filter((v) => v.id !== id) }));
 
   const rename = (list: 'videoTitles' | 'playlistTitles', id: string, value: string) =>
     setDraft((d) => {
@@ -118,13 +150,30 @@ export const YoutubeManager: React.FC = () => {
           </span>
         </div>
         <fieldset className="space-y-2 pt-1">
-          <legend className="font-semibold text-stone-900 dark:text-stone-100 text-sm">إضافة قائمة جديدة من القناة</legend>
+          <legend className="font-semibold text-stone-900 dark:text-stone-100 text-sm">إضافة فيديو أو قائمة من يوتيوب</legend>
           <div className="flex flex-wrap gap-2">
-            <input aria-label="رابط القائمة أو رقمها" dir="ltr" value={newList} onChange={(e) => setNewList(e.target.value)} placeholder="https://www.youtube.com/playlist?list=..." className={`${input} w-full sm:w-80`} />
-            <input aria-label="عنوان القائمة" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="عنوان القائمة" className={`${input} w-full sm:w-56`} />
-            <button type="button" onClick={addPlaylist} className="h-10 px-4 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-sm font-semibold">إضافة</button>
+            <input aria-label="رابط الفيديو أو القائمة" dir="ltr" value={newList} onChange={(e) => setNewList(e.target.value)} placeholder="https://youtu.be/...  or  ...playlist?list=..." className={`${input} w-full sm:w-96`} />
+            <input aria-label="العنوان" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="العنوان (اختياري للفيديو)" className={`${input} w-full sm:w-56`} />
+            <button type="button" onClick={addPlaylist} disabled={adding} className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-sm font-semibold disabled:opacity-60">
+              {adding && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+              إضافة
+            </button>
           </div>
-          <p className="text-xs text-stone-600 dark:text-stone-400">بعد «حفظ التغييرات» تظهر القائمة فوراً بأحدث فيديوهاتها من يوتيوب (يوتيوب يعطي آخر ١٥ فيديو فقط لكل قائمة)، ثم تتحدث تلقائياً كل ٦ ساعات.</p>
+          <ul className="text-xs text-stone-600 dark:text-stone-400 space-y-1 list-disc ps-5">
+            <li><b>فيديو واحد:</b> من يوتيوب اضغط «مشاركة» ثم «نسخ»، والصق الرابط هنا. العنوان يُجلب تلقائياً، ويظهر الفيديو في الموقع ضمن «مقاطع مختارة».</li>
+            <li><b>قائمة تشغيل كاملة:</b> افتح القائمة نفسها على يوتيوب (من تبويب «قوائم التشغيل» في القناة) ثم «مشاركة» ثم «نسخ»، فيكون في الرابط <span dir="ltr">list=</span>. اكتب لها عنواناً. تظهر بأحدث ١٥ فيديو منها، وتتحدث تلقائياً كل ٦ ساعات.</li>
+            <li>لا يظهر شيء في الموقع قبل الضغط على «حفظ التغييرات».</li>
+          </ul>
+          {draft.extraVideos.length > 0 && (
+            <ul className="flex flex-wrap gap-2" aria-label="الفيديوهات المضافة">
+              {draft.extraVideos.map((v) => (
+                <li key={v.id} className="inline-flex items-center gap-2 ps-3 pe-1 h-9 max-w-full rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 text-sm">
+                  <span className="truncate">▶ {v.title}</span>
+                  <button type="button" onClick={() => removeVideo(v.id)} aria-label={`إزالة ${v.title}`} className="w-7 h-7 shrink-0 rounded-full hover:bg-amber-100 dark:hover:bg-amber-900">×</button>
+                </li>
+              ))}
+            </ul>
+          )}
           {draft.extraPlaylists.length > 0 && (
             <ul className="flex flex-wrap gap-2">
               {draft.extraPlaylists.map((p) => (

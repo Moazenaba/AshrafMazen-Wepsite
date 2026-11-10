@@ -64,6 +64,7 @@ export const Navbar: React.FC = () => {
 
   // The three kinds of content first (watch, listen, read), then the subjects and what the visitor saved
   const navLinks = [
+    { label: 'الرئيسية', to: '/' },
     { label: 'المرئيات', to: '/videos' },
     { label: 'الصوتيات', to: '/audio' },
     { label: 'المكتبة', to: '/books' },
@@ -112,7 +113,7 @@ export const Navbar: React.FC = () => {
           <nav className="hidden lg:flex items-center gap-1" aria-label="القائمة الرئيسية">
             {navLinks.map((item) =>
               typeof item.to === 'string' ? (
-                <NavLink key={item.label} to={item.to} className={({ isActive }) => linkClass(isActive)}>
+                <NavLink key={item.label} to={item.to} end={item.to === '/'} className={({ isActive }) => linkClass(isActive)}>
                   <span className="link-grow pb-0.5">{item.label}</span>
                 </NavLink>
               ) : (
@@ -126,8 +127,8 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center gap-1 shrink-0">
             <Link
               to="/search"
-              aria-label="البحث في الدروس"
-              title="البحث في الدروس"
+              aria-label="البحث في الموقع"
+              title="البحث في الموقع"
               className="w-11 h-11 flex items-center justify-center rounded-lg text-stone-600 dark:text-stone-300 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors"
             >
               <Search className="w-5 h-5" />

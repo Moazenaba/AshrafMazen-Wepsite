@@ -8,3 +8,24 @@ export const normalizeArabic = (text: string | null | undefined): string =>
     .replace(/ى/g, 'ي')
     .replace(/ة/g, 'ه')
     .toLowerCase();
+
+// The words of a text after normalizing: punctuation (| - « » ، :) and extra spaces do not count
+const wordsOf = (text: string | null | undefined): string[] =>
+  normalizeArabic(text)
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .split(' ')
+    .filter(Boolean);
+
+// How well a text answers a search: 0 = not at all. The words may come in any order and with any punctuation between
+// them, and a long search still finds its lesson when one or two of its words are not in the title (a typo, an extra word).
+export function searchScore(text: string | null | undefined, query: string | null | undefined): number {
+  const needles = wordsOf(query);
+  if (needles.length === 0) return 0;
+  const haystack = wordsOf(text).join(' ');
+  if (!haystack) return 0;
+  const whole = needles.join(' ');
+  if (haystack.includes(whole)) return needles.length + 1;
+  const found = needles.filter((w) => haystack.includes(w)).length;
+  const required = needles.length <= 2 ? needles.length : Math.ceil(needles.length * 0.7);
+  return found >= required ? found : 0;
+}
