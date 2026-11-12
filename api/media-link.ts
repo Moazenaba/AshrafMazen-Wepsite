@@ -21,6 +21,7 @@ import { YOUTUBE_LIBRARY } from '../src/data/youtube-library.js';
 const CHANNEL_HANDLE = process.env.YOUTUBE_CHANNEL_HANDLE || 'Ashrafmazen';
 const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || 'UCisGvsFtKyDU6NTFywaITzQ';
 const STEP_MS = 9000;
+const COBALT_MS = 16000;
 // A service that just failed is skipped for a while, so visitors don't wait on it every time
 const FAIL_MS = 10 * 60 * 1000;
 const failedAt = new Map<string, number>();
@@ -38,8 +39,8 @@ async function timed(url: string, init: RequestInit = {}, ms = STEP_MS): Promise
   }
 }
 
-async function json(url: string, init?: RequestInit): Promise<any> {
-  const response = await timed(url, init);
+async function json(url: string, init?: RequestInit, ms = STEP_MS): Promise<any> {
+  const response = await timed(url, init, ms);
   if (!response.ok && response.status !== 400) throw new Error(`HTTP ${response.status}`);
   return response.json();
 }
@@ -64,7 +65,8 @@ async function works(link: MediaLink): Promise<boolean> {
 async function ask(p: Provider, id: string, kind: MediaKind): Promise<MediaLink | null> {
   if (p.type === 'cobalt') {
     const req = cobaltRequest(p, id, kind);
-    return parseCobalt(await json(req.url, req.init));
+    // cobalt prepares the file before it answers (an MP3 can take several seconds), so it gets longer
+    return parseCobalt(await json(req.url, req.init, COBALT_MS));
   }
   if (p.type === 'invidious') return parseInvidious(p, await json(invidiousRequest(p, id)), kind);
   return parsePiped(await json(pipedRequest(p, id)), kind);
