@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Menu, X, Search, LogIn } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
+import { MobileMenuSheet } from './nav/MobileMenuSheet';
+import { FloatingMenuButton } from './nav/FloatingMenuButton';
 import { useBookmarks } from '../services/bookmarkService';
 import { supabase } from '../lib/supabase';
 import { checkCurrentAdmin, getSiteSettings, DEFAULT_SITE_SETTINGS } from '../services/dataService';
@@ -50,6 +52,7 @@ export const Navbar: React.FC = () => {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname, location.hash, location.key]);
+  const closeMenu = useCallback(() => setIsMobileMenuOpen(false), []);
 
   // A soft shadow appears once the page scrolls under the sticky header /* taste-skill-ignore: the sticky bar is the one surface allowed a shadow */
   const [isScrolled, setIsScrolled] = useState(false);
@@ -153,7 +156,7 @@ export const Navbar: React.FC = () => {
               className="w-11 h-11 flex items-center justify-center lg:hidden rounded-lg text-stone-700 dark:text-stone-200"
               aria-label={isMobileMenuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
               aria-expanded={isMobileMenuOpen}
-              aria-controls="mobile-menu"
+              aria-haspopup="dialog"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -161,38 +164,9 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
-      {isMobileMenuOpen && (
-        <nav
-          id="mobile-menu"
-          aria-label="القائمة الرئيسية"
-          className="lg:hidden bg-stone-100 dark:bg-stone-900 px-4 py-3 space-y-1"
-        >
-          {navLinks.map((item) => (
-            <Link
-              key={item.label}
-              to={item.to}
-              className="flex items-center min-h-[48px] px-3 rounded-lg text-base font-semibold text-stone-800 dark:text-stone-100"
-            >
-              {item.label}
-            </Link>
-          ))}
-          {/* On phones the admin sign-in lives here, so the top bar keeps room for the name */}
-          {!isAdmin && (
-            <Link
-              to="/admin"
-              className="sm:hidden flex items-center gap-2 min-h-[48px] px-3 rounded-lg text-base font-semibold text-stone-800 dark:text-stone-100"
-            >
-              <LogIn className="w-5 h-5" aria-hidden="true" />
-              دخول الإدارة
-            </Link>
-          )}
-          <div className="flex items-center justify-between min-h-[48px] px-3">
-            <span className="text-base font-semibold text-stone-800 dark:text-stone-100">المظهر</span>
-            <ThemeToggle size="lg" />
-          </div>
-        </nav>
-      )}
+      {/* Phones: one menu, opened by the top bar's button or the floating one (hidden in the admin, which has its own) */}
+      <MobileMenuSheet open={isMobileMenuOpen} onClose={closeMenu} isAdmin={isAdmin} bookmarkCount={bookmarkCount} />
+      {!location.pathname.startsWith('/admin') && <FloatingMenuButton open={isMobileMenuOpen} onOpen={() => setIsMobileMenuOpen(true)} />}
     </header>
   );
 };
