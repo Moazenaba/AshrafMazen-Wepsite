@@ -16,6 +16,7 @@ import {
 } from './siteContentRules';
 import type { TickerQuote } from '../../constants/tickerQuotes';
 import { cleanHomeFeature, parseHomeFeature, validateHomeFeature, type HomeFeature } from './homeFeatureRules';
+import { cleanWelcomeSound, parseWelcomeSound, validateWelcomeSound, type WelcomeSound } from './welcomeSoundRules';
 
 let cached: SiteContent | null = null;
 
@@ -31,6 +32,7 @@ export async function getSiteContent(forceRefresh = false): Promise<SiteContent>
         hero: parseHero(byKey.get(SITE_CONTENT_KEYS.hero)),
         contact: parseContact(byKey.get(SITE_CONTENT_KEYS.contact)),
         feature: parseHomeFeature(byKey.get(SITE_CONTENT_KEYS.feature)),
+        welcome: parseWelcomeSound(byKey.get(SITE_CONTENT_KEYS.welcome)),
       };
       return cached;
     }
@@ -68,5 +70,13 @@ export async function saveHomeFeature(feature: HomeFeature): Promise<HomeFeature
   const problem = validateHomeFeature(clean);
   if (problem) throw new Error(problem);
   await write(SITE_CONTENT_KEYS.feature, clean);
+  return clean;
+}
+
+export async function saveWelcomeSound(sound: WelcomeSound): Promise<WelcomeSound> {
+  const clean = cleanWelcomeSound(sound);
+  const problem = validateWelcomeSound(clean);
+  if (problem) throw new Error(problem);
+  await write(SITE_CONTENT_KEYS.welcome, clean);
   return clean;
 }

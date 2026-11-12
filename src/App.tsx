@@ -5,6 +5,7 @@ import { BrowserRouter, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AudioProvider, useAudio } from './context/AudioContext';
 import { MiniPlayer, MINI_PLAYER_SPACE } from './components/MiniPlayer';
+import { WelcomeSound } from './components/WelcomeSound';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -52,6 +53,7 @@ function AppLayout() {
       </main>
       {!isAdmin && <Footer />}
       {showPlayer && <MiniPlayer />}
+      {!isAdmin && <WelcomeSound />}
     </div>
   );
 }
