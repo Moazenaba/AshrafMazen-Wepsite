@@ -1,10 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { getResumeSeconds, markLessonWatched, saveLessonPosition } from '../services/progressService';
 import { createPlaybackMeter, trackView } from '../services/analytics';
-import { SILENCE, isYoutubeTrackId, youtubeAudioUrl } from '../lib/youtubeAudio';
+import { SILENCE, youtubeAudioUrl } from '../lib/youtubeAudio';
+import { finite, isSilence, reachable, statsKey, useMediaSession } from './audioEngine';
 
 // One recording the site can play: a lesson's audio (identified by the lesson's id), or a channel video's sound
-// (id "yt:<videoId>", src empty: the link is fetched when it plays, see lib/youtubeAudio)
+// (id "yt:<videoId>", with youtubeId: its link lasts minutes and is fetched again if it breaks, see lib/youtubeAudio)
 export interface AudioTrack {
   id: string;
   title: string;
@@ -14,11 +15,6 @@ export interface AudioTrack {
   // Where the title in the mini player leads back to
   href?: string;
 }
-
-// The key statistics count under: a lesson's, or the channel video's (the same its video page uses)
-const statsKey = (id: string) => (isYoutubeTrackId(id) ? id : `lesson:${id}`);
-const isSilence = (audio: HTMLAudioElement) => audio.src.startsWith('data:');
-const finite = (n: number) => (Number.isFinite(n) ? n : 0);
 
 type AudioEvent = { type: 'time'; trackId: string; seconds: number; duration: number } | { type: 'ended'; trackId: string };
 
@@ -43,6 +39,12 @@ interface AudioApi {
   setVolume(volume: number): void;
   toggleMute(): void;
   close(): void;
+  // For a player that starts somewhere else and moves here (YouTube's sound while this one gets ready, see
+  // YoutubeAudioBar): unlock playback from the visitor's tap, load a recording quietly (no track shown), and
+  // tell how many seconds of it can be reached so far (0 while it is not the one loaded)
+  prime(): void;
+  preload(src: string): void;
+  reach(src: string): number;
   // The lesson page listens here to follow playback (chapters, the paragraph being read, auto-next)
   subscribe(listener: (event: AudioEvent) => void): () => void;
 }
@@ -50,7 +52,6 @@ interface AudioApi {
 const AudioCtx = createContext<AudioApi | null>(null);
 
 const SAVE_EVERY_SECONDS = 5;
-const ARTIST = 'الشيخ أشرف مازن';
 
 // The site's one audio element lives here, above the routes, so a recording keeps playing while the visitor
 // moves between pages. Phones get lock-screen controls through the Media Session API, and playback continues
@@ -104,7 +105,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     audio.play().catch(() => {});
   };
 
-  // Fetches a channel video's sound and plays it from `at` seconds, unless the visitor moved on meanwhile
+  // Fetches a channel video's sound again and plays it from `at` seconds, unless the visitor moved on meanwhile
   const playYoutube = useCallback(async (next: AudioTrack, at: number) => {
     setLoading(true);
     setError(null);
@@ -125,7 +126,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const audio = audioRef.current;
     if (!audio) return;
     const current = trackRef.current;
-    const loaded = next.youtubeId ? !!audio.src && !isSilence(audio) : current?.src === next.src;
+    const loaded = current?.src === next.src && !isSilence(audio);
     if (current && current.id === next.id && loaded) {
       if (startAt !== undefined) audio.currentTime = startAt;
       audio.play().catch(() => {});
@@ -139,17 +140,39 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setTime(pendingStart.current);
     setDuration(0);
     setError(null);
-    if (next.youtubeId && !next.src) {
-      // A silent sound from the tap itself unlocks playback; the real one follows when its link arrives
-      start(audio, SILENCE);
-      trackRef.current = next;
-      playYoutube(next, pendingStart.current);
+    setLoading(false);
+    // Loaded already (preload): it plays from what has arrived, without fetching it again
+    if (audio.src === next.src) {
+      audio.playbackRate = rateRef.current;
+      seekPending(audio);
+      audio.play().catch(() => {});
       return;
     }
-    setLoading(false);
     // Called from the visitor's tap, so the browser allows playback to start
     start(audio, next.src);
   }, [savePosition, playYoutube]);
+
+  const prime = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    savePosition(true);
+    setTrack(null);
+    setPlaying(false);
+    start(audio, SILENCE);
+  }, [savePosition]);
+
+  const preload = useCallback((src: string) => {
+    const audio = audioRef.current;
+    if (!audio || trackRef.current || audio.src === src) return;
+    audio.preload = 'auto';
+    audio.src = src;
+    audio.load();
+  }, []);
+
+  const reach = useCallback((src: string) => {
+    const audio = audioRef.current;
+    return audio && audio.src === src && !audio.error ? reachable(audio) : 0;
+  }, []);
 
   const pause = useCallback(() => {
     audioRef.current?.pause();
@@ -219,38 +242,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, []);
 
-  // Lock-screen and headphone controls, and the title shown there
-  useEffect(() => {
-    if (!('mediaSession' in navigator)) return;
-    const session = navigator.mediaSession;
-    if (!track) {
-      session.metadata = null;
-      return;
-    }
-    // A channel video shows its picture in the notification and on the lock screen
-    const artwork = track.youtubeId ? [{ src: `https://i.ytimg.com/vi/${track.youtubeId}/hqdefault.jpg`, sizes: '480x360', type: 'image/jpeg' }] : [];
-    session.metadata = new MediaMetadata({ title: track.title, artist: ARTIST, album: track.subtitle || '', artwork });
-    const handlers: [MediaSessionAction, MediaSessionActionHandler][] = [
-      ['play', () => audioRef.current?.play().catch(() => {})],
-      ['pause', () => audioRef.current?.pause()],
-      ['seekbackward', (d) => skip(-(d.seekOffset || 10))],
-      ['seekforward', (d) => skip(d.seekOffset || 10)],
-      ['seekto', (d) => d.seekTime !== undefined && seek(d.seekTime)],
-      ['stop', () => close()],
-    ];
-    handlers.forEach(([action, handler]) => {
-      try {
-        session.setActionHandler(action, handler);
-      } catch {
-        // An action this browser does not support
-      }
-    });
-    return () => handlers.forEach(([action]) => {
-      try {
-        session.setActionHandler(action, null);
-      } catch {}
-    });
-  }, [track, skip, seek, close]);
+  useMediaSession(audioRef, track, { skip, seek, close });
 
   // Keep the place when the visitor closes or reloads the tab
   useEffect(() => {
@@ -260,8 +252,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [savePosition]);
 
   const api = useMemo<AudioApi>(
-    () => ({ track, playing, time, duration, rate, muted, volume, loading, error, play, toggle, pause, seek, skip, setRate, setVolume, toggleMute, close, subscribe }),
-    [track, playing, time, duration, rate, muted, volume, loading, error, play, toggle, pause, seek, skip, setRate, setVolume, toggleMute, close, subscribe]
+    () => ({ track, playing, time, duration, rate, muted, volume, loading, error, play, toggle, pause, seek, skip, setRate, setVolume, toggleMute, close, prime, preload, reach, subscribe }),
+    [track, playing, time, duration, rate, muted, volume, loading, error, play, toggle, pause, seek, skip, setRate, setVolume, toggleMute, close, prime, preload, reach, subscribe]
   );
 
   // The place to resume from is reached once the browser has that part (a channel video's sound cannot jump
@@ -274,8 +266,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       pendingStart.current = 0;
       return;
     }
-    const reach = audio.seekable.length ? audio.seekable.end(audio.seekable.length - 1) : 0;
-    if (reach >= at) {
+    if (reachable(audio) >= at) {
       audio.currentTime = at;
       pendingStart.current = 0;
     }

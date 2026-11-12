@@ -1,26 +1,41 @@
 // "استمع فقط" for a YouTube video: no picture on the page, only a sound bar (play, seek, ±15 s, speed).
-// YouTube's player is kept out of sight and driven through its API; the sound is YouTube's own.
-// On phones the sound stops when the screen locks (YouTube's player pauses), unlike a recording kept on the site.
-import React, { useEffect, useRef, useState } from 'react';
+// It starts at once on YouTube's own player, kept out of sight. Meanwhile the same sound is fetched for the site's
+// own player (lib/youtubeAudio, a few seconds to half a minute); once enough of it has arrived, playback moves
+// there at the same second. From then on it goes on with the screen off and shows in the phone's notifications
+// (YouTube's player stops when the screen locks). If that sound cannot be had, YouTube simply keeps playing.
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Headphones, Loader2, Pause, Play, RotateCcw, RotateCw } from 'lucide-react';
 import { loadYouTubeApi, type YTPlayer } from '../lib/youtube';
+import { youtubeAudioUrl } from '../lib/youtubeAudio';
 import { formatAudioTime } from '../utils/helpers';
-import { useAudio } from '../context/AudioContext';
+import { useAudio, type AudioTrack } from '../context/AudioContext';
+import { AudioPlayer, type MediaHandle } from './AudioPlayer';
 
 const RATES = [1, 1.25, 1.5, 2];
+// Seconds of the site's sound that must be ready past the current place before playback moves there
+const AHEAD = 3;
 
 interface Props {
   videoId: string;
   title: string;
+  // Where the sound is remembered (progress, statistics) and what the notification shows
+  trackId: string;
+  subtitle?: string;
+  href?: string;
   startAt?: number;
   onTimeUpdate?: (seconds: number, duration: number) => void;
   onEnded?: () => void;
 }
 
-export const YoutubeAudioBar: React.FC<Props> = ({ videoId, title, startAt = 0, onTimeUpdate, onEnded }) => {
+export const YoutubeAudioBar = forwardRef<MediaHandle, Props>(({ videoId, title, trackId, subtitle, href, startAt = 0, onTimeUpdate, onEnded }, ref) => {
   const hostRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
+  const siteRef = useRef<MediaHandle>(null);
   const callbacks = useRef({ onTimeUpdate, onEnded });
+  const engine = useAudio();
+  const engineRef = useRef(engine);
+  const urlRef = useRef<string | null>(null);
+  const [from, setFrom] = useState(startAt);
   const [started, setStarted] = useState(false);
   const [ready, setReady] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -29,15 +44,19 @@ export const YoutubeAudioBar: React.FC<Props> = ({ videoId, title, startAt = 0, 
   const [duration, setDuration] = useState(0);
   const [rate, setRate] = useState(1);
   const [failed, setFailed] = useState(false);
-  const { pause: pauseAudio } = useAudio();
+  // The track once playback has moved to the site's own player
+  const [moved, setMoved] = useState<AudioTrack | null>(null);
+  const rateRef = useRef(rate);
 
   useEffect(() => {
     callbacks.current = { onTimeUpdate, onEnded };
+    engineRef.current = engine;
+    rateRef.current = rate;
   });
 
   // The hidden player is made on the first press of play (a browser lets sound start only after a press)
   useEffect(() => {
-    if (!started || !hostRef.current) return;
+    if (!started || moved || !hostRef.current) return;
     const mount = document.createElement('div');
     hostRef.current.appendChild(mount);
     let cancelled = false;
@@ -53,6 +72,18 @@ export const YoutubeAudioBar: React.FC<Props> = ({ videoId, title, startAt = 0, 
         lastReport = t;
         callbacks.current.onTimeUpdate?.(t, d);
       }
+      // Move to the site's player once its sound reaches a little past where YouTube is
+      const url = urlRef.current;
+      if (url && d && engineRef.current.reach(url) >= Math.min(t + AHEAD, d - 1)) {
+        const wasPlaying = player.getPlayerState?.() === 1;
+        player.pauseVideo?.();
+        const track: AudioTrack = { id: trackId, title, subtitle, src: url, youtubeId: videoId, href };
+        engineRef.current.setRate(rateRef.current);
+        engineRef.current.play(track, t);
+        if (!wasPlaying) window.setTimeout(() => engineRef.current.pause(), 0);
+        setFrom(t);
+        setMoved(track);
+      }
     }, 500);
 
     loadYouTubeApi()
@@ -61,11 +92,12 @@ export const YoutubeAudioBar: React.FC<Props> = ({ videoId, title, startAt = 0, 
         player = new YT.Player(mount, {
           videoId,
           host: 'https://www.youtube-nocookie.com',
-          playerVars: { autoplay: 1, controls: 0, playsinline: 1, rel: 0, start: Math.floor(startAt), origin: window.location.origin },
+          playerVars: { autoplay: 1, controls: 0, playsinline: 1, rel: 0, start: Math.floor(from), origin: window.location.origin },
           events: {
             onReady: () => {
               playerRef.current = player;
               setReady(true);
+              player?.setPlaybackRate?.(rateRef.current);
               player?.playVideo?.();
             },
             onStateChange: (event) => {
@@ -86,11 +118,26 @@ export const YoutubeAudioBar: React.FC<Props> = ({ videoId, title, startAt = 0, 
       player?.destroy();
       mount.remove();
     };
-  }, [started, videoId, startAt]);
+    // `from` is read once when the player is made; later jumps go through seekTo
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [started, moved, videoId]);
+
+  const begin = () => {
+    // Unlocks the site's player from this tap (it takes over later, without a tap) and stops whatever it played
+    engine.prime();
+    setStarted(true);
+    youtubeAudioUrl(videoId)
+      .then((url) => {
+        urlRef.current = url;
+        engineRef.current.preload(url);
+      })
+      .catch(() => {
+        // No sound for the site's player: YouTube keeps playing (it stops when the screen locks)
+      });
+  };
 
   const toggle = () => {
-    pauseAudio();
-    if (!started) return setStarted(true);
+    if (!started) return begin();
     const p = playerRef.current;
     if (!p) return;
     if (playing) p.pauseVideo?.();
@@ -100,8 +147,29 @@ export const YoutubeAudioBar: React.FC<Props> = ({ videoId, title, startAt = 0, 
   const seek = (seconds: number) => {
     const target = Math.max(0, Math.min(duration || seconds, seconds));
     setTime(target);
+    if (!started) {
+      setFrom(target);
+      return begin();
+    }
     playerRef.current?.seekTo(target, true);
   };
+
+  // The lesson page's chapters and transcript jump here, before or after the move
+  useImperativeHandle(ref, () => ({
+    seek(seconds: number) {
+      if (moved) siteRef.current?.seek(seconds);
+      else seek(seconds);
+    },
+  }));
+
+  if (moved) {
+    return (
+      <div className="space-y-2">
+        <AudioPlayer ref={siteRef} track={moved} startAt={from} onTimeUpdate={onTimeUpdate} onEnded={onEnded} />
+        <p className="text-xs text-stone-600 dark:text-stone-400">يكمل التشغيل لو قفلت الشاشة أو خرجت من الموقع، وتتحكم فيه من الإشعارات.</p>
+      </div>
+    );
+  }
 
   const nextRate = () => {
     const next = RATES[(RATES.indexOf(rate) + 1) % RATES.length];
@@ -155,4 +223,4 @@ export const YoutubeAudioBar: React.FC<Props> = ({ videoId, title, startAt = 0, 
       {failed && <p role="alert" className="text-sm text-red-200">تعذّر تشغيل الصوت. جرّب «شاهد» أو أعد تحميل الصفحة.</p>}
     </div>
   );
-};
+});
