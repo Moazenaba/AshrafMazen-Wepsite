@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { playlistSources, sourceOf } from './mediaDownload';
+import { isStale, playlistSources, sourceOf } from './mediaDownload';
 
 describe('downloads', () => {
   it('uses the site file first, else the YouTube video', () => {
@@ -26,5 +26,17 @@ describe('savefrom fallback', () => {
   it('uses their shortcut before the video link', async () => {
     const { savefromUrl } = await import('./mediaDownload');
     expect(savefromUrl('abcdefghijk')).toBe('https://sfrom.net/https://www.youtube.com/watch?v=abcdefghijk');
+  });
+});
+
+describe('isStale', () => {
+  const link = { url: 'https://t/x', name: 'a', attachment: true, youtubeId: 'abcdefghijk', at: 0 };
+  it('marks an old cobalt link from YouTube as stale', () => {
+    expect(isStale(link, 59_000)).toBe(false);
+    expect(isStale(link, 61_000)).toBe(true);
+  });
+  it('never marks a site file or a non-attachment link', () => {
+    expect(isStale({ ...link, youtubeId: undefined }, 999_999)).toBe(false);
+    expect(isStale({ ...link, attachment: false }, 999_999)).toBe(false);
   });
 });

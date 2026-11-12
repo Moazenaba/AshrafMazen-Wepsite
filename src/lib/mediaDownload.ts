@@ -49,24 +49,39 @@ export interface StartedDownload {
   name: string;
   // Sent as an attachment: opening it saves the file and the page stays
   attachment: boolean;
+  // Started by itself; otherwise the visitor taps its button in the dialog
+  auto?: boolean;
+  // The YouTube video it came from and when, so an old link can be asked for again
+  youtubeId?: string;
+  at?: number;
+}
+
+// cobalt's links (attachments) die about 90 seconds after they are made; a phone visitor often comes back later
+// (after checking the download in another app), and a dead link saves as a 0 KB file
+const LINK_FRESH_MS = 60 * 1000;
+export const isStale = (d: StartedDownload, now = Date.now()) => !!d.youtubeId && d.attachment && now - (d.at ?? 0) > LINK_FRESH_MS;
+
+// "إعادة التحميل": the same link while fresh, else a new one from the services
+export async function redownload(d: StartedDownload, kind: DownloadKind): Promise<StartedDownload> {
+  if (!isStale(d)) {
+    deliver(d);
+    return d;
+  }
+  const fresh: StartedDownload = { ...(await fetchMediaLink(d.youtubeId!, kind)), name: d.name, youtubeId: d.youtubeId, at: Date.now() };
+  fresh.auto = deliver(fresh);
+  // A link that is not an attachment cannot be opened this late (the browser would block it): it is shown to tap
+  return fresh;
 }
 
 // An attachment is opened in this tab: the browser saves it and the page stays where it is.
 // (A hidden frame works on laptops but phones, iPhones above all, ignore downloads from it.)
-// Any other link opens in a new tab, where the visitor can save it.
-export function deliver(d: StartedDownload): void {
-  if (d.attachment) {
-    window.location.href = d.url;
-    return;
-  }
-  const a = document.createElement('a');
-  a.href = d.url;
-  a.download = d.name;
-  a.target = '_blank';
-  a.rel = 'noopener noreferrer';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+// Any other link would need a new tab, and opening one seconds after the click (the link takes time to get) is
+// what the browser blocks as a popup, so it is not opened here: the dialog shows it as a button to tap.
+// Returns whether the download was started.
+export function deliver(d: StartedDownload): boolean {
+  if (!d.attachment) return false;
+  window.location.href = d.url;
+  return true;
 }
 
 // Gets the link (from the site's files or the download services) and starts it; returns it for "إعادة التحميل"
@@ -74,8 +89,8 @@ export async function downloadSource(source: DownloadSource, kind: DownloadKind)
   const started: StartedDownload =
     source.type === 'file'
       ? { url: downloadHref(source.url, source.name), name: source.name, attachment: isR2Url(source.url) }
-      : { ...(await fetchMediaLink(source.id, kind)), name: source.name };
-  deliver(started);
+      : { ...(await fetchMediaLink(source.id, kind)), name: source.name, youtubeId: source.id, at: Date.now() };
+  started.auto = deliver(started);
   return started;
 }
 
