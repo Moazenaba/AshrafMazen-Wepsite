@@ -17,6 +17,8 @@ export interface SiteVideo extends LibraryVideo {
 
 export interface SitePlaylist extends Omit<LibraryPlaylist, 'videos'> {
   videos: SiteVideo[];
+  // The admin's category for it (a slug, or "none"); see lib/channelSearch
+  category?: string;
 }
 
 export const EXTRA_VIDEOS_LIST = 'extra-videos';
@@ -70,6 +72,7 @@ export function applyOverrides(library: SitePlaylist[], o: YoutubeOverrides | nu
       return {
         ...p,
         title: o.playlistTitles[p.id] || p.title,
+        ...(o.playlistCategories?.[p.id] ? { category: o.playlistCategories[p.id] } : {}),
         videos,
         count: `${videos.length} فيديو`,
         // The playlist's picture must be a YouTube video that is still shown

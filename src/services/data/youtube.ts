@@ -23,11 +23,13 @@ export interface YoutubeOverrides {
   playlistRemovals: Record<string, string[]>;
   // The admin's order of the videos inside a playlist (videos not placed keep their place after them)
   videoOrder: Record<string, string[]>;
+  // The site category (its slug) a playlist belongs to in "كل الدروس"; "none" = none. Unset: guessed from its title
+  playlistCategories: Record<string, string>;
 }
 
 export const EMPTY_OVERRIDES: YoutubeOverrides = {
   hiddenPlaylists: [], hiddenVideos: [], videoTitles: {}, playlistTitles: {}, extraPlaylists: [], extraVideos: [],
-  playlistAdditions: {}, playlistOrder: [], mediaFiles: {}, playlistRemovals: {}, videoOrder: {},
+  playlistAdditions: {}, playlistOrder: [], mediaFiles: {}, playlistRemovals: {}, videoOrder: {}, playlistCategories: {},
 };
 
 const isObject = (v: unknown): v is Record<string, any> => !!v && typeof v === 'object' && !Array.isArray(v);
@@ -51,6 +53,7 @@ export async function getYoutubeOverrides(): Promise<YoutubeOverrides> {
       mediaFiles: isObject(parsed.mediaFiles) ? parsed.mediaFiles : {},
       playlistRemovals: isObject(parsed.playlistRemovals) ? parsed.playlistRemovals : {},
       videoOrder: isObject(parsed.videoOrder) ? parsed.videoOrder : {},
+      playlistCategories: isObject(parsed.playlistCategories) ? parsed.playlistCategories : {},
     };
   } catch {
     return EMPTY_OVERRIDES;

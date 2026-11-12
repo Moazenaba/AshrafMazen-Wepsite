@@ -16,14 +16,15 @@ export const SideColumn = ({ placed, activeCategories, recentLesson, recentResum
         <aside className="min-w-0 lg:col-start-2 lg:row-start-1 lg:flex lg:flex-col" aria-label="القائمة الجانبية">
           <Panel title="القائمة" id="menu-heading" className="lg:flex-1">
             {/* The admin orders and hides these items (sideMenuRules, the admin's "القائمة الجانبية") */}
-            <ul className="flex flex-wrap gap-2 sm:block sm:space-y-1">
+            <ul className="grid grid-cols-2 gap-2 sm:block sm:space-y-1">
               {arrangeMenu(sideMenuItems(activeCategories, visibleLibrary), menu).map((item) => (
                 <li key={item.key}>
                   <Link
                     to={item.to}
-                    className="inline-flex max-w-full items-center min-h-11 px-4 rounded-full bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-200 hover:bg-gold-soft/40 dark:hover:bg-stone-700 sm:flex sm:justify-between sm:rounded-lg sm:px-3 sm:bg-transparent dark:sm:bg-transparent"
+                    className="flex min-h-14 flex-col justify-center px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-200 hover:bg-gold-soft/40 dark:hover:bg-stone-700 sm:flex-row sm:min-h-11 sm:items-center sm:justify-between sm:rounded-lg sm:px-3 sm:py-0 sm:bg-transparent dark:sm:bg-transparent"
                   >
-                    <span className="min-w-0 truncate">{item.label}</span>
+                    <span className="min-w-0 truncate text-sm font-semibold leading-snug">{item.label}</span>
+                    {item.count && <span className="text-xs text-stone-500 dark:text-stone-400 sm:ms-2">{item.count}</span>}
                     <ChevronLeft className="hidden sm:block w-4 h-4 shrink-0" aria-hidden="true" />
                   </Link>
                 </li>

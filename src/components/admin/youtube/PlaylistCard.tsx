@@ -21,13 +21,15 @@ interface Props {
   onMove: (step: -1 | 1) => void;
   first: boolean;
   last: boolean;
+  // The site's categories (for the playlist's category in «كل الدروس»)
+  categories: { slug: string; name: string }[];
   // Every playlist (for "انقل إلى قائمة")
   playlists: { id: string; title: string }[];
   fetchTitle: (videoId: string) => Promise<string | null>;
   onMessage: (m: { type: 'ok' | 'error'; text: string }) => void;
 }
 
-export const PlaylistCard: React.FC<Props> = ({ playlist, draft, setDraft, query, expanded, onToggleOpen, onMove, first, last, playlists, fetchTitle, onMessage }) => {
+export const PlaylistCard: React.FC<Props> = ({ playlist, draft, setDraft, query, expanded, onToggleOpen, onMove, first, last, categories, playlists, fetchTitle, onMessage }) => {
   const [link, setLink] = useState('');
   const [busy, setBusy] = useState(false);
   const [actionsOpen, setActionsOpen] = useState<string | null>(null);
@@ -84,6 +86,27 @@ export const PlaylistCard: React.FC<Props> = ({ playlist, draft, setDraft, query
             <p className="text-xs text-stone-600 dark:text-stone-400">
               {new Intl.NumberFormat('ar-EG').format(all.length)} فيديو · الأصل: {playlist.title}
             </p>
+            <label className="flex flex-wrap items-center gap-2 text-xs text-stone-700 dark:text-stone-300">
+              <span>القسم في «كل الدروس»:</span>
+              <select
+                value={draft.playlistCategories[playlist.id] ?? ''}
+                onChange={(e) =>
+                  setDraft((d) => {
+                    const next = { ...d.playlistCategories };
+                    if (e.target.value) next[playlist.id] = e.target.value;
+                    else delete next[playlist.id];
+                    return { ...d, playlistCategories: next };
+                  })
+                }
+                className={`${inputClass} h-9 max-w-56`}
+              >
+                <option value="">تلقائي (حسب العنوان)</option>
+                {categories.map((c) => (
+                  <option key={c.slug} value={c.slug}>{c.name}</option>
+                ))}
+                <option value="none">بدون قسم</option>
+              </select>
+            </label>
           </div>
         </div>
         <div className="flex items-center justify-end gap-2 shrink-0">

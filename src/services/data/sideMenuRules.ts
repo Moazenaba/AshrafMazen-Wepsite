@@ -7,6 +7,8 @@ export interface MenuItem {
   key: string;
   label: string;
   to: string;
+  // How many videos a playlist has ("12 فيديو"), shown beside it
+  count?: string;
 }
 
 export interface SideMenuConfig {
@@ -33,14 +35,14 @@ export function parseSideMenu(raw: string | null | undefined): SideMenuConfig {
 }
 
 // Every item the menu can show, in the built-in order. The sermons category leads to the sermons playlist.
-export function sideMenuItems(categories: { id: string; name: string; slug: string }[], playlists: { id: string; title: string }[]): MenuItem[] {
+export function sideMenuItems(categories: { id: string; name: string; slug: string }[], playlists: { id: string; title: string; count?: string }[]): MenuItem[] {
   return [
     { key: 'link:search', label: 'كل الدروس', to: '/search' },
     { key: 'link:reels', label: 'الريلز', to: '/reels' },
     ...categories.map((c) =>
       isSermonCategory(c.name) ? { key: `cat:${c.id}`, label: JUMUAH_LABEL, to: `/playlist/${JUMUAH_PLAYLIST_ID}` } : { key: `cat:${c.id}`, label: c.name, to: `/category/${c.slug}` }
     ),
-    ...playlists.map((p) => ({ key: `pl:${p.id}`, label: p.title, to: `/playlist/${p.id}` })),
+    ...playlists.map((p) => ({ key: `pl:${p.id}`, label: p.title, to: `/playlist/${p.id}`, count: p.count })),
   ];
 }
 

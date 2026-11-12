@@ -7,6 +7,7 @@ import { orderPlaylists } from '../../lib/libraryOverrides';
 import { EMPTY_OVERRIDES } from '../../services/data/youtube';
 import { FileUploadButton } from './FileUploadButton';
 import { PlaylistCard } from './youtube/PlaylistCard';
+import { getCategories } from '../../services/dataService';
 import { inputClass } from './youtube/styles';
 import { movePlaylist, newUploadId, titleFromFile } from './youtube/overridesDraft';
 
@@ -96,6 +97,10 @@ export const YoutubeManager: React.FC = () => {
     setMessage({ type: 'ok', text: `رُفع «${title}». اضغط «حفظ التغييرات» ليظهر في الموقع ضمن «مقاطع مختارة». ولرفع ملف داخل قائمة بعينها افتح القائمة من الأسفل.` });
   };
 
+  const [categories, setCategories] = useState<{ slug: string; name: string }[]>([]);
+  useEffect(() => {
+    getCategories().then((list) => setCategories(list.map((c) => ({ slug: c.slug, name: c.name })))).catch(() => setCategories([]));
+  }, []);
   const ordered = useMemo(() => orderPlaylists(library, draft.playlistOrder), [library, draft.playlistOrder]);
 
   const save = async () => {
@@ -230,6 +235,7 @@ export const YoutubeManager: React.FC = () => {
               onMove={(step) => setDraft((d) => movePlaylist(d, ordered.map((p) => p.id), i, step))}
               first={i === 0}
               last={i === ordered.length - 1}
+              categories={categories}
               playlists={ordered.map((p) => ({ id: p.id, title: draft.playlistTitles[p.id] || p.title }))}
               fetchTitle={youtubeTitle}
               onMessage={setMessage}
