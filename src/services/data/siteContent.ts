@@ -17,6 +17,7 @@ import {
 import type { TickerQuote } from '../../constants/tickerQuotes';
 import { cleanSideMenu, parseSideMenu, type SideMenuConfig } from './sideMenuRules';
 import { cleanHomeFeature, parseHomeFeature, validateHomeFeature, type HomeFeature } from './homeFeatureRules';
+import { cleanWelcomeSound, parseWelcomeSound, validateWelcomeSound, type WelcomeSound } from './welcomeSoundRules';
 
 let cached: SiteContent | null = null;
 
@@ -33,6 +34,7 @@ export async function getSiteContent(forceRefresh = false): Promise<SiteContent>
         contact: parseContact(byKey.get(SITE_CONTENT_KEYS.contact)),
         feature: parseHomeFeature(byKey.get(SITE_CONTENT_KEYS.feature)),
         menu: parseSideMenu(byKey.get(SITE_CONTENT_KEYS.menu)),
+        welcome: parseWelcomeSound(byKey.get(SITE_CONTENT_KEYS.welcome)),
       };
       return cached;
     }
@@ -76,5 +78,13 @@ export async function saveHomeFeature(feature: HomeFeature): Promise<HomeFeature
 export async function saveSideMenu(menu: SideMenuConfig): Promise<SideMenuConfig> {
   const clean = cleanSideMenu(menu);
   await write(SITE_CONTENT_KEYS.menu, clean);
+  return clean;
+}
+
+export async function saveWelcomeSound(sound: WelcomeSound): Promise<WelcomeSound> {
+  const clean = cleanWelcomeSound(sound);
+  const problem = validateWelcomeSound(clean);
+  if (problem) throw new Error(problem);
+  await write(SITE_CONTENT_KEYS.welcome, clean);
   return clean;
 }

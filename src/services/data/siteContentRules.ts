@@ -1,6 +1,7 @@
 // Pure rules for the texts the admin edits from the dashboard: the sayings strip, the home hadith, the contact details.
 // Nothing here touches the database or the screen, so each rule can be tested on its own.
 import { EMPTY_MENU, type SideMenuConfig } from './sideMenuRules';
+import { EMPTY_WELCOME, type WelcomeSound } from './welcomeSoundRules';
 import { TICKER_QUOTES, type TickerQuote } from '../../constants/tickerQuotes';
 import { EMPTY_FEATURE, type HomeFeature } from './homeFeatureRules';
 
@@ -23,9 +24,10 @@ export interface SiteContent {
   contact: ContactInfo;
   feature: HomeFeature;
   menu: SideMenuConfig;
+  welcome: WelcomeSound;
 }
 
-export const SITE_CONTENT_KEYS = { quotes: 'ticker_quotes', hero: 'hero_quote', contact: 'contact_info', feature: 'home_feature', menu: 'side_menu' } as const;
+export const SITE_CONTENT_KEYS = { quotes: 'ticker_quotes', hero: 'hero_quote', contact: 'contact_info', feature: 'home_feature', menu: 'side_menu', welcome: 'welcome_sound' } as const;
 
 export const MAX_QUOTES = 100;
 export const QUOTE_LIMITS = { text: 500, source: 150, intro: 80, email: 120, phone: 40, footer: 200 };
@@ -43,7 +45,7 @@ export const DEFAULT_CONTACT: ContactInfo = {
   dua: 'نسأل الله الإخلاص والقبول في القول والعمل',
 };
 
-export const DEFAULT_CONTENT: SiteContent = { quotes: TICKER_QUOTES, hero: DEFAULT_HERO, contact: DEFAULT_CONTACT, feature: EMPTY_FEATURE, menu: EMPTY_MENU };
+export const DEFAULT_CONTENT: SiteContent = { quotes: TICKER_QUOTES, hero: DEFAULT_HERO, contact: DEFAULT_CONTACT, feature: EMPTY_FEATURE, menu: EMPTY_MENU, welcome: EMPTY_WELCOME };
 
 const text = (value: unknown, max: number) => String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 
