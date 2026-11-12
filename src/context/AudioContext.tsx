@@ -1,16 +1,24 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { getResumeSeconds, markLessonWatched, saveLessonPosition } from '../services/progressService';
 import { createPlaybackMeter, trackView } from '../services/analytics';
+import { SILENCE, isYoutubeTrackId, youtubeAudioUrl } from '../lib/youtubeAudio';
 
-// One recording the site can play: a lesson's audio, identified by the lesson's id
+// One recording the site can play: a lesson's audio (identified by the lesson's id), or a channel video's sound
+// (id "yt:<videoId>", src empty: the link is fetched when it plays, see lib/youtubeAudio)
 export interface AudioTrack {
   id: string;
   title: string;
   subtitle?: string;
   src: string;
+  youtubeId?: string;
   // Where the title in the mini player leads back to
   href?: string;
 }
+
+// The key statistics count under: a lesson's, or the channel video's (the same its video page uses)
+const statsKey = (id: string) => (isYoutubeTrackId(id) ? id : `lesson:${id}`);
+const isSilence = (audio: HTMLAudioElement) => audio.src.startsWith('data:');
+const finite = (n: number) => (Number.isFinite(n) ? n : 0);
 
 type AudioEvent = { type: 'time'; trackId: string; seconds: number; duration: number } | { type: 'ended'; trackId: string };
 
@@ -22,6 +30,9 @@ interface AudioApi {
   rate: number;
   muted: boolean;
   volume: number;
+  // A channel video's sound is being fetched; or why it could not be played
+  loading: boolean;
+  error: string | null;
   // Starts a track (at startAt, or where the visitor left it last time), or resumes it if it is already loaded
   play(track: AudioTrack, startAt?: number): void;
   toggle(): void;
@@ -57,16 +68,22 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [rate, setRateState] = useState(1);
   const [muted, setMuted] = useState(false);
   const [volume, setVolumeState] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const trackRef = useRef<AudioTrack | null>(null);
   trackRef.current = track;
+  const rateRef = useRef(1);
+  rateRef.current = rate;
+  // A channel video's link that broke (expired after a long pause) is fetched again once per play
+  const retried = useRef(false);
 
   const emit = (event: AudioEvent) => listeners.current.forEach((l) => l(event));
 
   // Statistics: the seconds actually heard (a seek adds nothing), counted for the recording that is playing
   const meterRef = useRef<{ key: string; meter: ReturnType<typeof createPlaybackMeter> } | null>(null);
   const meterFor = (id: string) => {
-    const key = `lesson:${id}`;
+    const key = statsKey(id);
     if (meterRef.current?.key !== key) meterRef.current = { key, meter: createPlaybackMeter('audio', key) };
     return meterRef.current.meter;
   };
@@ -74,17 +91,42 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const savePosition = useCallback((force = false) => {
     const audio = audioRef.current;
     const current = trackRef.current;
-    if (!audio || !current || !audio.duration) return;
+    if (!audio || !current || !finite(audio.duration) || isSilence(audio)) return;
     if (!force && Math.abs(audio.currentTime - lastSaved.current) < SAVE_EVERY_SECONDS) return;
     saveLessonPosition(current.id, audio.currentTime, audio.duration);
     lastSaved.current = audio.currentTime;
+  }, []);
+
+  const start = (audio: HTMLAudioElement, src: string) => {
+    audio.src = src;
+    audio.playbackRate = rateRef.current;
+    audio.load();
+    audio.play().catch(() => {});
+  };
+
+  // Fetches a channel video's sound and plays it from `at` seconds, unless the visitor moved on meanwhile
+  const playYoutube = useCallback(async (next: AudioTrack, at: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const url = await youtubeAudioUrl(next.youtubeId!);
+      const audio = audioRef.current;
+      if (!audio || trackRef.current?.id !== next.id) return;
+      pendingStart.current = at;
+      start(audio, url);
+    } catch (err) {
+      if (trackRef.current?.id !== next.id) return;
+      setLoading(false);
+      setError(err instanceof Error ? err.message : 'تعذّر تشغيل الصوت الآن.');
+    }
   }, []);
 
   const play = useCallback((next: AudioTrack, startAt?: number) => {
     const audio = audioRef.current;
     if (!audio) return;
     const current = trackRef.current;
-    if (current && current.id === next.id && current.src === next.src) {
+    const loaded = next.youtubeId ? !!audio.src && !isSilence(audio) : current?.src === next.src;
+    if (current && current.id === next.id && loaded) {
       if (startAt !== undefined) audio.currentTime = startAt;
       audio.play().catch(() => {});
       return;
@@ -92,15 +134,22 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     savePosition(true);
     pendingStart.current = startAt ?? getResumeSeconds(next.id);
     lastSaved.current = pendingStart.current;
+    retried.current = false;
     setTrack(next);
     setTime(pendingStart.current);
     setDuration(0);
-    audio.src = next.src;
-    audio.playbackRate = rate;
-    audio.load();
+    setError(null);
+    if (next.youtubeId && !next.src) {
+      // A silent sound from the tap itself unlocks playback; the real one follows when its link arrives
+      start(audio, SILENCE);
+      trackRef.current = next;
+      playYoutube(next, pendingStart.current);
+      return;
+    }
+    setLoading(false);
     // Called from the visitor's tap, so the browser allows playback to start
-    audio.play().catch(() => {});
-  }, [rate, savePosition]);
+    start(audio, next.src);
+  }, [savePosition, playYoutube]);
 
   const pause = useCallback(() => {
     audioRef.current?.pause();
@@ -157,6 +206,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     setTrack(null);
     setPlaying(false);
+    setLoading(false);
+    setError(null);
     setTime(0);
     setDuration(0);
   }, [savePosition]);
@@ -176,7 +227,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       session.metadata = null;
       return;
     }
-    session.metadata = new MediaMetadata({ title: track.title, artist: ARTIST, album: track.subtitle || '' });
+    // A channel video shows its picture in the notification and on the lock screen
+    const artwork = track.youtubeId ? [{ src: `https://i.ytimg.com/vi/${track.youtubeId}/hqdefault.jpg`, sizes: '480x360', type: 'image/jpeg' }] : [];
+    session.metadata = new MediaMetadata({ title: track.title, artist: ARTIST, album: track.subtitle || '', artwork });
     const handlers: [MediaSessionAction, MediaSessionActionHandler][] = [
       ['play', () => audioRef.current?.play().catch(() => {})],
       ['pause', () => audioRef.current?.pause()],
@@ -207,9 +260,26 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [savePosition]);
 
   const api = useMemo<AudioApi>(
-    () => ({ track, playing, time, duration, rate, muted, volume, play, toggle, pause, seek, skip, setRate, setVolume, toggleMute, close, subscribe }),
-    [track, playing, time, duration, rate, muted, volume, play, toggle, pause, seek, skip, setRate, setVolume, toggleMute, close, subscribe]
+    () => ({ track, playing, time, duration, rate, muted, volume, loading, error, play, toggle, pause, seek, skip, setRate, setVolume, toggleMute, close, subscribe }),
+    [track, playing, time, duration, rate, muted, volume, loading, error, play, toggle, pause, seek, skip, setRate, setVolume, toggleMute, close, subscribe]
   );
+
+  // The place to resume from is reached once the browser has that part (a channel video's sound cannot jump
+  // ahead of what has arrived, and arrives within seconds)
+  const seekPending = (audio: HTMLAudioElement) => {
+    const at = pendingStart.current;
+    if (!at || isSilence(audio)) return;
+    const length = finite(audio.duration);
+    if (length && at >= length - 1) {
+      pendingStart.current = 0;
+      return;
+    }
+    const reach = audio.seekable.length ? audio.seekable.end(audio.seekable.length - 1) : 0;
+    if (reach >= at) {
+      audio.currentTime = at;
+      pendingStart.current = 0;
+    }
+  };
 
   return (
     <AudioCtx.Provider value={api}>
@@ -219,40 +289,60 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         preload="metadata"
         onLoadedMetadata={(e) => {
           const audio = e.currentTarget;
-          setDuration(audio.duration || 0);
-          const start = pendingStart.current;
-          if (start > 0 && start < (audio.duration || 0) - 1) audio.currentTime = start;
-          pendingStart.current = 0;
+          if (isSilence(audio)) return;
+          setDuration(finite(audio.duration));
+          seekPending(audio);
+        }}
+        onDurationChange={(e) => !isSilence(e.currentTarget) && setDuration(finite(e.currentTarget.duration))}
+        onProgress={(e) => seekPending(e.currentTarget)}
+        onPlaying={(e) => !isSilence(e.currentTarget) && setLoading(false)}
+        onError={(e) => {
+          const audio = e.currentTarget;
+          const current = trackRef.current;
+          if (!current || isSilence(audio) || !audio.src) return;
+          // A channel video's link lasts minutes: after a long pause it is fetched again and resumed in place
+          if (current.youtubeId && !retried.current) {
+            retried.current = true;
+            playYoutube(current, audio.currentTime || time);
+            return;
+          }
+          setLoading(false);
+          setError('تعذّر تشغيل التسجيل الآن. حاول بعد قليل.');
         }}
         onTimeUpdate={(e) => {
           const audio = e.currentTarget;
           const current = trackRef.current;
+          if (isSilence(audio)) return;
           setTime(audio.currentTime);
+          seekPending(audio);
           if (!current) return;
           if (!audio.paused) meterFor(current.id).update(audio.currentTime);
           savePosition();
-          emit({ type: 'time', trackId: current.id, seconds: audio.currentTime, duration: audio.duration || 0 });
-          if ('mediaSession' in navigator && audio.duration && navigator.mediaSession.setPositionState) {
+          emit({ type: 'time', trackId: current.id, seconds: audio.currentTime, duration: finite(audio.duration) });
+          if ('mediaSession' in navigator && finite(audio.duration) && navigator.mediaSession.setPositionState) {
             try {
               navigator.mediaSession.setPositionState({ duration: audio.duration, position: audio.currentTime, playbackRate: audio.playbackRate });
             } catch {}
           }
         }}
-        onPlay={() => {
+        onPlay={(e) => {
+          if (isSilence(e.currentTarget)) return;
           setPlaying(true);
           const current = trackRef.current;
           if (current) {
-            trackView('audio', `lesson:${current.id}`);
+            trackView('audio', statsKey(current.id));
             // Start counting from where playback resumes, so the time paused is never added
             meterFor(current.id).reset();
           }
         }}
-        onPause={() => {
+        onPause={(e) => {
+          if (isSilence(e.currentTarget)) return;
           setPlaying(false);
           savePosition(true);
           meterRef.current?.meter.reset();
         }}
-        onEnded={() => {
+        onEnded={(e) => {
+          if (isSilence(e.currentTarget)) return;
           const current = trackRef.current;
           setPlaying(false);
           if (!current) return;
