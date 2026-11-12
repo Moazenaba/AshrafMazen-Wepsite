@@ -37,3 +37,5 @@ export function parsePosition(raw: string | null): FloatPosition {
   }
   return DEFAULT_POSITION;
 }
+
+// (تحديث صغير)
