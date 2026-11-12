@@ -71,7 +71,6 @@ export const Navbar: React.FC = () => {
     { label: 'المرئيات', to: '/videos' },
     { label: 'الصوتيات', to: '/audio' },
     { label: 'المكتبة', to: '/books' },
-    { label: 'الأقسام', to: { pathname: '/', hash: '#categories' } },
     { label: bookmarksLabel, to: '/bookmarks' },
     ...(isAdmin ? [{ label: 'لوحة التحكم', to: '/admin' }] : []),
   ];
