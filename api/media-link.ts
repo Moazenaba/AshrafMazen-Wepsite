@@ -21,10 +21,8 @@ import { YOUTUBE_LIBRARY } from '../src/data/youtube-library.js';
 const CHANNEL_HANDLE = process.env.YOUTUBE_CHANNEL_HANDLE || 'Ashrafmazen';
 const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || 'UCisGvsFtKyDU6NTFywaITzQ';
 const STEP_MS = 9000;
-const COBALT_MS = 16000;
-// A service that just failed is skipped for a while, so visitors don't wait on it every time
-const FAIL_MS = 10 * 60 * 1000;
-const failedAt = new Map<string, number>();
+// A cobalt video can take 20 s or more to answer; the function may run 60 s (vercel.json)
+const COBALT_MS = 45000;
 // Videos already checked to be the channel's
 // The site's saved library counts as the channel's (also when YouTube's oEmbed cannot be reached)
 const channelVideos = new Set<string>(YOUTUBE_LIBRARY.flatMap((p) => p.videos.map((v) => v.id)));
@@ -118,16 +116,11 @@ export default async function handler(req: any, res: any) {
   if (!/^[A-Za-z0-9_-]{11}$/.test(id)) return res.status(400).send(JSON.stringify({ error: 'رابط فيديو غير صالح.' }));
   if (!(await belongsToChannel(id))) return res.status(403).send(JSON.stringify({ error: 'التحميل متاح لفيديوهات قناة الشيخ فقط.' }));
 
-  const providers = providersFrom(process.env);
-  // Services that failed lately go last instead of first
-  const now = Date.now();
-  const ordered = [...providers.filter((p) => now - (failedAt.get(p.base) ?? 0) > FAIL_MS), ...providers.filter((p) => now - (failedAt.get(p.base) ?? 0) <= FAIL_MS)];
-
-  // Vercel stops a function after 30 seconds; stop trying a little before
-  const deadline = Date.now() + 24000;
+  // All services are asked at once and the first working link wins. One after another, a slow cobalt video
+  // (it can take over 16 s to answer) used up the time and the visitor got "no service answers".
+  const started = Date.now();
   const tried: { service: string; why: string }[] = [];
-  for (const p of ordered) {
-    if (Date.now() > deadline) break;
+  const attempt = async (p: Provider): Promise<MediaLink & { provider: string }> => {
     const service = new URL(p.base).host;
     try {
       const { link, why } = await ask(p, id, kind);
@@ -135,14 +128,22 @@ export default async function handler(req: any, res: any) {
       // and opening it here only to drop it made the service slower and used up its request limit, so the
       // next visitor got a timeout or "too_many_requests". The other services' links are checked to give bytes.
       if (link && (p.type === 'cobalt' || (await works(link, STEP_MS)))) {
-        failedAt.delete(p.base);
-        return res.status(200).send(JSON.stringify({ ...link, provider: p.type }));
+        return { ...link, provider: p.type };
       }
       tried.push({ service, why: link ? 'link did not answer' : why });
     } catch (err: any) {
       tried.push({ service, why: err?.name === 'AbortError' ? 'timeout' : String(err?.message || err).slice(0, 100) });
     }
-    failedAt.set(p.base, Date.now());
+    throw new Error(service);
+  };
+
+  try {
+    const link = await Promise.any(providersFrom(process.env).map(attempt));
+    console.log(`media-link ok ${id} ${kind} via ${link.provider} in ${Date.now() - started} ms`);
+    return res.status(200).send(JSON.stringify(link));
+  } catch {
+    // Written to the Vercel logs, so a failure can be read there (which service, and why)
+    console.warn(`media-link failed ${id} ${kind} after ${Date.now() - started} ms: ${JSON.stringify(tried)}`);
+    return res.status(502).send(JSON.stringify({ error: 'خدمات التحميل لا تستجيب الآن. حاول بعد قليل.', tried }));
   }
-  return res.status(502).send(JSON.stringify({ error: 'خدمات التحميل لا تستجيب الآن. حاول بعد قليل.', tried }));
 }
