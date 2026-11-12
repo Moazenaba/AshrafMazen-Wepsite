@@ -1,9 +1,10 @@
 // The player of a channel video, in two modes: "شاهد" (the video) and "استمع فقط" (sound only).
 // Listening uses the recording the admin attached when there is one; a file uploaded to the site plays in the site's
-// own player; otherwise the YouTube player stays, made small, since YouTube gives no sound-only stream.
+// own player; otherwise YouTube's player is hidden and driven by the site's own sound bar.
 import React, { useRef, useState } from 'react';
 import { Download, Headphones, MonitorPlay } from 'lucide-react';
 import { VideoPlayer } from '../../components/VideoPlayer';
+import { YoutubeAudioBar } from '../../components/YoutubeAudioBar';
 import type { SiteVideo } from '../../lib/libraryOverrides';
 import { getYouTubeThumbnail } from '../../lib/youtube';
 
@@ -111,12 +112,7 @@ export const VideoMedia: React.FC<Props> = ({ video, startAt, onTimeUpdate, onEn
             </div>
           </div>
         ) : (
-          <div className="space-y-2">
-            <div className="max-w-sm">
-              <VideoPlayer key={`yt-listen-${video.id}`} youtubeUrl={youtubeUrl} title={video.title} startAt={startAt} onTimeUpdate={onTimeUpdate} onEnded={onEnded} />
-            </div>
-            <p className="text-sm text-stone-600 dark:text-stone-400">وضع الاستماع: الصورة مصغّرة، والصوت يعمل كاملاً.</p>
-          </div>
+          <YoutubeAudioBar key={`yt-listen-${video.id}`} videoId={video.id} title={video.title} startAt={startAt} onTimeUpdate={onTimeUpdate} onEnded={onEnded} />
         )
       ) : videoFile && video.src ? (
         <FilePlayer key={`watch-${videoFile}`} src={videoFile} audio={false} title={video.title} startAt={startAt} onTimeUpdate={onTimeUpdate} onEnded={onEnded} />

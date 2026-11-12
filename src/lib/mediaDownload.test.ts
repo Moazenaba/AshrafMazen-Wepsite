@@ -1,17 +1,23 @@
 import { describe, expect, it } from 'vitest';
-import { playlistFiles } from './mediaDownload';
+import { playlistSources, sourceOf } from './mediaDownload';
 
-describe('playlist downloads', () => {
-  it('lists the files of one kind, numbered, and counts the videos without one', () => {
+describe('downloads', () => {
+  it('uses the site file first, else the YouTube video', () => {
+    expect(sourceOf({ id: 'abcdefghijk', title: 'T', files: { audio: 'https://f/a.mp3' } }, 'audio')).toEqual({ type: 'file', url: 'https://f/a.mp3', name: 'T' });
+    expect(sourceOf({ id: 'abcdefghijk', title: 'T' }, 'video')).toEqual({ type: 'youtube', id: 'abcdefghijk', name: 'T' });
+  });
+
+  it('has nothing for a site upload without that kind', () => {
+    expect(sourceOf({ id: 'up-1', title: 'U', src: 'https://f/u.mp3', kind: 'audio', files: { audio: 'https://f/u.mp3' } }, 'video')).toBeNull();
+  });
+
+  it('numbers a playlist and counts what is missing', () => {
     const videos = [
-      { id: 'a', title: 'أول', files: { audio: 'https://f/a.mp3' } },
-      { id: 'b', title: 'ثان' },
-      { id: 'c', title: 'ثالث', files: { audio: 'https://f/c.mp3', video: 'https://f/c.mp4' } },
+      { id: 'aaaaaaaaaaa', title: 'أول' },
+      { id: 'up-2', title: 'مرفوع', src: 'https://f/b.mp3', kind: 'audio' as const, files: { audio: 'https://f/b.mp3' } },
     ];
-    expect(playlistFiles(videos, 'audio')).toEqual({
-      items: [{ url: 'https://f/a.mp3', name: '01 - أول' }, { url: 'https://f/c.mp3', name: '03 - ثالث' }],
-      missing: 1,
-    });
-    expect(playlistFiles(videos, 'video').items).toHaveLength(1);
+    const audio = playlistSources(videos, 'audio');
+    expect(audio.items.map((s) => s.name)).toEqual(['01 - أول', '02 - مرفوع']);
+    expect(playlistSources(videos, 'video').missing).toBe(1);
   });
 });

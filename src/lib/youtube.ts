@@ -23,6 +23,10 @@ export interface YTPlayer {
   getDuration(): number;
   seekTo(seconds: number, allowSeekAhead: boolean): void;
   destroy(): void;
+  // Used by the sound-only bar (components/YoutubeAudioBar.tsx), which drives a hidden player
+  playVideo?(): void;
+  pauseVideo?(): void;
+  setPlaybackRate?(rate: number): void;
 }
 
 interface YTNamespace {
@@ -35,10 +39,11 @@ interface YTNamespace {
       events?: {
         onReady?: () => void;
         onStateChange?: (event: { data: number }) => void;
+        onError?: (event: { data: number }) => void;
       };
     }
   ) => YTPlayer;
-  PlayerState: { ENDED: number; PLAYING: number; PAUSED: number };
+  PlayerState: { ENDED: number; PLAYING: number; PAUSED: number; BUFFERING: number };
 }
 
 declare global {
