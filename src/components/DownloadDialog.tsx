@@ -1,13 +1,16 @@
 // "تحميل": asks whether to save the sound or the video, for one video or a whole playlist.
 import React, { useEffect, useRef, useState } from 'react';
-import { Download, Music, Video, X } from 'lucide-react';
+import { Download, Loader2, Music, Video, X } from 'lucide-react';
 import type { SiteVideo } from '../lib/libraryOverrides';
-import { downloadAll, playlistFiles, type DownloadKind } from '../lib/mediaDownload';
+import { downloadAll, playlistSources, type DownloadKind } from '../lib/mediaDownload';
 
 const LABEL: Record<DownloadKind, string> = { audio: 'صوت فقط', video: 'فيديو' };
+const n = (value: number) => new Intl.NumberFormat('ar-EG').format(value);
+
+type State = { done: number; failed: number; total: number; finished: boolean };
 
 export const DownloadDialog: React.FC<{ title: string; videos: SiteVideo[]; onClose: () => void }> = ({ title, videos, onClose }) => {
-  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [state, setState] = useState<State | null>(null);
   const signal = useRef({ cancelled: false });
   const many = videos.length > 1;
 
@@ -22,11 +25,13 @@ export const DownloadDialog: React.FC<{ title: string; videos: SiteVideo[]; onCl
   }, [onClose]);
 
   const start = async (kind: DownloadKind) => {
-    const { items } = playlistFiles(videos, kind);
-    setProgress({ done: 0, total: items.length });
-    await downloadAll(items, (done) => setProgress({ done, total: items.length }), signal.current);
-    if (!many) onClose();
+    const { items } = playlistSources(videos, kind);
+    setState({ done: 0, failed: 0, total: items.length, finished: false });
+    const { failed } = await downloadAll(items, kind, (done, failedSoFar) => setState({ done, failed: failedSoFar, total: items.length, finished: false }), signal.current);
+    setState({ done: items.length, failed, total: items.length, finished: true });
   };
+
+  const busy = !!state && !state.finished;
 
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="dl-title" className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4" onClick={onClose}>
@@ -43,35 +48,40 @@ export const DownloadDialog: React.FC<{ title: string; videos: SiteVideo[]; onCl
         <p className="font-semibold text-stone-800 dark:text-stone-200">عايز تحمّله صوت ولا فيديو؟</p>
         <div className="grid grid-cols-2 gap-3">
           {(['audio', 'video'] as const).map((kind) => {
-            const { items, missing } = playlistFiles(videos, kind);
+            const { items, missing } = playlistSources(videos, kind);
             const Icon = kind === 'audio' ? Music : Video;
             return (
               <button
                 key={kind}
                 type="button"
-                disabled={items.length === 0 || progress !== null}
+                disabled={items.length === 0 || busy}
                 onClick={() => start(kind)}
                 className="flex flex-col items-center gap-1 p-4 rounded-xl border-2 border-stone-200 dark:border-stone-700 hover:border-gold disabled:opacity-40 disabled:hover:border-stone-200 text-stone-900 dark:text-stone-100"
               >
                 <Icon className="w-6 h-6" aria-hidden="true" />
                 <span className="font-bold">{LABEL[kind]}</span>
                 <span className="text-xs text-stone-600 dark:text-stone-400">
-                  {items.length === 0 ? 'غير متاح' : many ? `${new Intl.NumberFormat('ar-EG').format(items.length)} ملف${missing ? ` (و${new Intl.NumberFormat('ar-EG').format(missing)} غير متاح)` : ''}` : 'متاح'}
+                  {items.length === 0 ? 'غير متاح' : kind === 'audio' ? 'MP3' : 'MP4'}
+                  {many && items.length > 0 ? ` · ${n(items.length)} ملف` : ''}
+                  {many && missing > 0 ? ` (و${n(missing)} غير متاح)` : ''}
                 </span>
               </button>
             );
           })}
         </div>
-        {progress && (
-          <p role="status" className="flex items-center gap-2 text-sm font-semibold text-emerald-800 dark:text-emerald-300">
-            <Download className="w-4 h-4" aria-hidden="true" />
-            {progress.done < progress.total
-              ? `جارٍ التحميل ${new Intl.NumberFormat('ar-EG').format(progress.done)} من ${new Intl.NumberFormat('ar-EG').format(progress.total)}… (قد يسألك المتصفح عن السماح بتحميل عدة ملفات)`
-              : 'بدأ التحميل.'}
+        {state && (
+          <p role="status" className={`flex items-center gap-2 text-sm font-semibold ${state.finished && state.failed === state.total ? 'text-red-700 dark:text-red-400' : 'text-emerald-800 dark:text-emerald-300'}`}>
+            {busy ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Download className="w-4 h-4" aria-hidden="true" />}
+            {busy
+              ? many
+                ? `جارٍ تجهيز ${n(state.done + 1)} من ${n(state.total)}… (قد يسألك المتصفح عن السماح بتحميل عدة ملفات)`
+                : 'جارٍ تجهيز الملف… قد يستغرق ذلك ثواني.'
+              : state.failed === state.total
+                ? 'تعذّر التحميل الآن، خدمات التحميل لا تستجيب. حاول بعد قليل.'
+                : state.failed > 0
+                  ? `بدأ تحميل ${n(state.total - state.failed)} ملف، وتعذّر ${n(state.failed)}.`
+                  : 'بدأ التحميل.'}
           </p>
-        )}
-        {playlistFiles(videos, 'audio').items.length === 0 && playlistFiles(videos, 'video').items.length === 0 && (
-          <p className="text-sm text-stone-600 dark:text-stone-400">لا توجد ملفات للتحميل بعد. المقاطع المعروضة من يوتيوب لا يمكن تحميلها إلا إذا رفع لها الموقع ملفاً.</p>
         )}
       </div>
     </div>
