@@ -63,11 +63,20 @@ export const DownloadDialog: React.FC<{ title: string; videos: SiteVideo[]; onCl
 
   // "إعادة التحميل" on a link too old to work: a new one is fetched and started (or shown to tap)
   const [refreshing, setRefreshing] = useState<number | null>(null);
+  // A tapped download button says what is happening: the browser shows nothing on the page itself when a download
+  // starts (on phones it is a small bar or nothing), so without this the tap looked like it did nothing
+  const [tapped, setTapped] = useState<Record<number, 'starting' | 'sent'>>({});
+  const markTapped = (i: number) => {
+    setTapped((t) => ({ ...t, [i]: 'starting' }));
+    window.setTimeout(() => setTapped((t) => ({ ...t, [i]: 'sent' })), 2500);
+    window.setTimeout(() => setTapped(({ [i]: _done, ...rest }) => rest), 12000);
+  };
   const refresh = async (i: number, d: StartedDownload, k: DownloadKind) => {
     if (refreshing !== null) return;
     setRefreshing(i);
     try {
       const fresh = await redownload(d, k);
+      if (fresh.auto) markTapped(i);
       setState((s) => (s?.started ? { ...s, started: s.started.map((x, j) => (j === i ? fresh : x)) } : s));
     } catch {
       setState((s) => (s ? { ...s, failedVideos: [...(s.failedVideos ?? []), { id: d.youtubeId!, name: d.name }] } : s));
@@ -150,26 +159,50 @@ export const DownloadDialog: React.FC<{ title: string; videos: SiteVideo[]; onCl
             {state.failed > 0 && <p className="text-sm">تعذّر {n(state.failed)} ملف، تجدها بالأسفل.</p>}
             {countdown === 0 && (
               <ul className="space-y-2 max-h-56 overflow-y-auto">
-                {started.map((d, i) => (
-                  <li key={i}>
-                    {/* A plain link the visitor taps: the surest way on a phone. An old cobalt link is asked for again first. */}
-                    <a
-                      href={d.url}
-                      download={d.name}
-                      aria-busy={refreshing === i}
-                      onClick={(e) => {
-                        if (!isStale(d) || !kind) return;
-                        e.preventDefault();
-                        refresh(i, d, kind);
-                      }}
-                      {...(d.attachment ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
-                      className="flex items-center justify-center gap-2 min-h-12 px-4 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold"
-                    >
-                      {refreshing === i ? <Loader2 className="w-5 h-5 shrink-0 animate-spin" aria-hidden="true" /> : <RotateCcw className="w-5 h-5 shrink-0" aria-hidden="true" />}
-                      <span className="min-w-0 truncate">{d.auto ? (many ? `إعادة: ${d.name}` : 'إعادة التحميل') : many ? `تحميل: ${d.name}` : 'تحميل الملف'}</span>
-                    </a>
-                  </li>
-                ))}
+                {started.map((d, i) => {
+                  const label = d.auto ? (many ? `إعادة: ${d.name}` : 'إعادة التحميل') : many ? `تحميل: ${d.name}` : 'تحميل الملف';
+                  const now = refreshing === i ? 'refreshing' : tapped[i];
+                  return (
+                    <li key={i} className="space-y-1">
+                      {/* A plain link the visitor taps: the surest way on a phone. An old cobalt link is asked for again first. */}
+                      <a
+                        href={d.url}
+                        download={d.name}
+                        aria-busy={now === 'refreshing' || now === 'starting'}
+                        aria-disabled={now === 'refreshing'}
+                        onClick={(e) => {
+                          if (now === 'refreshing') return e.preventDefault();
+                          if (isStale(d) && kind) {
+                            e.preventDefault();
+                            refresh(i, d, kind);
+                            return;
+                          }
+                          markTapped(i);
+                        }}
+                        {...(d.attachment ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
+                        className={`flex items-center justify-center gap-2 min-h-12 px-4 rounded-xl text-white font-bold select-none transition duration-150 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-gold ${
+                          now === 'refreshing' || now === 'starting' ? 'bg-emerald-950 cursor-progress' : 'bg-emerald-800 hover:bg-emerald-900 active:bg-emerald-950'
+                        }`}
+                      >
+                        {now === 'refreshing' || now === 'starting' ? (
+                          <Loader2 className="w-5 h-5 shrink-0 animate-spin" aria-hidden="true" />
+                        ) : now === 'sent' ? (
+                          <CheckCircle2 className="w-5 h-5 shrink-0" aria-hidden="true" />
+                        ) : (
+                          <RotateCcw className="w-5 h-5 shrink-0" aria-hidden="true" />
+                        )}
+                        <span className="min-w-0 truncate">
+                          {now === 'refreshing' ? 'جارٍ تجهيز رابط جديد…' : now === 'starting' ? 'جارٍ بدء التحميل…' : now === 'sent' ? 'اتبعت للمتصفح، اضغط تاني لو ما ظهرش' : label}
+                        </span>
+                      </a>
+                      {now === 'sent' && (
+                        <p role="status" className="text-sm text-emerald-900 dark:text-emerald-200">
+                          شوف شريط التنزيلات في المتصفح (أو إشعارات الموبايل). الملف بيتجهز وهو بيتحمّل، فممكن ياخد ثواني لحد ما يبدأ.
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
