@@ -68,31 +68,36 @@ export const PlaylistCard: React.FC<Props> = ({ playlist, draft, setDraft, query
     onMessage({ type: 'ok', text: `رُفع «${title}» وأُضيف للقائمة. عدّل عنوانه إن شئت ثم اضغط «حفظ التغييرات».` });
   };
 
-  const iconBtn = 'w-10 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-30';
+  const iconBtn = 'w-11 h-11 shrink-0 flex items-center justify-center rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-30';
 
   return (
     <li className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800">
-      <div className="p-4 flex flex-wrap items-center gap-3">
-        <button type="button" onClick={onToggleOpen} aria-expanded={expanded} aria-label={`عرض فيديوهات ${playlist.title}`} className={iconBtn}>
-          <ChevronDown className={`w-5 h-5 transition-transform ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />
-        </button>
-        <div className="min-w-0 flex-1 space-y-1">
-          <label htmlFor={`pl-${playlist.id}`} className="sr-only">عنوان القائمة على الموقع</label>
-          <input id={`pl-${playlist.id}`} value={draft.playlistTitles[playlist.id] ?? ''} onChange={(e) => renamePlaylist(e.target.value)} placeholder={playlist.title} className={`${inputClass} w-full font-semibold ${hidden ? 'opacity-60' : ''}`} />
-          <p className="text-xs text-stone-600 dark:text-stone-400">
-            {new Intl.NumberFormat('ar-EG').format(all.length)} فيديو · الأصل: {playlist.title}
-          </p>
+      {/* Phones: the title takes the whole first line, the buttons the next; wide screens: one line */}
+      <div className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+        <div className="flex items-start gap-2 min-w-0 flex-1">
+          <button type="button" onClick={onToggleOpen} aria-expanded={expanded} aria-label={`عرض فيديوهات ${playlist.title}`} className={iconBtn}>
+            <ChevronDown className={`w-5 h-5 transition-transform ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />
+          </button>
+          <div className="min-w-0 flex-1 space-y-1">
+            <label htmlFor={`pl-${playlist.id}`} className="sr-only">عنوان القائمة على الموقع</label>
+            <input id={`pl-${playlist.id}`} value={draft.playlistTitles[playlist.id] ?? ''} onChange={(e) => renamePlaylist(e.target.value)} placeholder={playlist.title} className={`${inputClass} w-full font-semibold ${hidden ? 'opacity-60' : ''}`} />
+            <p className="text-xs text-stone-600 dark:text-stone-400">
+              {new Intl.NumberFormat('ar-EG').format(all.length)} فيديو · الأصل: {playlist.title}
+            </p>
+          </div>
         </div>
-        <button type="button" aria-label="تقديم القائمة" disabled={first} onClick={() => onMove(-1)} className={iconBtn}>
-          <ArrowUp className="w-4 h-4" aria-hidden="true" />
-        </button>
-        <button type="button" aria-label="تأخير القائمة" disabled={last} onClick={() => onMove(1)} className={iconBtn}>
-          <ArrowDown className="w-4 h-4" aria-hidden="true" />
-        </button>
-        <button type="button" onClick={toggleHidden} aria-pressed={hidden} className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl text-sm font-semibold ${hidden ? 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200' : 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300'}`}>
-          {hidden ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
-          {hidden ? 'مخفية' : 'ظاهرة'}
-        </button>
+        <div className="flex items-center justify-end gap-2 shrink-0">
+          <button type="button" aria-label="تقديم القائمة" disabled={first} onClick={() => onMove(-1)} className={iconBtn}>
+            <ArrowUp className="w-4 h-4" aria-hidden="true" />
+          </button>
+          <button type="button" aria-label="تأخير القائمة" disabled={last} onClick={() => onMove(1)} className={iconBtn}>
+            <ArrowDown className="w-4 h-4" aria-hidden="true" />
+          </button>
+          <button type="button" onClick={toggleHidden} aria-pressed={hidden} className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl text-sm font-semibold ${hidden ? 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200' : 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300'}`}>
+            {hidden ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
+            {hidden ? 'مخفية' : 'ظاهرة'}
+          </button>
+        </div>
       </div>
 
       {expanded && (

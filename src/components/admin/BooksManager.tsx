@@ -89,7 +89,7 @@ export const BooksManager: React.FC<{ categories: Category[]; onCountChange?: (c
       ) : (
         <ul className="grid gap-3">
           {books.map((book) => (
-            <li key={book.id} className="flex items-center gap-4 p-3 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800">
+            <li key={book.id} className="flex flex-wrap sm:flex-nowrap items-center gap-x-4 gap-y-2 p-3 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800">
               <BookCover book={book} className="w-14 shrink-0" />
               <div className="min-w-0 flex-1 space-y-1">
                 <p className="font-semibold text-stone-900 dark:text-stone-100 truncate">{book.title}</p>
@@ -106,7 +106,8 @@ export const BooksManager: React.FC<{ categories: Category[]; onCountChange?: (c
                   {book.status === 'published' ? 'منشور' : 'مسودة'}
                 </span>
               </div>
-              <div className="flex items-center gap-1 shrink-0">
+              {/* Phones: the buttons take their own line under the book */}
+              <div className="flex items-center justify-end gap-1 shrink-0 w-full sm:w-auto">
                 <MoveButtons name={book.title} canUp={order.canMove(book, -1)} canDown={order.canMove(book, 1)} busy={order.busy} onMove={(step) => order.move(book, step)} />
                 <a href={book.file_url} target="_blank" rel="noopener noreferrer" aria-label={`فتح ملف ${book.title}`} title="فتح الملف" className="w-10 h-10 flex items-center justify-center rounded-lg text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800">
                   <ExternalLink className="w-4 h-4" aria-hidden="true" />
