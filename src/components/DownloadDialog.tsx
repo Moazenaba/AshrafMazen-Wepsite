@@ -4,9 +4,10 @@
 // Once a download starts, a 5-second count runs; then "إعادة التحميل" offers the file again as a plain link to tap.
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { CheckCircle2, Download, ExternalLink, Loader2, Music, RotateCcw, Video, X } from 'lucide-react';
+import { CheckCircle2, Download, Loader2, Music, RotateCcw, Video, X } from 'lucide-react';
 import type { SiteVideo } from '../lib/libraryOverrides';
-import { downloadAll, isStale, playlistSources, redownload, savefromUrl, type DownloadKind, type StartedDownload } from '../lib/mediaDownload';
+import { downloadAll, isStale, playlistSources, redownload, type DownloadKind, type StartedDownload } from '../lib/mediaDownload';
+import { DownloadFallbacks } from './DownloadFallbacks';
 
 const LABEL: Record<DownloadKind, string> = { audio: 'صوت فقط', video: 'فيديو' };
 const n = (value: number) => new Intl.NumberFormat('ar-EG').format(value);
@@ -176,25 +177,11 @@ export const DownloadDialog: React.FC<{ title: string; videos: SiteVideo[]; onCl
 
         {allFailed && (
           <p role="alert" className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-300 font-semibold">
-            خدمات التحميل لا تستجيب الآن. حمّله من savefrom بالزر بالأسفل، أو حاول بعد قليل.
+            خدمات التحميل المباشر لا تستجيب الآن. حمّله من أحد المواقع بالأسفل، أو حاول بعد قليل.
           </p>
         )}
 
-        {state?.finished && !!state.failedVideos?.length && (
-          <div className="space-y-2">
-            <p className="text-sm text-stone-600 dark:text-stone-400">يفتح صفحة savefrom والتحميل جاهز، اضغط «Download» هناك.</p>
-            <ul className="space-y-2 max-h-56 overflow-y-auto">
-              {state.failedVideos.map((v) => (
-                <li key={v.id}>
-                  <a href={savefromUrl(v.id)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 min-h-12 px-4 rounded-xl bg-gold text-mushaf-deep font-bold">
-                    <ExternalLink className="w-5 h-5 shrink-0" aria-hidden="true" />
-                    <span className="min-w-0 truncate">{many ? v.name : 'حمّل من savefrom'}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {state?.finished && !!state.failedVideos?.length && <DownloadFallbacks videos={state.failedVideos} many={many} />}
       </div>
     </div>,
     document.body

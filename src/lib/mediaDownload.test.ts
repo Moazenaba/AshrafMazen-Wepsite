@@ -40,3 +40,11 @@ describe('isStale', () => {
     expect(isStale({ ...link, attachment: false }, 999_999)).toBe(false);
   });
 });
+
+describe('fallback sites', () => {
+  it('starts with a site that opens with the video filled in, and every site gives an https page', async () => {
+    const { FALLBACK_SITES } = await import('./mediaDownload');
+    expect(FALLBACK_SITES[0].prefilled).toBe(true);
+    for (const site of FALLBACK_SITES) expect(site.url('abcdefghijk')).toMatch(/^https:\/\//);
+  });
+});
