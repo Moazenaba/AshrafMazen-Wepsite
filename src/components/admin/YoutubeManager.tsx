@@ -1,10 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, Eye, EyeOff, Loader2, Save } from 'lucide-react';
+import { Loader2, Save } from 'lucide-react';
 import { getYoutubeOverrides, saveYoutubeOverrides, type YoutubeOverrides } from '../../services/dataService';
 import { overridesChanged, useRawYoutubeLibrary } from '../../lib/youtubeLibrary';
 import { getYouTubeId } from '../../lib/youtube';
+import { orderPlaylists } from '../../lib/libraryOverrides';
+import { EMPTY_OVERRIDES } from '../../services/data/youtube';
+import { FileUploadButton } from './FileUploadButton';
+import { PlaylistCard, inputClass } from './youtube/PlaylistCard';
+import { movePlaylist, newUploadId, titleFromFile } from './youtube/overridesDraft';
 
-const empty: YoutubeOverrides = { hiddenPlaylists: [], hiddenVideos: [], videoTitles: {}, playlistTitles: {}, extraPlaylists: [], extraVideos: [] };
+const empty: YoutubeOverrides = EMPTY_OVERRIDES;
 
 // A playlist address or just its id: https://www.youtube.com/playlist?list=PL... or PL... (a video id is 11 characters, a playlist's longer)
 const playlistIdFrom = (text: string) =>
@@ -49,9 +54,6 @@ export const YoutubeManager: React.FC = () => {
 
   const dirty = useMemo(() => JSON.stringify(saved) !== JSON.stringify(draft), [saved, draft]);
 
-  const toggle = (list: 'hiddenPlaylists' | 'hiddenVideos', id: string) =>
-    setDraft((d) => ({ ...d, [list]: d[list].includes(id) ? d[list].filter((x) => x !== id) : [...d[list], id] }));
-
   const [adding, setAdding] = useState(false);
 
   // One box for both: a playlist link (it has list=...) adds the whole playlist, any other video link adds that video alone
@@ -85,13 +87,15 @@ export const YoutubeManager: React.FC = () => {
   const removeExtra = (id: string) => setDraft((d) => ({ ...d, extraPlaylists: d.extraPlaylists.filter((p) => p.id !== id) }));
   const removeVideo = (id: string) => setDraft((d) => ({ ...d, extraVideos: d.extraVideos.filter((v) => v.id !== id) }));
 
-  const rename = (list: 'videoTitles' | 'playlistTitles', id: string, value: string) =>
-    setDraft((d) => {
-      const next = { ...d[list] };
-      if (value.trim()) next[id] = value;
-      else delete next[id];
-      return { ...d, [list]: next };
-    });
+  // A file uploaded to the site, shown with the single videos («مقاطع مختارة»)
+  const addUpload = (kind: 'video' | 'audio') => (url: string, file: File) => {
+    const title = newTitle.trim() || titleFromFile(file.name) || 'ملف مرفوع';
+    setDraft((d) => ({ ...d, extraVideos: [{ id: newUploadId(), title, src: url, kind }, ...d.extraVideos] }));
+    setNewTitle('');
+    setMessage({ type: 'ok', text: `رُفع «${title}». اضغط «حفظ التغييرات» ليظهر في الموقع ضمن «مقاطع مختارة». ولرفع ملف داخل قائمة بعينها افتح القائمة من الأسفل.` });
+  };
+
+  const ordered = useMemo(() => orderPlaylists(library, draft.playlistOrder), [library, draft.playlistOrder]);
 
   const save = async () => {
     try {
@@ -117,8 +121,7 @@ export const YoutubeManager: React.FC = () => {
   const q = query.trim();
   const hiddenCount = draft.hiddenPlaylists.length + draft.hiddenVideos.length;
 
-  const input =
-    'h-10 px-3 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-700';
+  const input = inputClass;
 
   return (
     <div className="space-y-6">
@@ -158,17 +161,22 @@ export const YoutubeManager: React.FC = () => {
               {adding && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
               إضافة
             </button>
+            <FileUploadButton kind="video" label="رفع فيديو للموقع" onUploaded={addUpload('video')} onError={(text) => setMessage({ type: 'error', text })} />
+            <FileUploadButton kind="audio" label="رفع صوتية للموقع" onUploaded={addUpload('audio')} onError={(text) => setMessage({ type: 'error', text })} />
           </div>
           <ul className="text-xs text-stone-600 dark:text-stone-400 space-y-1 list-disc ps-5">
             <li><b>فيديو واحد:</b> من يوتيوب اضغط «مشاركة» ثم «نسخ»، والصق الرابط هنا. العنوان يُجلب تلقائياً، ويظهر الفيديو في الموقع ضمن «مقاطع مختارة».</li>
             <li><b>قائمة تشغيل كاملة:</b> افتح القائمة نفسها على يوتيوب (من تبويب «قوائم التشغيل» في القناة) ثم «مشاركة» ثم «نسخ»، فيكون في الرابط <span dir="ltr">list=</span>. اكتب لها عنواناً. تظهر بأحدث ١٥ فيديو منها، وتتحدث تلقائياً كل ٦ ساعات.</li>
+            <li><b>رفع ملف:</b> فيديو أو صوتية من جهازك تُرفع للموقع نفسه. ولإضافتها داخل قائمة معيّنة افتح القائمة من الأسفل واستخدم أزرار الرفع فيها.</li>
+            <li><b>حذف فيديو من قائمة:</b> افتح القائمة واضغط على العين بجانبه. المحذوف لا يعود تلقائياً حتى لو بقي على يوتيوب، والجديد بعده يُضاف عادي.</li>
+            <li><b>الاستماع والتحميل:</b> زر النوتة بجانب أي فيديو يرفق له ملف صوت و/أو فيديو، فيظهر للزائر «استمع فقط» و«تحميل».</li>
             <li>لا يظهر شيء في الموقع قبل الضغط على «حفظ التغييرات».</li>
           </ul>
           {draft.extraVideos.length > 0 && (
             <ul className="flex flex-wrap gap-2" aria-label="الفيديوهات المضافة">
               {draft.extraVideos.map((v) => (
                 <li key={v.id} className="inline-flex items-center gap-2 ps-3 pe-1 h-9 max-w-full rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 text-sm">
-                  <span className="truncate">▶ {v.title}</span>
+                  <span className="truncate">{v.src ? (v.kind === 'audio' ? '♪' : '⬆') : '▶'} {v.title}</span>
                   <button type="button" onClick={() => removeVideo(v.id)} aria-label={`إزالة ${v.title}`} className="w-7 h-7 shrink-0 rounded-full hover:bg-amber-100 dark:hover:bg-amber-900">×</button>
                 </li>
               ))}
@@ -209,85 +217,22 @@ export const YoutubeManager: React.FC = () => {
         </div>
       ) : (
         <ul className="space-y-3">
-          {library.map((playlist) => {
-            const hidden = draft.hiddenPlaylists.includes(playlist.id);
-            const videos = q ? playlist.videos.filter((v) => (draft.videoTitles[v.id] || v.title).includes(q) || v.title.includes(q)) : playlist.videos;
-            if (q && videos.length === 0) return null;
-            const expanded = open === playlist.id || !!q;
-            return (
-              <li key={playlist.id} className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800">
-                <div className="p-4 flex flex-wrap items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setOpen(expanded && !q ? null : playlist.id)}
-                    aria-expanded={expanded}
-                    aria-label={`عرض فيديوهات ${playlist.title}`}
-                    className="w-10 h-10 flex items-center justify-center rounded-lg text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
-                  >
-                    <ChevronDown className={`w-5 h-5 transition-transform ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />
-                  </button>
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <label htmlFor={`pl-${playlist.id}`} className="sr-only">عنوان القائمة على الموقع</label>
-                    <input
-                      id={`pl-${playlist.id}`}
-                      value={draft.playlistTitles[playlist.id] ?? ''}
-                      onChange={(e) => rename('playlistTitles', playlist.id, e.target.value)}
-                      placeholder={playlist.title}
-                      className={`${input} w-full font-semibold ${hidden ? 'opacity-60' : ''}`}
-                    />
-                    <p className="text-xs text-stone-600 dark:text-stone-400">
-                      {new Intl.NumberFormat('ar-EG').format(playlist.videos.length)} فيديو · الأصل: {playlist.title}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => toggle('hiddenPlaylists', playlist.id)}
-                    aria-pressed={hidden}
-                    className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl text-sm font-semibold ${
-                      hidden
-                        ? 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200'
-                        : 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300'
-                    }`}
-                  >
-                    {hidden ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
-                    {hidden ? 'مخفية' : 'ظاهرة'}
-                  </button>
-                </div>
-
-                {expanded && (
-                  <ul className="border-t border-stone-100 dark:border-stone-800 p-2 sm:p-3 space-y-1 max-h-[28rem] overflow-y-auto">
-                    {videos.map((video) => {
-                      const videoHidden = draft.hiddenVideos.includes(video.id);
-                      return (
-                        <li key={video.id} className="flex items-center gap-2 p-1.5 rounded-lg">
-                          <label htmlFor={`v-${video.id}`} className="sr-only">عنوان الفيديو على الموقع</label>
-                          <input
-                            id={`v-${video.id}`}
-                            value={draft.videoTitles[video.id] ?? ''}
-                            onChange={(e) => rename('videoTitles', video.id, e.target.value)}
-                            placeholder={video.title}
-                            className={`${input} min-w-0 flex-1 ${videoHidden ? 'opacity-60' : ''}`}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => toggle('hiddenVideos', video.id)}
-                            aria-pressed={videoHidden}
-                            aria-label={videoHidden ? `إظهار «${video.title}»` : `إخفاء «${video.title}»`}
-                            title={videoHidden ? 'إظهار' : 'إخفاء'}
-                            className={`w-10 h-10 shrink-0 flex items-center justify-center rounded-lg ${
-                              videoHidden ? 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200' : 'text-emerald-800 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/50'
-                            }`}
-                          >
-                            {videoHidden ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </li>
-            );
-          })}
+          {ordered.map((playlist, i) => (
+            <PlaylistCard
+              key={playlist.id}
+              playlist={playlist}
+              draft={draft}
+              setDraft={setDraft}
+              query={q}
+              expanded={open === playlist.id || !!q}
+              onToggleOpen={() => setOpen(open === playlist.id ? null : playlist.id)}
+              onMove={(step) => setDraft((d) => movePlaylist(d, ordered.map((p) => p.id), i, step))}
+              first={i === 0}
+              last={i === ordered.length - 1}
+              fetchTitle={youtubeTitle}
+              onMessage={setMessage}
+            />
+          ))}
         </ul>
       )}
     </div>

@@ -13,6 +13,10 @@ const KINDS = {
   cover: { folder: 'library/covers', extensions: ['jpg', 'jpeg', 'png', 'webp'], maxMb: 5, type: '' },
   audio: { folder: 'audio', extensions: ['mp3', 'm4a', 'wav', 'ogg'], maxMb: 500, type: '' },
   logo: { folder: 'branding', extensions: ['png', 'jpg', 'jpeg', 'webp'], maxMb: 2, type: '' },
+  // The home page's featured picture
+  hero: { folder: 'branding/hero', extensions: ['png', 'jpg', 'jpeg', 'webp'], maxMb: 8, type: '' },
+  // Videos the admin uploads to the site itself (R2 takes a single upload of up to 5 GB)
+  video: { folder: 'media/video', extensions: ['mp4', 'webm', 'mov', 'm4v'], maxMb: 4000, type: '' },
 } as const;
 
 const IMAGE_TYPES: Record<string, string> = {
@@ -23,6 +27,7 @@ const IMAGE_TYPES: Record<string, string> = {
   svg: 'image/svg+xml',
 };
 const AUDIO_TYPES: Record<string, string> = { mp3: 'audio/mpeg', m4a: 'audio/mp4', wav: 'audio/wav', ogg: 'audio/ogg' };
+const VIDEO_TYPES: Record<string, string> = { mp4: 'video/mp4', m4v: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime' };
 
 const send = (res: any, status: number, body: unknown) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -48,7 +53,7 @@ async function sign(cfg: R2Config, body: any, res: any) {
     return send(res, 400, { error: `حجم الملف أكبر من ${rules.maxMb} ميجابايت.` });
   }
   const key = `${rules.folder}/${randomUUID()}.${extension}`;
-  const contentType = rules.type || IMAGE_TYPES[extension] || AUDIO_TYPES[extension] || 'application/octet-stream';
+  const contentType = rules.type || IMAGE_TYPES[extension] || AUDIO_TYPES[extension] || VIDEO_TYPES[extension] || 'application/octet-stream';
   return send(res, 200, {
     uploadUrl: presign(cfg, 'PUT', key, 15 * 60),
     publicUrl: fileLink(cfg, key),
@@ -84,11 +89,14 @@ const LINK_SECONDS = 24 * 60 * 60;
 function serveFile(cfg: R2Config, req: any, res: any) {
   const key = String(req.query?.file || '');
   // Only the site's own uploads, so this cannot be used to read anything else in the bucket
-  if (!/^(library\/(files|covers)|audio|branding)\//.test(key) || key.includes('..')) return send(res, 400, { error: 'رابط ملف غير صالح.' });
+  if (!/^(library\/(files|covers)|audio|branding|media\/video)\//.test(key) || key.includes('..')) return send(res, 400, { error: 'رابط ملف غير صالح.' });
   const extra: Record<string, string> = {};
   if (req.query?.download) {
-    const name = String(req.query?.name || 'book.pdf').replace(/[\\/:*?"<>|\r\n]+/g, ' ').trim() || 'book.pdf';
-    extra['response-content-disposition'] = `attachment; filename="book.pdf"; filename*=UTF-8''${encodeURIComponent(name)}`;
+    // The file keeps its own extension, so a recording or a video downloads as such and not as a PDF
+    const ext = (key.split('.').pop() || 'pdf').toLowerCase();
+    let name = String(req.query?.name || '').replace(/[\\/:*?"<>|\r\n]+/g, ' ').trim() || 'file';
+    if (!name.toLowerCase().endsWith(`.${ext}`)) name = `${name}.${ext}`;
+    extra['response-content-disposition'] = `attachment; filename="file.${ext}"; filename*=UTF-8''${encodeURIComponent(name)}`;
   }
   res.setHeader('Cache-Control', req.query?.download ? 'no-store' : 'private, max-age=3600');
   res.statusCode = 302;

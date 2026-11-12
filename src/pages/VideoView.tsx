@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { usePageTitle } from '../hooks/usePageTitle';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
-import type { LibraryPlaylist, LibraryVideo } from '../data/youtube-library';
 import { useYoutubeLibrary } from '../lib/youtubeLibrary';
-import { VideoPlayer } from '../components/VideoPlayer';
+import type { SitePlaylist, SiteVideo } from '../lib/libraryOverrides';
+import { DownloadDialog } from '../components/DownloadDialog';
+import { VideoMedia } from './video/VideoMedia';
 import { ReportLink } from '../components/ReportLink';
 import { BookmarkButton } from '../components/BookmarkButton';
 import { saveRecentLesson } from '../services/recentLessonService';
@@ -31,9 +31,11 @@ export const VideoView: React.FC = () => {
     return null;
   }, [library, videoId]);
 
-  const video: LibraryVideo | null = found?.video ?? null;
-  const playlist: LibraryPlaylist | null = library.find((p) => p.id === listId) ?? found?.playlist ?? null;
-  usePageTitle(video?.title);
+  // A YouTube video outside the library (for example the one the home page's featured card opens) still plays here
+  const loose: SiteVideo | null = !found && library.length > 0 && /^[A-Za-z0-9_-]{11}$/.test(videoId) ? { id: videoId, title: params.get('t') || '' } : null;
+  const video: SiteVideo | null = found?.video ?? loose;
+  const [downloading, setDownloading] = useState(false);
+  const playlist: SitePlaylist | null = library.find((p) => p.id === listId) ?? found?.playlist ?? null;
   const index = playlist && video ? playlist.videos.findIndex((v) => v.id === video.id) : -1;
   const next = playlist && index >= 0 && index < playlist.videos.length - 1 ? playlist.videos[index + 1] : null;
   const resumeAt = useMemo(() => getResumeSeconds(progressKey(videoId)), [videoId]);
@@ -89,10 +91,10 @@ export const VideoView: React.FC = () => {
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0 space-y-5">
-          <VideoPlayer
+          <VideoMedia
             key={video.id}
-            youtubeUrl={`https://www.youtube.com/watch?v=${video.id}`}
-            title={video.title}
+            video={video}
+            onDownload={() => setDownloading(true)}
             startAt={resumeAt}
             onTimeUpdate={(seconds, duration) => {
               trackView('video', statsKey);
@@ -105,7 +107,9 @@ export const VideoView: React.FC = () => {
             }}
           />
 
-          <h1 className="font-semibold text-xl sm:text-2xl leading-snug text-stone-900 dark:text-stone-100 text-balance">{video.title}</h1>
+          {downloading && <DownloadDialog title={video.title} videos={[video]} onClose={() => setDownloading(false)} />}
+
+          {video.title && <h1 className="font-semibold text-xl sm:text-2xl leading-snug text-stone-900 dark:text-stone-100 text-balance">{video.title}</h1>}
 
           {views !== null && views > 0 && (
             <p className="text-sm text-stone-600 dark:text-stone-400">{formatArabicCount(views, COUNT_FORMS.view)}</p>

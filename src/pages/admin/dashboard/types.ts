@@ -6,4 +6,4 @@ export interface LessonAdminItem extends Lesson {
 }
 
 export type AdminTab =
-  | 'stats' | 'requests' | 'videos' | 'lessons' | 'series' | 'categories' | 'books' | 'quotes' | 'branding' | 'system';
+  | 'stats' | 'requests' | 'videos' | 'reels' | 'lessons' | 'series' | 'categories' | 'books' | 'quotes' | 'branding' | 'system';

@@ -9,6 +9,7 @@ import { BooksManager } from '../../components/admin/BooksManager';
 import { StatsPanel } from '../../components/admin/StatsPanel';
 import { SubmissionsManager } from '../../components/admin/SubmissionsManager';
 import { YoutubeManager } from '../../components/admin/YoutubeManager';
+import { ReelsManager } from '../../components/admin/ReelsManager';
 import type { AdminUser, Category, Series } from '../../types';
 import { AdminHeader } from './dashboard/AdminHeader';
 import { useReorder } from './dashboard/hooks/useReorder';
@@ -130,6 +131,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
         {activeTab === 'requests' && <SubmissionsManager onCountChange={requests.setPending} onCreateLesson={lessonActions.openFromSubmission} refreshKey={requests.listVersion} />}
 
         {activeTab === 'videos' && <YoutubeManager />}
+
+        {activeTab === 'reels' && <ReelsManager />}
 
         {activeTab === 'books' && <BooksManager categories={categories} onCountChange={setBooksCount} />}
 

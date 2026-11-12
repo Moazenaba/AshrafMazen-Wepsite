@@ -15,6 +15,7 @@ import {
   type SiteContent,
 } from './siteContentRules';
 import type { TickerQuote } from '../../constants/tickerQuotes';
+import { cleanHomeFeature, parseHomeFeature, validateHomeFeature, type HomeFeature } from './homeFeatureRules';
 
 let cached: SiteContent | null = null;
 
@@ -29,6 +30,7 @@ export async function getSiteContent(forceRefresh = false): Promise<SiteContent>
         quotes: parseQuotes(byKey.get(SITE_CONTENT_KEYS.quotes)),
         hero: parseHero(byKey.get(SITE_CONTENT_KEYS.hero)),
         contact: parseContact(byKey.get(SITE_CONTENT_KEYS.contact)),
+        feature: parseHomeFeature(byKey.get(SITE_CONTENT_KEYS.feature)),
       };
       return cached;
     }
@@ -58,5 +60,13 @@ export async function saveHeroQuote(hero: HeroQuote): Promise<void> {
 export async function saveContactInfo(contact: ContactInfo): Promise<ContactInfo> {
   const clean = cleanContact(contact);
   await write(SITE_CONTENT_KEYS.contact, clean);
+  return clean;
+}
+
+export async function saveHomeFeature(feature: HomeFeature): Promise<HomeFeature> {
+  const clean = cleanHomeFeature(feature);
+  const problem = validateHomeFeature(clean);
+  if (problem) throw new Error(problem);
+  await write(SITE_CONTENT_KEYS.feature, clean);
   return clean;
 }
