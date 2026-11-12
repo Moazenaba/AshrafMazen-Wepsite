@@ -1,0 +1,10 @@
+{
+  // The server functions run on Node (Vercel), not in the browser: they need Node's types, not Vite's.
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2022", "DOM"]
+  },
+  "include": ["./**/*.ts", "../src/data/**/*.ts"],
+  "exclude": ["./**/*.test.ts"]
+}
