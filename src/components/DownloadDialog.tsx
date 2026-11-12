@@ -6,7 +6,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CheckCircle2, Download, ExternalLink, Loader2, Music, RotateCcw, Video, X } from 'lucide-react';
 import type { SiteVideo } from '../lib/libraryOverrides';
-import { downloadAll, playlistSources, savefromUrl, type DownloadKind, type StartedDownload } from '../lib/mediaDownload';
+import { downloadAll, isStale, playlistSources, redownload, savefromUrl, type DownloadKind, type StartedDownload } from '../lib/mediaDownload';
 
 const LABEL: Record<DownloadKind, string> = { audio: 'صوت فقط', video: 'فيديو' };
 const n = (value: number) => new Intl.NumberFormat('ar-EG').format(value);
@@ -56,7 +56,23 @@ export const DownloadDialog: React.FC<{ title: string; videos: SiteVideo[]; onCl
     setState({ done: 0, failed: 0, total: items.length, finished: false });
     const result = await downloadAll(items, k, (done, failedSoFar) => setState({ done, failed: failedSoFar, total: items.length, finished: false }), signal.current);
     setState({ done: items.length, total: items.length, finished: true, ...result });
-    if (result.started.length > 0) setCountdown(WAIT_SECONDS);
+    // Only a download that started by itself needs the wait; a link to tap is shown at once
+    if (result.started.some((d) => d.auto)) setCountdown(WAIT_SECONDS);
+  };
+
+  // "إعادة التحميل" on a link too old to work: a new one is fetched and started (or shown to tap)
+  const [refreshing, setRefreshing] = useState<number | null>(null);
+  const refresh = async (i: number, d: StartedDownload, k: DownloadKind) => {
+    if (refreshing !== null) return;
+    setRefreshing(i);
+    try {
+      const fresh = await redownload(d, k);
+      setState((s) => (s?.started ? { ...s, started: s.started.map((x, j) => (j === i ? fresh : x)) } : s));
+    } catch {
+      setState((s) => (s ? { ...s, failedVideos: [...(s.failedVideos ?? []), { id: d.youtubeId!, name: d.name }] } : s));
+    } finally {
+      setRefreshing(null);
+    }
   };
 
   const busy = !!state && !state.finished;
@@ -124,22 +140,32 @@ export const DownloadDialog: React.FC<{ title: string; videos: SiteVideo[]; onCl
           <div role="status" className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-900 dark:text-emerald-200 space-y-3">
             <p className="flex items-center gap-2 font-bold">
               {countdown > 0 ? <Loader2 className="w-5 h-5 shrink-0 animate-spin" aria-hidden="true" /> : <CheckCircle2 className="w-5 h-5 shrink-0" aria-hidden="true" />}
-              {countdown > 0 ? `بدأ التحميل… تأكد خلال ${n(countdown)}` : 'لو التحميل ما بدأش، اضغط «إعادة التحميل».'}
+              {countdown > 0
+                ? `بدأ التحميل… تأكد خلال ${n(countdown)}`
+                : started.some((d) => d.auto)
+                  ? 'لو التحميل ما بدأش، اضغط «إعادة التحميل».'
+                  : 'الملف جاهز، اضغط الزر لتحميله.'}
             </p>
             {state.failed > 0 && <p className="text-sm">تعذّر {n(state.failed)} ملف، تجدها بالأسفل.</p>}
             {countdown === 0 && (
               <ul className="space-y-2 max-h-56 overflow-y-auto">
-                {started.map((d) => (
-                  <li key={d.url}>
-                    {/* A plain link the visitor taps: the surest way on a phone */}
+                {started.map((d, i) => (
+                  <li key={i}>
+                    {/* A plain link the visitor taps: the surest way on a phone. An old cobalt link is asked for again first. */}
                     <a
                       href={d.url}
                       download={d.name}
+                      aria-busy={refreshing === i}
+                      onClick={(e) => {
+                        if (!isStale(d) || !kind) return;
+                        e.preventDefault();
+                        refresh(i, d, kind);
+                      }}
                       {...(d.attachment ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
                       className="flex items-center justify-center gap-2 min-h-12 px-4 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold"
                     >
-                      <RotateCcw className="w-5 h-5 shrink-0" aria-hidden="true" />
-                      <span className="min-w-0 truncate">{many ? `إعادة: ${d.name}` : 'إعادة التحميل'}</span>
+                      {refreshing === i ? <Loader2 className="w-5 h-5 shrink-0 animate-spin" aria-hidden="true" /> : <RotateCcw className="w-5 h-5 shrink-0" aria-hidden="true" />}
+                      <span className="min-w-0 truncate">{d.auto ? (many ? `إعادة: ${d.name}` : 'إعادة التحميل') : many ? `تحميل: ${d.name}` : 'تحميل الملف'}</span>
                     </a>
                   </li>
                 ))}

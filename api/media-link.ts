@@ -54,20 +54,29 @@ function reason(data: any): string {
   return String(data?.error?.code ?? data?.error ?? data?.status ?? 'no link').slice(0, 80);
 }
 
-// The link must start giving the file; only its first bytes are asked for, then the request is dropped
-async function works(link: MediaLink): Promise<boolean> {
+// The link must really start giving the file: the first bytes of its body are waited for, then the request is dropped.
+// A link that answers 200 and then sends nothing (a cobalt tunnel YouTube cut off, an expired link) would save as a
+// 0 KB file, so headers alone are not enough.
+async function works(link: MediaLink, ms: number, range = true): Promise<boolean> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), STEP_MS);
+  const timer = setTimeout(() => controller.abort(), ms);
   try {
-    const response = await fetch(link.url, { headers: { Range: 'bytes=0-1023' }, signal: controller.signal, redirect: 'follow' });
+    const response = await fetch(link.url, { headers: range ? { Range: 'bytes=0-1023' } : {}, signal: controller.signal, redirect: 'follow' });
     const type = response.headers.get('content-type') || '';
-    const ok = (response.status === 200 || response.status === 206) && !type.startsWith('text/') && !type.includes('json');
-    controller.abort();
-    return ok;
+    if (!(response.status === 200 || response.status === 206) || type.startsWith('text/') || type.includes('json')) return false;
+    if (response.headers.get('content-length') === '0' || !response.body) return false;
+    const reader = response.body.getReader();
+    // Some bytes must arrive (empty chunks are skipped); the stream ending first means an empty file
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) return false;
+      if (value && value.byteLength > 0) return true;
+    }
   } catch {
     return false;
   } finally {
     clearTimeout(timer);
+    controller.abort();
   }
 }
 
@@ -122,9 +131,11 @@ export default async function handler(req: any, res: any) {
     const service = new URL(p.base).host;
     try {
       const { link, why } = await ask(p, id, kind);
-      // cobalt answers with a link only once it has found the video (its video links can take seconds to start),
-      // so only the other services' links are tried first
-      if (link && (p.type === 'cobalt' || (await works(link)))) {
+      // Every link is checked to give bytes before it is handed out. A cobalt tunnel can take seconds to start
+      // (and ignores Range), so it gets the time left before the deadline.
+      const left = Math.max(2000, deadline + 4000 - Date.now());
+      const checked = link && (p.type === 'cobalt' ? await works(link, Math.min(COBALT_MS, left), false) : await works(link, Math.min(STEP_MS, left)));
+      if (link && checked) {
         failedAt.delete(p.base);
         return res.status(200).send(JSON.stringify({ ...link, provider: p.type }));
       }
