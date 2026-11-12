@@ -4,7 +4,7 @@ import type { YoutubeOverrides } from '../services/data/youtube';
 
 const o = (over: Partial<YoutubeOverrides> = {}): YoutubeOverrides => ({
   hiddenPlaylists: [], hiddenVideos: [], videoTitles: {}, playlistTitles: {}, extraPlaylists: [], extraVideos: [],
-  playlistAdditions: {}, playlistOrder: [], mediaFiles: {}, ...over,
+  playlistAdditions: {}, playlistOrder: [], mediaFiles: {}, playlistRemovals: {}, videoOrder: {}, ...over,
 });
 const lib = (): SitePlaylist[] => [
   { id: 'p1', title: 'one', count: '', latestVideoId: 'a', videos: [{ id: 'a', title: 'A' }, { id: 'b', title: 'B' }] },

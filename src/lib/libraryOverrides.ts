@@ -39,7 +39,7 @@ function extraVideosPlaylist(o: YoutubeOverrides): SitePlaylist[] {
   return [{ id: EXTRA_VIDEOS_LIST, title: 'مقاطع مختارة', count: `${videos.length} فيديو`, latestVideoId: videos[0].id, videos }];
 }
 
-// Playlists in the admin's order; any the admin has not placed keep their place after them
+// Items (playlists, or the videos of one) in the admin's order; any the admin has not placed keep their place after them
 export function orderPlaylists<T extends { id: string }>(list: T[], order: string[] | undefined): T[] {
   if (!order?.length) return list;
   const rank = new Map(order.map((id, i) => [id, i]));
@@ -59,8 +59,9 @@ export function applyOverrides(library: SitePlaylist[], o: YoutubeOverrides | nu
     .map((p) => {
       const added = (o.playlistAdditions?.[p.id] ?? []).filter(usable);
       const addedIds = new Set(added.map((v) => v.id));
-      const videos = [...added, ...p.videos.filter((v) => !addedIds.has(v.id))]
-        .filter((v) => !hiddenVideos.has(v.id))
+      const removed = new Set(o.playlistRemovals?.[p.id] ?? []);
+      const videos = orderPlaylists([...added, ...p.videos.filter((v) => !addedIds.has(v.id))], o.videoOrder?.[p.id])
+        .filter((v) => !hiddenVideos.has(v.id) && !removed.has(v.id))
         .map((v) => {
           const title = o.videoTitles[v.id] || v.title;
           const files = filesOf(v, o.mediaFiles);

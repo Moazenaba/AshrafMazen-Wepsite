@@ -19,11 +19,15 @@ export interface YoutubeOverrides {
   playlistOrder: string[];
   // A recording and/or a video file attached to a video, for "listen only" and downloading
   mediaFiles: Record<string, MediaFiles>;
+  // Videos taken out of one playlist only (hiddenVideos takes a video off the whole site)
+  playlistRemovals: Record<string, string[]>;
+  // The admin's order of the videos inside a playlist (videos not placed keep their place after them)
+  videoOrder: Record<string, string[]>;
 }
 
 export const EMPTY_OVERRIDES: YoutubeOverrides = {
   hiddenPlaylists: [], hiddenVideos: [], videoTitles: {}, playlistTitles: {}, extraPlaylists: [], extraVideos: [],
-  playlistAdditions: {}, playlistOrder: [], mediaFiles: {},
+  playlistAdditions: {}, playlistOrder: [], mediaFiles: {}, playlistRemovals: {}, videoOrder: {},
 };
 
 const isObject = (v: unknown): v is Record<string, any> => !!v && typeof v === 'object' && !Array.isArray(v);
@@ -45,6 +49,8 @@ export async function getYoutubeOverrides(): Promise<YoutubeOverrides> {
       playlistAdditions: isObject(parsed.playlistAdditions) ? parsed.playlistAdditions : {},
       playlistOrder: Array.isArray(parsed.playlistOrder) ? parsed.playlistOrder : [],
       mediaFiles: isObject(parsed.mediaFiles) ? parsed.mediaFiles : {},
+      playlistRemovals: isObject(parsed.playlistRemovals) ? parsed.playlistRemovals : {},
+      videoOrder: isObject(parsed.videoOrder) ? parsed.videoOrder : {},
     };
   } catch {
     return EMPTY_OVERRIDES;

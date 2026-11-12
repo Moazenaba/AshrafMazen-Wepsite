@@ -6,7 +6,8 @@ import { getYouTubeId } from '../../lib/youtube';
 import { orderPlaylists } from '../../lib/libraryOverrides';
 import { EMPTY_OVERRIDES } from '../../services/data/youtube';
 import { FileUploadButton } from './FileUploadButton';
-import { PlaylistCard, inputClass } from './youtube/PlaylistCard';
+import { PlaylistCard } from './youtube/PlaylistCard';
+import { inputClass } from './youtube/styles';
 import { movePlaylist, newUploadId, titleFromFile } from './youtube/overridesDraft';
 
 const empty: YoutubeOverrides = EMPTY_OVERRIDES;
@@ -229,6 +230,7 @@ export const YoutubeManager: React.FC = () => {
               onMove={(step) => setDraft((d) => movePlaylist(d, ordered.map((p) => p.id), i, step))}
               first={i === 0}
               last={i === ordered.length - 1}
+              playlists={ordered.map((p) => ({ id: p.id, title: draft.playlistTitles[p.id] || p.title }))}
               fetchTitle={youtubeTitle}
               onMessage={setMessage}
             />

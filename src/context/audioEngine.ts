@@ -1,7 +1,7 @@
 // Small pieces of the site's audio engine (AudioContext): helpers about the one <audio> element, and the
 // phone's notification / lock-screen controls.
 import { useEffect, type RefObject } from 'react';
-import { isYoutubeTrackId } from '../lib/youtubeAudio';
+import { isSilenceSrc, isYoutubeTrackId } from '../lib/youtubeAudio';
 import type { AudioTrack } from './AudioContext';
 
 const ARTIST = 'الشيخ أشرف مازن';
@@ -9,7 +9,7 @@ const ARTIST = 'الشيخ أشرف مازن';
 // The key statistics count under: a lesson's, or the channel video's (the same its video page uses)
 export const statsKey = (id: string) => (isYoutubeTrackId(id) ? id : `lesson:${id}`);
 // The silent sound played from a tap to unlock playback (see SILENCE) is never a real recording
-export const isSilence = (audio: HTMLAudioElement) => audio.src.startsWith('data:');
+export const isSilence = (audio: HTMLAudioElement) => isSilenceSrc(audio.src);
 // A recording sent while it is made has no length yet (Infinity): treated as unknown
 export const finite = (n: number) => (Number.isFinite(n) ? n : 0);
 // How far into the recording the player can jump: what has arrived, or all of it when the server allows jumps

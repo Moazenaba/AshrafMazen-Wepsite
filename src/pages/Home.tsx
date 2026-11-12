@@ -65,7 +65,7 @@ export const Home: React.FC = () => {
 
           <SciencesColumn placed={placed} activeCategories={activeCategories} loading={!dataLoaded} />
 
-          <SideColumn placed={placed} activeCategories={activeCategories} recentLesson={recentLesson} recentResume={recentResume} recentDuration={recentDuration} visibleLibrary={visibleLibrary} />
+          <SideColumn placed={placed} activeCategories={activeCategories} recentLesson={recentLesson} recentResume={recentResume} recentDuration={recentDuration} visibleLibrary={visibleLibrary} menu={content.menu} />
 
         </div>
 
