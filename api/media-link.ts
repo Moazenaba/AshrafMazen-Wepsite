@@ -41,8 +41,17 @@ async function timed(url: string, init: RequestInit = {}, ms = STEP_MS): Promise
 
 async function json(url: string, init?: RequestInit, ms = STEP_MS): Promise<any> {
   const response = await timed(url, init, ms);
-  if (!response.ok && response.status !== 400) throw new Error(`HTTP ${response.status}`);
-  return response.json();
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`HTTP ${response.status}: ${text.replace(/\s+/g, ' ').slice(0, 80)}`);
+  }
+}
+
+// Why a service gave no link, kept short, for the error answer (helps tell a blocked service from a slow one)
+function reason(data: any): string {
+  return String(data?.error?.code ?? data?.error ?? data?.status ?? 'no link').slice(0, 80);
 }
 
 // The link must start giving the file; only its first bytes are asked for, then the request is dropped
@@ -62,14 +71,22 @@ async function works(link: MediaLink): Promise<boolean> {
   }
 }
 
-async function ask(p: Provider, id: string, kind: MediaKind): Promise<MediaLink | null> {
+async function ask(p: Provider, id: string, kind: MediaKind): Promise<{ link: MediaLink | null; why: string }> {
+  let data: any;
+  let link: MediaLink | null;
   if (p.type === 'cobalt') {
     const req = cobaltRequest(p, id, kind);
     // cobalt prepares the file before it answers (an MP3 can take several seconds), so it gets longer
-    return parseCobalt(await json(req.url, req.init, COBALT_MS));
+    data = await json(req.url, req.init, COBALT_MS);
+    link = parseCobalt(data);
+  } else if (p.type === 'invidious') {
+    data = await json(invidiousRequest(p, id));
+    link = parseInvidious(p, data, kind);
+  } else {
+    data = await json(pipedRequest(p, id));
+    link = parsePiped(data, kind);
   }
-  if (p.type === 'invidious') return parseInvidious(p, await json(invidiousRequest(p, id)), kind);
-  return parsePiped(await json(pipedRequest(p, id)), kind);
+  return { link, why: link ? '' : reason(data) };
 }
 
 async function belongsToChannel(id: string): Promise<boolean> {
@@ -99,20 +116,23 @@ export default async function handler(req: any, res: any) {
 
   // Vercel stops a function after 30 seconds; stop trying a little before
   const deadline = Date.now() + 24000;
+  const tried: { service: string; why: string }[] = [];
   for (const p of ordered) {
     if (Date.now() > deadline) break;
+    const service = new URL(p.base).host;
     try {
-      const link = await ask(p, id, kind);
+      const { link, why } = await ask(p, id, kind);
       // cobalt answers with a link only once it has found the video (its video links can take seconds to start),
       // so only the other services' links are tried first
       if (link && (p.type === 'cobalt' || (await works(link)))) {
         failedAt.delete(p.base);
         return res.status(200).send(JSON.stringify({ ...link, provider: p.type }));
       }
-    } catch {
-      // try the next one
+      tried.push({ service, why: link ? 'link did not answer' : why });
+    } catch (err: any) {
+      tried.push({ service, why: err?.name === 'AbortError' ? 'timeout' : String(err?.message || err).slice(0, 100) });
     }
     failedAt.set(p.base, Date.now());
   }
-  return res.status(502).send(JSON.stringify({ error: 'خدمات التحميل لا تستجيب الآن. حاول بعد قليل.' }));
+  return res.status(502).send(JSON.stringify({ error: 'خدمات التحميل لا تستجيب الآن. حاول بعد قليل.', tried }));
 }
