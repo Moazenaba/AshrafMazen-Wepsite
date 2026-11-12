@@ -44,19 +44,24 @@ export async function fetchMediaLink(id: string, kind: DownloadKind): Promise<Me
   return { url: data.url, attachment: !!data.attachment };
 }
 
-// A file sent as an attachment downloads quietly in a hidden frame, so the page stays; any other link opens in a new tab
-function deliver(url: string, attachment: boolean, name: string): void {
-  if (attachment) {
-    const frame = document.createElement('iframe');
-    frame.style.display = 'none';
-    frame.src = url;
-    document.body.appendChild(frame);
-    setTimeout(() => frame.remove(), 10 * 60 * 1000);
+export interface StartedDownload {
+  url: string;
+  name: string;
+  // Sent as an attachment: opening it saves the file and the page stays
+  attachment: boolean;
+}
+
+// An attachment is opened in this tab: the browser saves it and the page stays where it is.
+// (A hidden frame works on laptops but phones, iPhones above all, ignore downloads from it.)
+// Any other link opens in a new tab, where the visitor can save it.
+export function deliver(d: StartedDownload): void {
+  if (d.attachment) {
+    window.location.href = d.url;
     return;
   }
   const a = document.createElement('a');
-  a.href = url;
-  a.download = name;
+  a.href = d.url;
+  a.download = d.name;
   a.target = '_blank';
   a.rel = 'noopener noreferrer';
   document.body.appendChild(a);
@@ -64,10 +69,14 @@ function deliver(url: string, attachment: boolean, name: string): void {
   a.remove();
 }
 
-export async function downloadSource(source: DownloadSource, kind: DownloadKind): Promise<void> {
-  if (source.type === 'file') return deliver(downloadHref(source.url, source.name), isR2Url(source.url), source.name);
-  const link = await fetchMediaLink(source.id, kind);
-  deliver(link.url, link.attachment, source.name);
+// Gets the link (from the site's files or the download services) and starts it; returns it for "إعادة التحميل"
+export async function downloadSource(source: DownloadSource, kind: DownloadKind): Promise<StartedDownload> {
+  const started: StartedDownload =
+    source.type === 'file'
+      ? { url: downloadHref(source.url, source.name), name: source.name, attachment: isR2Url(source.url) }
+      : { ...(await fetchMediaLink(source.id, kind)), name: source.name };
+  deliver(started);
+  return started;
 }
 
 // The last resort when every service fails: savefrom's own shortcut (sfrom.net/ before the video link).
@@ -81,13 +90,14 @@ export async function downloadAll(
   kind: DownloadKind,
   onProgress?: (done: number, failed: number) => void,
   signal?: { cancelled: boolean }
-): Promise<{ failed: number; failedVideos: { id: string; name: string }[] }> {
+): Promise<{ failed: number; failedVideos: { id: string; name: string }[]; started: StartedDownload[] }> {
   let failed = 0;
   const failedVideos: { id: string; name: string }[] = [];
+  const started: StartedDownload[] = [];
   for (let i = 0; i < items.length; i++) {
     if (signal?.cancelled) break;
     try {
-      await downloadSource(items[i], kind);
+      started.push(await downloadSource(items[i], kind));
     } catch {
       failed++;
       const item = items[i];
@@ -96,5 +106,5 @@ export async function downloadAll(
     onProgress?.(i + 1, failed);
     if (i < items.length - 1) await new Promise((r) => setTimeout(r, 1500));
   }
-  return { failed, failedVideos };
+  return { failed, failedVideos, started };
 }
