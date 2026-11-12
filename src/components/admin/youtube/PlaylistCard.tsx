@@ -1,15 +1,15 @@
-// One playlist in the admin's "فيديوهات القناة" tab: its title, shown or hidden, its place in the menu,
-// and its videos: remove any (a removed one never comes back from YouTube), add more, attach files for listening and download.
+// One playlist in the admin's "فيديوهات القناة" tab: its title, shown or hidden, its place in the menu, and its
+// videos (VideoRow): order them, move one to another playlist, take one out of this playlist or off the whole site,
+// add more by link or upload, attach files for listening and download.
 import React, { useState } from 'react';
-import { ArrowDown, ArrowUp, ChevronDown, Eye, EyeOff, Music, Plus, Video, X } from 'lucide-react';
-import type { SitePlaylist, SiteVideo } from '../../../lib/libraryOverrides';
+import { ArrowDown, ArrowUp, ChevronDown, Eye, EyeOff, Plus } from 'lucide-react';
+import { orderPlaylists, type SitePlaylist } from '../../../lib/libraryOverrides';
 import type { YoutubeOverrides } from '../../../services/data/youtube';
 import { getYouTubeId } from '../../../lib/youtube';
 import { FileUploadButton } from '../FileUploadButton';
-import { addToPlaylist, newUploadId, removeFromPlaylist, setMediaFile, titleFromFile } from './overridesDraft';
-
-export const inputClass =
-  'h-10 px-3 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-700';
+import { addToPlaylist, newUploadId, titleFromFile } from './overridesDraft';
+import { VideoRow } from './VideoRow';
+import { inputClass } from './styles';
 
 interface Props {
   playlist: SitePlaylist;
@@ -21,51 +21,35 @@ interface Props {
   onMove: (step: -1 | 1) => void;
   first: boolean;
   last: boolean;
+  // The site's categories (for the playlist's category in «كل الدروس»)
+  categories: { slug: string; name: string }[];
+  // Every playlist (for "انقل إلى قائمة")
+  playlists: { id: string; title: string }[];
   fetchTitle: (videoId: string) => Promise<string | null>;
   onMessage: (m: { type: 'ok' | 'error'; text: string }) => void;
 }
 
-const FilesRow: React.FC<{ video: SiteVideo; draft: YoutubeOverrides; setDraft: Props['setDraft']; onMessage: Props['onMessage'] }> = ({ video, draft, setDraft, onMessage }) => {
-  const files = draft.mediaFiles[video.id] ?? {};
-  const err = (text: string) => onMessage({ type: 'error', text });
-  return (
-    <div className="flex flex-wrap items-center gap-2 ps-2 pb-2 text-xs text-stone-600 dark:text-stone-400">
-      <span>ملفات الاستماع والتحميل:</span>
-      {(['audio', 'video'] as const).map((kind) => (
-        <span key={kind} className="inline-flex items-center gap-1">
-          {files[kind] ? (
-            <span className="inline-flex items-center gap-1 h-8 ps-3 pe-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-900 dark:text-emerald-200">
-              {kind === 'audio' ? 'صوت ✓' : 'فيديو ✓'}
-              <button type="button" aria-label="إزالة الملف" onClick={() => setDraft((d) => setMediaFile(d, video.id, kind, null))} className="w-6 h-6 rounded-full hover:bg-emerald-100 dark:hover:bg-emerald-900">×</button>
-            </span>
-          ) : (
-            <FileUploadButton kind={kind} label={kind === 'audio' ? 'رفع صوت' : 'رفع فيديو'} className="h-8 px-3 text-xs" onError={err} onUploaded={(url) => setDraft((d) => setMediaFile(d, video.id, kind, url))} />
-          )}
-        </span>
-      ))}
-    </div>
-  );
-};
-
-export const PlaylistCard: React.FC<Props> = ({ playlist, draft, setDraft, query, expanded, onToggleOpen, onMove, first, last, fetchTitle, onMessage }) => {
+export const PlaylistCard: React.FC<Props> = ({ playlist, draft, setDraft, query, expanded, onToggleOpen, onMove, first, last, categories, playlists, fetchTitle, onMessage }) => {
   const [link, setLink] = useState('');
   const [busy, setBusy] = useState(false);
-  const [filesOpen, setFilesOpen] = useState<string | null>(null);
+  const [actionsOpen, setActionsOpen] = useState<string | null>(null);
   const hidden = draft.hiddenPlaylists.includes(playlist.id);
   const additions = draft.playlistAdditions[playlist.id] ?? [];
   const addedIds = new Set(additions.map((v) => v.id));
-  const all = [...additions, ...playlist.videos.filter((v) => !addedIds.has(v.id))];
+  const all = orderPlaylists([...additions, ...playlist.videos.filter((v) => !addedIds.has(v.id))], draft.videoOrder[playlist.id]);
+  const orderedIds = all.map((v) => v.id);
+  const targets = playlists.filter((p) => p.id !== playlist.id);
   const videos = query ? all.filter((v) => (draft.videoTitles[v.id] || v.title).includes(query) || v.title.includes(query)) : all;
   if (query && videos.length === 0) return null;
 
-  const toggleHidden = (list: 'hiddenPlaylists' | 'hiddenVideos', id: string) =>
-    setDraft((d) => ({ ...d, [list]: d[list].includes(id) ? d[list].filter((x) => x !== id) : [...d[list], id] }));
-  const rename = (list: 'videoTitles' | 'playlistTitles', id: string, value: string) =>
+  const toggleHidden = () =>
+    setDraft((d) => ({ ...d, hiddenPlaylists: hidden ? d.hiddenPlaylists.filter((x) => x !== playlist.id) : [...d.hiddenPlaylists, playlist.id] }));
+  const renamePlaylist = (value: string) =>
     setDraft((d) => {
-      const next = { ...d[list] };
-      if (value.trim()) next[id] = value;
-      else delete next[id];
-      return { ...d, [list]: next };
+      const next = { ...d.playlistTitles };
+      if (value.trim()) next[playlist.id] = value;
+      else delete next[playlist.id];
+      return { ...d, playlistTitles: next };
     });
 
   const addLink = async () => {
@@ -86,31 +70,57 @@ export const PlaylistCard: React.FC<Props> = ({ playlist, draft, setDraft, query
     onMessage({ type: 'ok', text: `رُفع «${title}» وأُضيف للقائمة. عدّل عنوانه إن شئت ثم اضغط «حفظ التغييرات».` });
   };
 
-  const iconBtn = 'w-10 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-30';
+  const iconBtn = 'w-11 h-11 shrink-0 flex items-center justify-center rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-30';
 
   return (
     <li className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800">
-      <div className="p-4 flex flex-wrap items-center gap-3">
-        <button type="button" onClick={onToggleOpen} aria-expanded={expanded} aria-label={`عرض فيديوهات ${playlist.title}`} className={iconBtn}>
-          <ChevronDown className={`w-5 h-5 transition-transform ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />
-        </button>
-        <div className="min-w-0 flex-1 space-y-1">
-          <label htmlFor={`pl-${playlist.id}`} className="sr-only">عنوان القائمة على الموقع</label>
-          <input id={`pl-${playlist.id}`} value={draft.playlistTitles[playlist.id] ?? ''} onChange={(e) => rename('playlistTitles', playlist.id, e.target.value)} placeholder={playlist.title} className={`${inputClass} w-full font-semibold ${hidden ? 'opacity-60' : ''}`} />
-          <p className="text-xs text-stone-600 dark:text-stone-400">
-            {new Intl.NumberFormat('ar-EG').format(all.length)} فيديو · الأصل: {playlist.title}
-          </p>
+      {/* Phones: the title takes the whole first line, the buttons the next; wide screens: one line */}
+      <div className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+        <div className="flex items-start gap-2 min-w-0 flex-1">
+          <button type="button" onClick={onToggleOpen} aria-expanded={expanded} aria-label={`عرض فيديوهات ${playlist.title}`} className={iconBtn}>
+            <ChevronDown className={`w-5 h-5 transition-transform ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />
+          </button>
+          <div className="min-w-0 flex-1 space-y-1">
+            <label htmlFor={`pl-${playlist.id}`} className="sr-only">عنوان القائمة على الموقع</label>
+            <input id={`pl-${playlist.id}`} value={draft.playlistTitles[playlist.id] ?? ''} onChange={(e) => renamePlaylist(e.target.value)} placeholder={playlist.title} className={`${inputClass} w-full font-semibold ${hidden ? 'opacity-60' : ''}`} />
+            <p className="text-xs text-stone-600 dark:text-stone-400">
+              {new Intl.NumberFormat('ar-EG').format(all.length)} فيديو · الأصل: {playlist.title}
+            </p>
+            <label className="flex flex-wrap items-center gap-2 text-xs text-stone-700 dark:text-stone-300">
+              <span>القسم في «كل الدروس»:</span>
+              <select
+                value={draft.playlistCategories[playlist.id] ?? ''}
+                onChange={(e) =>
+                  setDraft((d) => {
+                    const next = { ...d.playlistCategories };
+                    if (e.target.value) next[playlist.id] = e.target.value;
+                    else delete next[playlist.id];
+                    return { ...d, playlistCategories: next };
+                  })
+                }
+                className={`${inputClass} h-9 max-w-56`}
+              >
+                <option value="">تلقائي (حسب العنوان)</option>
+                {categories.map((c) => (
+                  <option key={c.slug} value={c.slug}>{c.name}</option>
+                ))}
+                <option value="none">بدون قسم</option>
+              </select>
+            </label>
+          </div>
         </div>
-        <button type="button" aria-label="تقديم القائمة" disabled={first} onClick={() => onMove(-1)} className={iconBtn}>
-          <ArrowUp className="w-4 h-4" aria-hidden="true" />
-        </button>
-        <button type="button" aria-label="تأخير القائمة" disabled={last} onClick={() => onMove(1)} className={iconBtn}>
-          <ArrowDown className="w-4 h-4" aria-hidden="true" />
-        </button>
-        <button type="button" onClick={() => toggleHidden('hiddenPlaylists', playlist.id)} aria-pressed={hidden} className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl text-sm font-semibold ${hidden ? 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200' : 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300'}`}>
-          {hidden ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
-          {hidden ? 'مخفية' : 'ظاهرة'}
-        </button>
+        <div className="flex items-center justify-end gap-2 shrink-0">
+          <button type="button" aria-label="تقديم القائمة" disabled={first} onClick={() => onMove(-1)} className={iconBtn}>
+            <ArrowUp className="w-4 h-4" aria-hidden="true" />
+          </button>
+          <button type="button" aria-label="تأخير القائمة" disabled={last} onClick={() => onMove(1)} className={iconBtn}>
+            <ArrowDown className="w-4 h-4" aria-hidden="true" />
+          </button>
+          <button type="button" onClick={toggleHidden} aria-pressed={hidden} className={`inline-flex items-center gap-2 h-10 px-4 rounded-xl text-sm font-semibold ${hidden ? 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200' : 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300'}`}>
+            {hidden ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
+            {hidden ? 'مخفية' : 'ظاهرة'}
+          </button>
+        </div>
       </div>
 
       {expanded && (
@@ -124,36 +134,22 @@ export const PlaylistCard: React.FC<Props> = ({ playlist, draft, setDraft, query
             <FileUploadButton kind="video" label="رفع فيديو" onUploaded={addUpload('video')} onError={(text) => onMessage({ type: 'error', text })} />
             <FileUploadButton kind="audio" label="رفع صوتية" onUploaded={addUpload('audio')} onError={(text) => onMessage({ type: 'error', text })} />
           </div>
-          <ul className="space-y-1 max-h-[32rem] overflow-y-auto">
-            {videos.map((video) => {
-              const added = addedIds.has(video.id);
-              const videoHidden = draft.hiddenVideos.includes(video.id);
-              const hasFiles = !!draft.mediaFiles[video.id];
-              return (
-                <li key={video.id} className="rounded-lg">
-                  <div className="flex items-center gap-2 p-1.5">
-                    {video.src && (video.kind === 'audio' ? <Music className="w-4 h-4 shrink-0 text-amber-700" aria-label="صوتية مرفوعة" /> : <Video className="w-4 h-4 shrink-0 text-amber-700" aria-label="فيديو مرفوع" />)}
-                    <label htmlFor={`v-${video.id}`} className="sr-only">عنوان الفيديو على الموقع</label>
-                    <input id={`v-${video.id}`} value={draft.videoTitles[video.id] ?? ''} onChange={(e) => rename('videoTitles', video.id, e.target.value)} placeholder={video.title} className={`${inputClass} min-w-0 flex-1 ${videoHidden ? 'opacity-60 line-through' : ''}`} />
-                    {!video.src && (
-                      <button type="button" onClick={() => setFilesOpen(filesOpen === video.id ? null : video.id)} aria-expanded={filesOpen === video.id} title="ملفات الاستماع والتحميل" aria-label={`ملفات «${video.title}»`} className={`${iconBtn} ${hasFiles ? 'text-emerald-700 dark:text-emerald-300' : 'text-stone-500'}`}>
-                        <Music className="w-4 h-4" aria-hidden="true" />
-                      </button>
-                    )}
-                    {added ? (
-                      <button type="button" onClick={() => setDraft((d) => removeFromPlaylist(d, playlist.id, video.id))} aria-label={`إزالة «${video.title}» من القائمة`} title="إزالة" className={`${iconBtn} text-red-700 dark:text-red-400`}>
-                        <X className="w-4 h-4" aria-hidden="true" />
-                      </button>
-                    ) : (
-                      <button type="button" onClick={() => toggleHidden('hiddenVideos', video.id)} aria-pressed={videoHidden} aria-label={videoHidden ? `إرجاع «${video.title}»` : `حذف «${video.title}» من الموقع`} title={videoHidden ? 'إرجاع' : 'حذف من الموقع (لن يعود تلقائياً)'} className={`${iconBtn} ${videoHidden ? 'bg-stone-200 dark:bg-stone-700' : 'text-emerald-800 dark:text-emerald-300'}`}>
-                        {videoHidden ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
-                      </button>
-                    )}
-                  </div>
-                  {filesOpen === video.id && <FilesRow video={video} draft={draft} setDraft={setDraft} onMessage={onMessage} />}
-                </li>
-              );
-            })}
+          <ul className="space-y-1 max-h-[36rem] overflow-y-auto">
+            {videos.map((video) => (
+              <VideoRow
+                key={video.id}
+                video={video}
+                playlistId={playlist.id}
+                orderedIds={orderedIds}
+                index={orderedIds.indexOf(video.id)}
+                targets={targets}
+                draft={draft}
+                setDraft={setDraft}
+                open={actionsOpen === video.id}
+                onToggle={() => setActionsOpen(actionsOpen === video.id ? null : video.id)}
+                onMessage={onMessage}
+              />
+            ))}
           </ul>
         </div>
       )}

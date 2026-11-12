@@ -9,44 +9,22 @@ import { Panel } from './Panel';
 import { ContinueCard, continueHref } from './ContinueCard';
 import { type LibraryPlaylist } from '../../data/youtube-library';
 import { type Placed } from './placeLessons';
-import { isSermonCategory, JUMUAH_PLAYLIST_ID, JUMUAH_LABEL } from './sermons';
+import { arrangeMenu, sideMenuItems, type SideMenuConfig } from '../../services/data/sideMenuRules';
 
-export const SideColumn = ({ placed, activeCategories, recentLesson, recentResume, recentDuration, visibleLibrary }: { placed: Placed; activeCategories: CategoryWithPortalData[]; recentLesson: RecentLesson | null; recentResume: number; recentDuration: number; visibleLibrary: LibraryPlaylist[] }) => (
+export const SideColumn = ({ placed, activeCategories, recentLesson, recentResume, recentDuration, visibleLibrary, menu }: { menu: SideMenuConfig; placed: Placed; activeCategories: CategoryWithPortalData[]; recentLesson: RecentLesson | null; recentResume: number; recentDuration: number; visibleLibrary: LibraryPlaylist[] }) => (
   <>
         <aside className="min-w-0 lg:col-start-2 lg:row-start-1 lg:flex lg:flex-col" aria-label="القائمة الجانبية">
           <Panel title="القائمة" id="menu-heading" className="lg:flex-1">
-            <ul className="flex flex-wrap gap-2 sm:block sm:space-y-1">
-              <li>
-                <Link to="/search" className="inline-flex max-w-full items-center min-h-11 px-4 rounded-full bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-200 hover:bg-gold-soft/40 dark:hover:bg-stone-700 sm:flex sm:justify-between sm:rounded-lg sm:px-3 sm:bg-transparent dark:sm:bg-transparent">
-                  كل الدروس
-                  <ChevronLeft className="hidden sm:block w-4 h-4" aria-hidden="true" />
-                </Link>
-              </li>
-              <li>
-                <Link to="/reels" className="inline-flex max-w-full items-center min-h-11 px-4 rounded-full bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-200 hover:bg-gold-soft/40 dark:hover:bg-stone-700 sm:flex sm:justify-between sm:rounded-lg sm:px-3 sm:bg-transparent dark:sm:bg-transparent">
-                  الريلز
-                  <ChevronLeft className="hidden sm:block w-4 h-4" aria-hidden="true" />
-                </Link>
-              </li>
-              {activeCategories.map((cat) => (
-                <li key={cat.id}>
+            {/* The admin orders and hides these items (sideMenuRules, the admin's "القائمة الجانبية") */}
+            <ul className="grid grid-cols-2 gap-2 sm:block sm:space-y-1">
+              {arrangeMenu(sideMenuItems(activeCategories, visibleLibrary), menu).map((item) => (
+                <li key={item.key}>
                   <Link
-                    to={isSermonCategory(cat.name) ? `/playlist/${JUMUAH_PLAYLIST_ID}` : `/category/${cat.slug}`}
-                    className="inline-flex max-w-full items-center min-h-11 px-4 rounded-full bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-200 hover:bg-gold-soft/40 dark:hover:bg-stone-700 sm:flex sm:justify-between sm:rounded-lg sm:px-3 sm:bg-transparent dark:sm:bg-transparent"
+                    to={item.to}
+                    className="flex min-h-14 flex-col justify-center px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-200 hover:bg-gold-soft/40 dark:hover:bg-stone-700 sm:flex-row sm:min-h-11 sm:items-center sm:justify-between sm:rounded-lg sm:px-3 sm:py-0 sm:bg-transparent dark:sm:bg-transparent"
                   >
-                    {isSermonCategory(cat.name) ? JUMUAH_LABEL : cat.name}
-                    <ChevronLeft className="hidden sm:block w-4 h-4" aria-hidden="true" />
-                  </Link>
-                </li>
-              ))}
-              {visibleLibrary.map((playlist) => (
-                <li key={playlist.id}>
-                  <Link
-                    to={`/playlist/${playlist.id}`}
-                    className="inline-flex max-w-full items-center min-h-11 px-4 rounded-full bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-200 hover:bg-gold-soft/40 dark:hover:bg-stone-700 sm:flex sm:justify-between sm:rounded-lg sm:px-3 sm:bg-transparent dark:sm:bg-transparent"
-                  >
-                    <span className="min-w-0 truncate">{playlist.title}</span>
-                    <span className="sr-only"> ({playlist.count})</span>
+                    <span className="min-w-0 truncate text-sm font-semibold leading-snug">{item.label}</span>
+                    {item.count && <span className="text-xs text-stone-500 dark:text-stone-400 sm:ms-2">{item.count}</span>}
                     <ChevronLeft className="hidden sm:block w-4 h-4 shrink-0" aria-hidden="true" />
                   </Link>
                 </li>

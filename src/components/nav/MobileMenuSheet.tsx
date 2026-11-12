@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { ThemeToggle } from '../ThemeToggle';
 import { JUMUAH_LABEL, JUMUAH_PLAYLIST_ID } from '../../pages/home/sermons';
+import { useYoutubeLibrary } from '../../lib/youtubeLibrary';
 
 interface Tile {
   label: string;
@@ -31,6 +32,7 @@ interface Tile {
 export const MobileMenuSheet: React.FC<{ open: boolean; onClose: () => void; isAdmin: boolean; bookmarkCount: number }> = ({ open, onClose, isAdmin, bookmarkCount }) => {
   const { pathname } = useLocation();
   const closeRef = useRef<HTMLButtonElement>(null);
+  const library = useYoutubeLibrary();
 
   // What the visitor comes for first (watch, listen, the sermons, every lesson), then the rest of the site
   const tiles: Tile[] = [
@@ -105,6 +107,26 @@ export const MobileMenuSheet: React.FC<{ open: boolean; onClose: () => void; isA
             );
           })}
         </ul>
+
+        {library.length > 0 && (
+          <section aria-labelledby="sheet-all-lists" className="mt-5 space-y-2">
+            <h3 id="sheet-all-lists" className="font-ruqaa text-xl text-mushaf dark:text-gold-soft">كل القوائم والدروس</h3>
+            <ul className="divide-y divide-stone-200 dark:divide-stone-700 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 overflow-hidden">
+              {library.map((p) => (
+                <li key={p.id}>
+                  <Link
+                    to={`/playlist/${p.id}`}
+                    onClick={onClose}
+                    className="flex min-h-14 items-center justify-between gap-3 px-4 py-2 text-sm font-semibold text-stone-800 dark:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-700"
+                  >
+                    <span className="min-w-0 truncate">{p.title}</span>
+                    <span className="shrink-0 text-xs font-medium text-stone-500 dark:text-stone-400">{p.count}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <div className="mt-4 flex items-center justify-between min-h-12 px-4 rounded-2xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
           <span className="text-base font-semibold text-stone-800 dark:text-stone-100">المظهر</span>

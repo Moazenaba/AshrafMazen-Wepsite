@@ -24,6 +24,8 @@ export function siteAudioOf(video: SiteVideo): string | undefined {
   return video.files?.audio || (video.kind === 'audio' ? video.src : undefined);
 }
 
-// A tiny silent sound played from the visitor's tap while the real link is fetched: phones only let a page start
-// sound from a tap, and the link arrives seconds later
-export const SILENCE = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+// A tiny silent sound (public/silence.wav, 0.1 s) played from the visitor's tap while the real sound is fetched:
+// phones only let a page start sound from a tap, and the sound arrives seconds later. A file of the site's own,
+// since the site's security policy (vercel.json, media-src) does not allow data: sounds.
+export const SILENCE = '/silence.wav';
+export const isSilenceSrc = (src: string) => src.endsWith(SILENCE);

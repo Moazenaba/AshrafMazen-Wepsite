@@ -166,7 +166,7 @@ export const Navbar: React.FC = () => {
 
       {/* Phones: one menu, opened by the top bar's button or the floating one (hidden in the admin, which has its own) */}
       <MobileMenuSheet open={isMobileMenuOpen} onClose={closeMenu} isAdmin={isAdmin} bookmarkCount={bookmarkCount} />
-      {!location.pathname.startsWith('/admin') && <FloatingMenuButton open={isMobileMenuOpen} onOpen={() => setIsMobileMenuOpen(true)} />}
+      {!/^\/(admin|dev)(\/|$)/.test(location.pathname) && <FloatingMenuButton open={isMobileMenuOpen} onOpen={() => setIsMobileMenuOpen(true)} />}
     </header>
   );
 };

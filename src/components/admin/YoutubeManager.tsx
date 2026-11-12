@@ -6,7 +6,9 @@ import { getYouTubeId } from '../../lib/youtube';
 import { orderPlaylists } from '../../lib/libraryOverrides';
 import { EMPTY_OVERRIDES } from '../../services/data/youtube';
 import { FileUploadButton } from './FileUploadButton';
-import { PlaylistCard, inputClass } from './youtube/PlaylistCard';
+import { PlaylistCard } from './youtube/PlaylistCard';
+import { getCategories } from '../../services/dataService';
+import { inputClass } from './youtube/styles';
 import { movePlaylist, newUploadId, titleFromFile } from './youtube/overridesDraft';
 
 const empty: YoutubeOverrides = EMPTY_OVERRIDES;
@@ -95,6 +97,10 @@ export const YoutubeManager: React.FC = () => {
     setMessage({ type: 'ok', text: `رُفع «${title}». اضغط «حفظ التغييرات» ليظهر في الموقع ضمن «مقاطع مختارة». ولرفع ملف داخل قائمة بعينها افتح القائمة من الأسفل.` });
   };
 
+  const [categories, setCategories] = useState<{ slug: string; name: string }[]>([]);
+  useEffect(() => {
+    getCategories().then((list) => setCategories(list.map((c) => ({ slug: c.slug, name: c.name })))).catch(() => setCategories([]));
+  }, []);
   const ordered = useMemo(() => orderPlaylists(library, draft.playlistOrder), [library, draft.playlistOrder]);
 
   const save = async () => {
@@ -168,8 +174,8 @@ export const YoutubeManager: React.FC = () => {
             <li><b>فيديو واحد:</b> من يوتيوب اضغط «مشاركة» ثم «نسخ»، والصق الرابط هنا. العنوان يُجلب تلقائياً، ويظهر الفيديو في الموقع ضمن «مقاطع مختارة».</li>
             <li><b>قائمة تشغيل كاملة:</b> افتح القائمة نفسها على يوتيوب (من تبويب «قوائم التشغيل» في القناة) ثم «مشاركة» ثم «نسخ»، فيكون في الرابط <span dir="ltr">list=</span>. اكتب لها عنواناً. تظهر بأحدث ١٥ فيديو منها، وتتحدث تلقائياً كل ٦ ساعات.</li>
             <li><b>رفع ملف:</b> فيديو أو صوتية من جهازك تُرفع للموقع نفسه. ولإضافتها داخل قائمة معيّنة افتح القائمة من الأسفل واستخدم أزرار الرفع فيها.</li>
-            <li><b>حذف فيديو من قائمة:</b> افتح القائمة واضغط على العين بجانبه. المحذوف لا يعود تلقائياً حتى لو بقي على يوتيوب، والجديد بعده يُضاف عادي.</li>
-            <li><b>الاستماع والتحميل:</b> زر النوتة بجانب أي فيديو يرفق له ملف صوت و/أو فيديو، فيظهر للزائر «استمع فقط» و«تحميل».</li>
+            <li><b>فيديو داخل قائمة:</b> افتح القائمة واضغط «⋯» بجانب الفيديو: «لأعلى / لأسفل» لترتيبه، «انقل إلى قائمة…» لنقله لقائمة أخرى، «شيله من القائمة دي» (يبقى في الموقع وفي قوائمه الأخرى)، أو «احذفه من الموقع كله». المحذوف لا يعود تلقائياً حتى لو بقي على يوتيوب، والجديد بعده يُضاف عادي.</li>
+            <li><b>الاستماع والتحميل:</b> من «⋯» أيضاً ترفق للفيديو ملف صوت و/أو فيديو، فيظهر للزائر «استمع فقط» و«تحميل» منه.</li>
             <li>لا يظهر شيء في الموقع قبل الضغط على «حفظ التغييرات».</li>
           </ul>
           {draft.extraVideos.length > 0 && (
@@ -229,6 +235,8 @@ export const YoutubeManager: React.FC = () => {
               onMove={(step) => setDraft((d) => movePlaylist(d, ordered.map((p) => p.id), i, step))}
               first={i === 0}
               last={i === ordered.length - 1}
+              categories={categories}
+              playlists={ordered.map((p) => ({ id: p.id, title: draft.playlistTitles[p.id] || p.title }))}
               fetchTitle={youtubeTitle}
               onMessage={setMessage}
             />

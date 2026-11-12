@@ -249,9 +249,15 @@ export const SearchPage: React.FC = () => {
         )}
       </section>
 
-      {/* The channel's videos and the library's books, found by the same words */}
-      {!categoryFilter && (mediaFilter === 'all' || mediaFilter === 'video') && (
-        <SiteSearchExtras query={trimmedQuery} highlight={highlight} showBooks={mediaFilter === 'all'} />
+      {/* The channel's videos (in the chosen category, or found by the words) and the library's books */}
+      {(mediaFilter === 'all' || mediaFilter === 'video') && (
+        <SiteSearchExtras
+          query={trimmedQuery}
+          highlight={highlight}
+          showBooks={mediaFilter === 'all' && !categoryFilter}
+          categorySlug={mediaFilter === 'all' || mediaFilter === 'video' ? categoryFilter : ''}
+          categories={categories.map((c) => ({ name: c.name, slug: c.slug }))}
+        />
       )}
     </div>
   );
