@@ -4,7 +4,8 @@ import { ChevronLeft } from 'lucide-react';
 import { useYoutubeLibrary } from '../lib/youtubeLibrary';
 import type { SitePlaylist, SiteVideo } from '../lib/libraryOverrides';
 import { DownloadDialog } from '../components/DownloadDialog';
-import { VideoMedia } from './video/VideoMedia';
+import { MediaStage } from '../components/media/MediaStage';
+import { stageOfVideo } from '../components/media/stageMedia';
 import { ReportLink } from '../components/ReportLink';
 import { BookmarkButton } from '../components/BookmarkButton';
 import { saveRecentLesson } from '../services/recentLessonService';
@@ -91,14 +92,17 @@ export const VideoView: React.FC = () => {
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0 space-y-5">
-          <VideoMedia
+          <MediaStage
             key={video.id}
-            video={video}
+            media={stageOfVideo(video, playlist?.title)}
             onDownload={() => setDownloading(true)}
             startAt={resumeAt}
-            onTimeUpdate={(seconds, duration) => {
-              trackView('video', statsKey);
-              meter.update(seconds);
+            onTimeUpdate={(seconds, duration, from) => {
+              // Listening is counted by the site's audio player; watching here
+              if (from === 'video') {
+                trackView('video', statsKey);
+                meter.update(seconds);
+              }
               saveLessonPosition(progressKey(video.id), seconds, duration);
             }}
             onEnded={() => {

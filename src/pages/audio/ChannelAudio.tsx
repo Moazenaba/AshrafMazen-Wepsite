@@ -1,32 +1,27 @@
 // The sheikh's YouTube channel, to listen to as sound only: a list per playlist (or a search over all of them).
-// A tap plays the sound in the site's own player, which keeps going with the screen off and shows in the phone's
-// notifications; the video's picture is never loaded.
+// A tap opens the video's page already on "استمع فقط" (?mode=listen): the same player as everywhere, with download.
+// Its sound starts at once and then goes on with the screen off and in the phone's notifications (YoutubeAudioBar).
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Loader2, Pause, Play } from 'lucide-react';
+import { Check, Headphones } from 'lucide-react';
 import { useYoutubeLibrary } from '../../lib/youtubeLibrary';
 import type { SiteVideo } from '../../lib/libraryOverrides';
 import { siteAudioOf, youtubeTrackId } from '../../lib/youtubeAudio';
 import { getLessonProgress, isLessonWatched } from '../../services/progressService';
-import { useAudio, type AudioTrack } from '../../context/AudioContext';
 import { formatAudioTime, normalizeArabic } from '../../utils/helpers';
 
 const arabicNumber = (n: number) => new Intl.NumberFormat('ar-EG').format(n);
 const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
 const PAGE = 40;
 
-type Item = { video: SiteVideo; playlist: string };
+type Item = { video: SiteVideo; playlist: string; playlistId: string };
 
 // A video can be heard if the site has its sound, or it is a YouTube video (an uploaded video file has no sound of its own here)
 const listenable = (v: SiteVideo) => !!siteAudioOf(v) || (!v.src && YOUTUBE_ID.test(v.id));
 
-const trackOf = ({ video, playlist }: Item): AudioTrack => {
-  const own = siteAudioOf(video);
-  return { id: youtubeTrackId(video.id), title: video.title, subtitle: playlist, src: own ?? '', youtubeId: own ? undefined : video.id, href: `/video/${video.id}` };
-};
+const listenHref = ({ video, playlistId }: Item) => `/video/${video.id}?list=${playlistId}&mode=listen`;
 
 export const ChannelAudio: React.FC = () => {
-  const audio = useAudio();
   const library = useYoutubeLibrary();
   const [playlistId, setPlaylistId] = useState('');
   const [query, setQuery] = useState('');
@@ -41,10 +36,10 @@ export const ChannelAudio: React.FC = () => {
       // A search looks through every playlist; a video in several lists shows once
       const seen = new Set<string>();
       return playlists.flatMap((p) =>
-        p.videos.filter((v) => listenable(v) && !seen.has(v.id) && normalizeArabic(v.title).includes(q) && seen.add(v.id)).map((video) => ({ video, playlist: p.title }))
+        p.videos.filter((v) => listenable(v) && !seen.has(v.id) && normalizeArabic(v.title).includes(q) && seen.add(v.id)).map((video) => ({ video, playlist: p.title, playlistId: p.id }))
       );
     }
-    return (chosen?.videos ?? []).filter(listenable).map((video) => ({ video, playlist: chosen!.title }));
+    return (chosen?.videos ?? []).filter(listenable).map((video) => ({ video, playlist: chosen!.title, playlistId: chosen!.id }));
   }, [playlists, chosen, query]);
 
   if (playlists.length === 0) return null;
@@ -55,7 +50,7 @@ export const ChannelAudio: React.FC = () => {
         <h2 id="channel-audio-heading" className="text-gold-soft font-ruqaa text-xl sm:text-2xl">
           من قناة الشيخ على يوتيوب
         </h2>
-        <p className="text-sm text-white/85">صوت فقط بدون فيديو، ويفضل شغال لو قفلت الشاشة أو خرجت من الموقع، وتتحكم فيه من الإشعارات.</p>
+        <p className="text-sm text-white/85">اضغط على أي درس يفتح على «استمع فقط»: صوت بدون فيديو، يفضل شغال لو قفلت الشاشة أو خرجت من الموقع، ومعاه زرار التحميل.</p>
         <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
           <label htmlFor="channel-playlist" className="sr-only">القائمة</label>
           <select
@@ -94,46 +89,30 @@ export const ChannelAudio: React.FC = () => {
       ) : (
         <ul className="p-2 sm:p-3 space-y-1">
           {items.slice(0, limit).map((item) => {
-            const track = trackOf(item);
-            const isCurrent = audio.track?.id === track.id;
-            const loadingThis = isCurrent && audio.loading;
-            const playingThis = isCurrent && audio.playing;
-            const progress = getLessonProgress(track.id);
-            const watched = isLessonWatched(track.id);
+            const id = youtubeTrackId(item.video.id);
+            const progress = getLessonProgress(id);
+            const watched = isLessonWatched(id);
             const resumeAt = !watched && progress && progress.seconds > 5 ? progress.seconds : 0;
+            const searching = !!query.trim();
             return (
-              <li
-                key={item.video.id}
-                className={`flex items-center gap-3 p-2 sm:p-3 rounded-lg transition-colors ${
-                  isCurrent ? 'bg-gold-soft/40 dark:bg-stone-700' : 'hover:bg-stone-50 dark:hover:bg-stone-900'
-                }`}
-              >
-                <button
-                  type="button"
-                  onClick={() => (isCurrent && !audio.error ? audio.toggle() : audio.play(track))}
-                  disabled={loadingThis}
-                  aria-busy={loadingThis}
-                  aria-label={loadingThis ? `جارٍ تجهيز: ${item.video.title}` : playingThis ? `إيقاف: ${item.video.title}` : `استمع: ${item.video.title}`}
-                  className="press shrink-0 w-12 h-12 rounded-full bg-mushaf hover:bg-mushaf-deep text-gold-soft flex items-center justify-center disabled:cursor-progress"
+              <li key={item.video.id}>
+                <Link
+                  to={listenHref(item)}
+                  className="press flex items-center gap-3 p-2 sm:p-3 rounded-lg transition-colors hover:bg-stone-50 dark:hover:bg-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mushaf"
                 >
-                  {loadingThis ? (
-                    <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
-                  ) : playingThis ? (
-                    <Pause className="w-5 h-5 fill-current" aria-hidden="true" />
-                  ) : (
-                    <Play className="w-5 h-5 fill-current ms-0.5" aria-hidden="true" />
-                  )}
-                </button>
-                <div className="min-w-0 flex-1">
-                  <Link to={`/video/${item.video.id}`} className="block font-semibold leading-snug text-stone-900 dark:text-stone-100 hover:text-mushaf dark:hover:text-gold">
-                    {item.video.title}
-                  </Link>
-                  <p className="text-sm text-stone-600 dark:text-stone-400">
-                    {query.trim() ? item.playlist : ''}
-                    {loadingThis ? 'جارٍ تجهيز الصوت… ثواني قليلة' : resumeAt ? `${query.trim() ? ' · ' : ''}توقفت عند ${formatAudioTime(resumeAt)}` : ''}
-                  </p>
-                </div>
-                {watched && <Check className="w-5 h-5 shrink-0 text-emerald-700 dark:text-emerald-400" aria-label="تم الاستماع" />}
+                  <span aria-hidden="true" className="shrink-0 w-12 h-12 rounded-full bg-mushaf text-gold-soft flex items-center justify-center">
+                    <Headphones className="w-5 h-5" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-semibold leading-snug text-stone-900 dark:text-stone-100">{item.video.title}</span>
+                    {(searching || resumeAt > 0) && (
+                      <span className="block text-sm text-stone-600 dark:text-stone-400">
+                        {[searching ? item.playlist : '', resumeAt ? `توقفت عند ${formatAudioTime(resumeAt)}` : ''].filter(Boolean).join(' · ')}
+                      </span>
+                    )}
+                  </span>
+                  {watched && <Check className="w-5 h-5 shrink-0 text-emerald-700 dark:text-emerald-400" aria-label="تم الاستماع" />}
+                </Link>
               </li>
             );
           })}

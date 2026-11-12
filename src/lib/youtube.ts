@@ -27,6 +27,8 @@ export interface YTPlayer {
   playVideo?(): void;
   pauseVideo?(): void;
   setPlaybackRate?(rate: number): void;
+  // 1 = playing (YT.PlayerState.PLAYING)
+  getPlayerState?(): number;
 }
 
 interface YTNamespace {
