@@ -4,7 +4,7 @@ import { Pause, Play, Check } from 'lucide-react';
 import { getAudioLessons, type LessonWithRelations } from '../services/dataService';
 import { getLessonProgress, isLessonWatched } from '../services/progressService';
 import { useAudio, type AudioTrack } from '../context/AudioContext';
-import { EmptyState } from '../components/EmptyState';
+import { ChannelAudio } from './audio/ChannelAudio';
 import { formatArabicDate, formatAudioTime } from '../utils/helpers';
 
 const arabicNumber = (n: number) => new Intl.NumberFormat('ar-EG').format(n);
@@ -17,7 +17,7 @@ const trackOf = (lesson: LessonWithRelations): AudioTrack => ({
   href: `/lesson/${lesson.id}`,
 });
 
-// Every lesson that has a recording, to listen to straight from the list. A tap plays it in the bar at the
+// Every lesson that has a recording, then the channel's videos as sound only (ChannelAudio), to listen to straight from the list. A tap plays it in the bar at the
 // foot of the screen, which keeps playing while the visitor reads on or moves to another page.
 export const AudioLibrary: React.FC = () => {
   const audio = useAudio();
@@ -57,6 +57,7 @@ export const AudioLibrary: React.FC = () => {
         </p>
       </header>
 
+      {lessons.length > 0 && (
       <form role="search" onSubmit={(e) => e.preventDefault()} className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:gap-3 sm:max-w-2xl">
         <label htmlFor="audio-query" className="sr-only">ابحث في الصوتيات</label>
         <input
@@ -80,21 +81,13 @@ export const AudioLibrary: React.FC = () => {
           ))}
         </select>
       </form>
+      )}
 
       {loading ? (
         <div className="min-h-[40vh]" aria-busy="true" />
       ) : failed ? (
         <p className="text-stone-700 dark:text-stone-300">تعذّر تحميل الصوتيات الآن. حاول مرة أخرى بعد قليل.</p>
-      ) : lessons.length === 0 ? (
-        <EmptyState
-          title="لا توجد تسجيلات صوتية بعد"
-          text="تُضاف هنا الدروس المسموعة فور رفعها. وفي الأثناء يمكنك مشاهدة سلاسل الشيخ، أو اقتراح مادة صوتية تُضاف بعد مراجعة الإدارة."
-          actions={[
-            { to: '/videos', label: 'شاهد السلاسل المرئية' },
-            { to: '/contribute?type=audio', label: 'اقترح مادة صوتية' },
-          ]}
-        />
-      ) : (
+      ) : lessons.length === 0 ? null : (
         <section aria-labelledby="audio-list-heading" className="rounded-xl bg-white dark:bg-stone-800 overflow-hidden">
           <h2 id="audio-list-heading" className="px-4 py-2.5 sm:px-5 sm:py-3 bg-mushaf text-gold-soft font-ruqaa text-xl sm:text-2xl border-b-2 border-gold">
             {category || query ? `${arabicNumber(shown.length)} من ${arabicNumber(lessons.length)} تسجيل` : `كل التسجيلات (${arabicNumber(lessons.length)})`}
@@ -141,6 +134,8 @@ export const AudioLibrary: React.FC = () => {
           )}
         </section>
       )}
+
+      <ChannelAudio />
     </div>
   );
 };

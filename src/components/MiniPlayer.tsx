@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Pause, Play, RotateCcw, RotateCw, X } from 'lucide-react';
+import { Loader2, Pause, Play, RotateCcw, RotateCw, X } from 'lucide-react';
 import { useAudio } from '../context/AudioContext';
 import { formatAudioTime } from '../utils/helpers';
 import { SPEED_OPTIONS } from './AudioPlayer';
@@ -38,8 +38,24 @@ export const MiniPlayer: React.FC = () => {
         className="block w-full h-1.5 -mt-1 cursor-pointer accent-gold"
       />
       <div className="max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 h-[4.25rem] flex items-center gap-2 sm:gap-3">
-        <button type="button" onClick={audio.toggle} aria-label={playing ? 'إيقاف مؤقت' : 'تشغيل'} className="press shrink-0 w-12 h-12 rounded-full bg-gold hover:bg-gold-soft text-mushaf-deep flex items-center justify-center">
-          {playing ? <Pause className="w-5 h-5 fill-current" aria-hidden="true" /> : <Play className="w-5 h-5 fill-current ms-0.5" aria-hidden="true" />}
+        {/* A channel video's sound takes a few seconds to arrive; after a failure the button tries again */}
+        <button
+          type="button"
+          onClick={() => (audio.error ? audio.play(track) : audio.toggle())}
+          disabled={audio.loading}
+          aria-busy={audio.loading}
+          aria-label={audio.loading ? 'جارٍ تجهيز الصوت' : audio.error ? 'إعادة المحاولة' : playing ? 'إيقاف مؤقت' : 'تشغيل'}
+          className="press shrink-0 w-12 h-12 rounded-full bg-gold hover:bg-gold-soft text-mushaf-deep flex items-center justify-center disabled:cursor-progress"
+        >
+          {audio.loading ? (
+            <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+          ) : audio.error ? (
+            <RotateCcw className="w-5 h-5" aria-hidden="true" />
+          ) : playing ? (
+            <Pause className="w-5 h-5 fill-current" aria-hidden="true" />
+          ) : (
+            <Play className="w-5 h-5 fill-current ms-0.5" aria-hidden="true" />
+          )}
         </button>
 
         <div className="min-w-0 flex-1">
@@ -50,9 +66,12 @@ export const MiniPlayer: React.FC = () => {
           ) : (
             <p className="truncate font-semibold text-white">{track.title}</p>
           )}
-          <p className="truncate text-xs sm:text-sm text-gold-soft/85 tabular-nums">
-            {formatAudioTime(time)} / {duration ? formatAudioTime(duration) : '--:--'}
-            {track.subtitle ? ` · ${track.subtitle}` : ''}
+          <p role={audio.error ? 'alert' : undefined} className="truncate text-xs sm:text-sm text-gold-soft/85 tabular-nums">
+            {audio.error
+              ? audio.error
+              : audio.loading
+                ? 'جارٍ تجهيز الصوت… ثواني قليلة'
+                : `${formatAudioTime(time)} / ${duration ? formatAudioTime(duration) : '--:--'}${track.subtitle ? ` · ${track.subtitle}` : ''}`}
           </p>
         </div>
 

@@ -6,7 +6,8 @@
 //   PIPED_INSTANCES     = https://host,...
 // Nothing here touches the network; api/media-link.ts does, so these rules can be tested on their own.
 
-export type MediaKind = 'audio' | 'video';
+// 'listen': the original sound to play on the site (no conversion, so it arrives fast with its size known)
+export type MediaKind = 'audio' | 'video' | 'listen';
 
 export interface Provider {
   type: 'cobalt' | 'invidious' | 'piped';
@@ -47,10 +48,13 @@ export function providersFrom(env: Record<string, string | undefined>): Provider
 export function cobaltRequest(p: Provider, videoId: string, kind: MediaKind): { url: string; init: RequestInit } {
   const headers: Record<string, string> = { Accept: 'application/json', 'Content-Type': 'application/json' };
   if (p.key) headers.Authorization = `Api-Key ${p.key}`;
+  const url = `https://www.youtube.com/watch?v=${videoId}`;
   const body =
-    kind === 'audio'
-      ? { url: `https://www.youtube.com/watch?v=${videoId}`, downloadMode: 'audio', audioFormat: 'mp3', audioBitrate: '128', filenameStyle: 'basic' }
-      : { url: `https://www.youtube.com/watch?v=${videoId}`, downloadMode: 'auto', videoQuality: '720', youtubeVideoCodec: 'h264', filenameStyle: 'basic' };
+    kind === 'listen'
+      ? { url, downloadMode: 'audio', audioFormat: 'best', filenameStyle: 'basic' }
+      : kind === 'audio'
+        ? { url, downloadMode: 'audio', audioFormat: 'mp3', audioBitrate: '128', filenameStyle: 'basic' }
+        : { url, downloadMode: 'auto', videoQuality: '720', youtubeVideoCodec: 'h264', filenameStyle: 'basic' };
   return { url: `${p.base}/`, init: { method: 'POST', headers, body: JSON.stringify(body) } };
 }
 
@@ -65,9 +69,9 @@ const absolute = (base: string, url: string) => (url.startsWith('/') ? `${base}$
 export const invidiousRequest = (p: Provider, videoId: string) => `${p.base}/api/v1/videos/${videoId}?local=true&fields=title,adaptiveFormats,formatStreams`;
 
 export function parseInvidious(p: Provider, data: any, kind: MediaKind): MediaLink | null {
-  const pool: any[] = kind === 'audio' ? data?.adaptiveFormats ?? [] : data?.formatStreams ?? [];
+  const pool: any[] = kind !== 'video' ? data?.adaptiveFormats ?? [] : data?.formatStreams ?? [];
   const pick =
-    kind === 'audio'
+    kind !== 'video'
       ? pool.find((f) => String(f?.itag) === '140') ?? pool.find((f) => String(f?.type ?? '').startsWith('audio/mp4'))
       : pool.find((f) => String(f?.itag) === '22') ?? pool.find((f) => String(f?.itag) === '18') ?? pool[0];
   if (!pick?.url) return null;
@@ -78,7 +82,7 @@ export function parseInvidious(p: Provider, data: any, kind: MediaKind): MediaLi
 export const pipedRequest = (p: Provider, videoId: string) => `${p.base}/streams/${videoId}`;
 
 export function parsePiped(data: any, kind: MediaKind): MediaLink | null {
-  if (kind === 'audio') {
+  if (kind !== 'video') {
     const audio: any[] = (data?.audioStreams ?? []).filter((s: any) => s?.url);
     const pick = audio.find((s) => String(s.mimeType ?? '').includes('mp4')) ?? audio[0];
     return pick ? { url: pick.url, filename: data?.title, attachment: false } : null;

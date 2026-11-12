@@ -1,5 +1,5 @@
 // Vercel serverless function: a download link for one of the channel's videos, as sound or as video.
-//   GET /api/media-link?id=<videoId>&kind=audio|video  ->  { url, filename, attachment, provider }
+//   GET /api/media-link?id=<videoId>&kind=audio|video|listen   (listen: the original sound, to play on the site)  ->  { url, filename, attachment, provider }
 // It asks the outside services in api/_providers.ts one after another and checks that the link really gives a file;
 // the first that works is returned. The file itself goes from that service straight to the visitor, never through
 // this server or R2. Only videos of the sheikh's channel are accepted, so this is not a downloader for any video.
@@ -112,7 +112,7 @@ export default async function handler(req: any, res: any) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
   const id = String(req.query?.id || '');
-  const kind: MediaKind = req.query?.kind === 'video' ? 'video' : 'audio';
+  const kind: MediaKind = req.query?.kind === 'video' ? 'video' : req.query?.kind === 'listen' ? 'listen' : 'audio';
   if (!/^[A-Za-z0-9_-]{11}$/.test(id)) return res.status(400).send(JSON.stringify({ error: 'رابط فيديو غير صالح.' }));
   if (!(await belongsToChannel(id))) return res.status(403).send(JSON.stringify({ error: 'التحميل متاح لفيديوهات قناة الشيخ فقط.' }));
 
