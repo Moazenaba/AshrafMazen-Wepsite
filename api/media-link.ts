@@ -4,6 +4,7 @@
 // the first that works is returned. The file itself goes from that service straight to the visitor, never through
 // this server or R2. Only videos of the sheikh's channel are accepted, so this is not a downloader for any video.
 import {
+  cobaltLinkNeedsCheck,
   cobaltRequest,
   invidiousRequest,
   isChannelVideo,
@@ -23,6 +24,8 @@ const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || 'UCisGvsFtKyDU6NTFywaITzQ';
 const STEP_MS = 9000;
 // A cobalt video can take 20 s or more to answer; the function may run 60 s (vercel.json)
 const COBALT_MS = 45000;
+// A second ask to cobalt only while there is time left for it to answer (the function may run 60 s)
+const RETRY_UNTIL_MS = 25000;
 // Videos already checked to be the channel's
 // The site's saved library counts as the channel's (also when YouTube's oEmbed cannot be reached)
 const channelVideos = new Set<string>(YOUTUBE_LIBRARY.flatMap((p) => p.videos.map((v) => v.id)));
@@ -122,15 +125,22 @@ export default async function handler(req: any, res: any) {
   const tried: { service: string; why: string }[] = [];
   const attempt = async (p: Provider): Promise<MediaLink & { provider: string }> => {
     const service = new URL(p.base).host;
+    // cobalt is asked a second time when its link turned out empty: the next answer often comes from another server
+    const rounds = p.type === 'cobalt' ? 2 : 1;
     try {
-      const { link, why } = await ask(p, id, kind);
-      // cobalt's link is handed out unchecked: it converts the file while sending it (first bytes after ~5 s),
-      // and opening it here only to drop it made the service slower and used up its request limit, so the
-      // next visitor got a timeout or "too_many_requests". The other services' links are checked to give bytes.
-      if (link && (p.type === 'cobalt' || (await works(link, STEP_MS)))) {
-        return { ...link, provider: p.type };
+      for (let round = 0; round < rounds; round++) {
+        const { link, why } = await ask(p, id, kind);
+        if (!link) {
+          tried.push({ service, why });
+          break;
+        }
+        // The other services' links are always checked to give bytes; cobalt's only when it may be empty
+        // (see cobaltLinkNeedsCheck: checking a link it converts slowed it down and used up its request limit)
+        const check = p.type !== 'cobalt' || cobaltLinkNeedsCheck(p.base, link.url, kind);
+        if (!check || (await works(link, STEP_MS))) return { ...link, provider: p.type };
+        tried.push({ service, why: 'link gave no file' });
+        if (Date.now() - started > RETRY_UNTIL_MS) break;
       }
-      tried.push({ service, why: link ? 'link did not answer' : why });
     } catch (err: any) {
       tried.push({ service, why: err?.name === 'AbortError' ? 'timeout' : String(err?.message || err).slice(0, 100) });
     }
