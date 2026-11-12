@@ -21,3 +21,10 @@ describe('downloads', () => {
     expect(playlistSources(videos, 'video').missing).toBe(1);
   });
 });
+
+describe('savefrom fallback', () => {
+  it('uses their shortcut before the video link', async () => {
+    const { savefromUrl } = await import('./mediaDownload');
+    expect(savefromUrl('abcdefghijk')).toBe('https://sfrom.net/https://www.youtube.com/watch?v=abcdefghijk');
+  });
+});

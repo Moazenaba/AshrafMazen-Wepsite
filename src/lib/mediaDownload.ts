@@ -70,6 +70,10 @@ export async function downloadSource(source: DownloadSource, kind: DownloadKind)
   deliver(link.url, link.attachment, source.name);
 }
 
+// The last resort when every service fails: savefrom's own shortcut (sfrom.net/ before the video link).
+// It opens their page with the download ready; the visitor presses «Download» there.
+export const savefromUrl = (videoId: string) => `https://sfrom.net/https://www.youtube.com/watch?v=${videoId}`;
+
 // One after another, with a short pause, so the browser accepts them all (it may ask once to allow several downloads).
 // A video that fails is counted and skipped.
 export async function downloadAll(
@@ -77,17 +81,20 @@ export async function downloadAll(
   kind: DownloadKind,
   onProgress?: (done: number, failed: number) => void,
   signal?: { cancelled: boolean }
-): Promise<{ failed: number }> {
+): Promise<{ failed: number; failedVideos: { id: string; name: string }[] }> {
   let failed = 0;
+  const failedVideos: { id: string; name: string }[] = [];
   for (let i = 0; i < items.length; i++) {
     if (signal?.cancelled) break;
     try {
       await downloadSource(items[i], kind);
     } catch {
       failed++;
+      const item = items[i];
+      if (item.type === 'youtube') failedVideos.push({ id: item.id, name: item.name });
     }
     onProgress?.(i + 1, failed);
     if (i < items.length - 1) await new Promise((r) => setTimeout(r, 1500));
   }
-  return { failed };
+  return { failed, failedVideos };
 }

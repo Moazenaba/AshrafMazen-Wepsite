@@ -1,13 +1,13 @@
 // "تحميل": asks whether to save the sound or the video, for one video or a whole playlist.
 import React, { useEffect, useRef, useState } from 'react';
-import { Download, Loader2, Music, Video, X } from 'lucide-react';
+import { Download, ExternalLink, Loader2, Music, Video, X } from 'lucide-react';
 import type { SiteVideo } from '../lib/libraryOverrides';
-import { downloadAll, playlistSources, type DownloadKind } from '../lib/mediaDownload';
+import { downloadAll, playlistSources, savefromUrl, type DownloadKind } from '../lib/mediaDownload';
 
 const LABEL: Record<DownloadKind, string> = { audio: 'صوت فقط', video: 'فيديو' };
 const n = (value: number) => new Intl.NumberFormat('ar-EG').format(value);
 
-type State = { done: number; failed: number; total: number; finished: boolean };
+type State = { done: number; failed: number; total: number; finished: boolean; failedVideos?: { id: string; name: string }[] };
 
 export const DownloadDialog: React.FC<{ title: string; videos: SiteVideo[]; onClose: () => void }> = ({ title, videos, onClose }) => {
   const [state, setState] = useState<State | null>(null);
@@ -27,8 +27,8 @@ export const DownloadDialog: React.FC<{ title: string; videos: SiteVideo[]; onCl
   const start = async (kind: DownloadKind) => {
     const { items } = playlistSources(videos, kind);
     setState({ done: 0, failed: 0, total: items.length, finished: false });
-    const { failed } = await downloadAll(items, kind, (done, failedSoFar) => setState({ done, failed: failedSoFar, total: items.length, finished: false }), signal.current);
-    setState({ done: items.length, failed, total: items.length, finished: true });
+    const { failed, failedVideos } = await downloadAll(items, kind, (done, failedSoFar) => setState({ done, failed: failedSoFar, total: items.length, finished: false }), signal.current);
+    setState({ done: items.length, failed, total: items.length, finished: true, failedVideos });
   };
 
   const busy = !!state && !state.finished;
@@ -77,11 +77,26 @@ export const DownloadDialog: React.FC<{ title: string; videos: SiteVideo[]; onCl
                 ? `جارٍ تجهيز ${n(state.done + 1)} من ${n(state.total)}… (قد يسألك المتصفح عن السماح بتحميل عدة ملفات)`
                 : 'جارٍ تجهيز الملف… قد يستغرق ذلك ثواني.'
               : state.failed === state.total
-                ? 'تعذّر التحميل الآن، خدمات التحميل لا تستجيب. حاول بعد قليل.'
+                ? 'خدمات التحميل لا تستجيب الآن. حمّله من savefrom بالزر بالأسفل، أو حاول بعد قليل.'
                 : state.failed > 0
                   ? `بدأ تحميل ${n(state.total - state.failed)} ملف، وتعذّر ${n(state.failed)}.`
                   : 'بدأ التحميل.'}
           </p>
+        )}
+        {state?.finished && !!state.failedVideos?.length && (
+          <div className="space-y-2">
+            <p className="text-sm text-stone-600 dark:text-stone-400">يفتح صفحة savefrom والتحميل جاهز، اضغط «Download» هناك.</p>
+            <ul className="space-y-2 max-h-60 overflow-y-auto">
+              {state.failedVideos.map((v) => (
+                <li key={v.id}>
+                  <a href={savefromUrl(v.id)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 min-h-11 px-3 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 text-sm font-semibold hover:bg-gold-soft/40">
+                    <ExternalLink className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span className="min-w-0 truncate">{many ? v.name : 'حمّل من savefrom'}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </div>
     </div>
