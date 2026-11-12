@@ -280,6 +280,24 @@
   animation: page-enter 450ms var(--ease-out-expo) both;
 }
 
+/* The phone menu rises from the bottom of the screen */
+@keyframes sheet-rise {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+.sheet-rise {
+  animation: sheet-rise 320ms var(--ease-out-expo) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet-rise {
+    animation: none;
+  }
+}
+
 /* The hero: the name's words rise one after another, then the hadith fades in beneath them */
 @keyframes hero-rise {
   from {
