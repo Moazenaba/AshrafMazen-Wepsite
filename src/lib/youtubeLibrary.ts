@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { LibraryPlaylist } from '../data/youtube-library';
 import { getYoutubeOverrides, type YoutubeOverrides } from '../services/dataService';
+import { EMPTY_OVERRIDES } from '../services/data/youtube';
+import { applyOverrides, type SitePlaylist } from './libraryOverrides';
 
 const LIBRARY_URL = '/api/youtube-library';
 const OVERRIDES_EVENT = 'youtube_overrides_changed';
@@ -25,7 +27,7 @@ function loadOverrides(force = false): Promise<void> {
     })
     .catch(() => {
       // Nothing saved or unreachable: the library shows as it is
-      overrides = overrides ?? { hiddenPlaylists: [], hiddenVideos: [], videoTitles: {}, playlistTitles: {}, extraPlaylists: [], extraVideos: [] };
+      overrides = overrides ?? EMPTY_OVERRIDES;
     }));
 }
 
@@ -36,38 +38,7 @@ export function overridesChanged(next: YoutubeOverrides): void {
   window.dispatchEvent(new Event(OVERRIDES_EVENT));
 }
 
-// The library as visitors see it: without what the admin hid, and with the titles the admin changed
-export const EXTRA_VIDEOS_LIST = 'extra-videos';
-
-// The single videos the admin added, as one list shown first
-function extraVideosPlaylist(o: YoutubeOverrides): LibraryPlaylist[] {
-  const videos = (o.extraVideos ?? []).filter((v) => v?.id && v?.title).map((v) => ({ id: v.id, title: v.title, published: '' }));
-  if (videos.length === 0) return [];
-  return [{ id: EXTRA_VIDEOS_LIST, title: 'مقاطع مختارة', count: `${videos.length} فيديو`, latestVideoId: videos[0].id, videos }];
-}
-
-export function applyOverrides(library: LibraryPlaylist[], o: YoutubeOverrides | null): LibraryPlaylist[] {
-  if (!o) return library;
-  if (library.length > 0) library = [...extraVideosPlaylist(o), ...library];
-  const hiddenPlaylists = new Set(o.hiddenPlaylists);
-  const hiddenVideos = new Set(o.hiddenVideos);
-  return library
-    .filter((p) => !hiddenPlaylists.has(p.id))
-    .map((p) => {
-      const videos = p.videos
-        .filter((v) => !hiddenVideos.has(v.id))
-        .map((v) => (o.videoTitles[v.id] ? { ...v, title: o.videoTitles[v.id] } : v));
-      return {
-        ...p,
-        title: o.playlistTitles[p.id] || p.title,
-        videos,
-        count: `${videos.length} فيديو`,
-        // The playlist's picture must be a video that is still shown
-        latestVideoId: videos.some((v) => v.id === p.latestVideoId) ? p.latestVideoId : videos[0]?.id || p.latestVideoId,
-      };
-    })
-    .filter((p) => p.videos.length > 0);
-}
+export { applyOverrides, EXTRA_VIDEOS_LIST } from './libraryOverrides';
 
 // The playlists the admin added, as the backend's cache key: a new one gives a new address, so neither the
 // server's stored copy nor the CDN's can keep showing the library without it
@@ -123,7 +94,7 @@ export function useRawYoutubeLibrary(): LibraryPlaylist[] {
 }
 
 // The library as visitors see it
-export function useYoutubeLibrary(): LibraryPlaylist[] {
+export function useYoutubeLibrary(): SitePlaylist[] {
   const raw = useRawLibrary();
   const [, bump] = useState(0);
 

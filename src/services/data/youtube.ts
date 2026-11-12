@@ -1,6 +1,7 @@
 // The channel's videos: what the admin hid, renamed or added.
 import { supabase } from '../../lib/supabase';
 import { translateSupabaseError } from '../../utils/supabaseErrors';
+import type { MediaFiles, SiteVideo } from '../../lib/libraryOverrides';
 
 export interface YoutubeOverrides {
   hiddenPlaylists: string[];
@@ -10,8 +11,22 @@ export interface YoutubeOverrides {
   // Playlists added by the admin; api/youtube-library.ts reads their videos from YouTube's feed
   extraPlaylists: { id: string; title: string }[];
   // Single videos added by the admin (newest first); the site shows them as one list, «مقاطع مختارة»
-  extraVideos: { id: string; title: string }[];
+  // (a video uploaded to the site carries its file in src)
+  extraVideos: SiteVideo[];
+  // Videos the admin added to a playlist (YouTube links or uploaded files), shown at its top
+  playlistAdditions: Record<string, SiteVideo[]>;
+  // The order of the playlists in the menu and the pages
+  playlistOrder: string[];
+  // A recording and/or a video file attached to a video, for "listen only" and downloading
+  mediaFiles: Record<string, MediaFiles>;
 }
+
+export const EMPTY_OVERRIDES: YoutubeOverrides = {
+  hiddenPlaylists: [], hiddenVideos: [], videoTitles: {}, playlistTitles: {}, extraPlaylists: [], extraVideos: [],
+  playlistAdditions: {}, playlistOrder: [], mediaFiles: {},
+};
+
+const isObject = (v: unknown): v is Record<string, any> => !!v && typeof v === 'object' && !Array.isArray(v);
 
 const YOUTUBE_OVERRIDES_KEY = 'youtube_overrides';
 
@@ -27,9 +42,12 @@ export async function getYoutubeOverrides(): Promise<YoutubeOverrides> {
       playlistTitles: parsed.playlistTitles && typeof parsed.playlistTitles === 'object' ? parsed.playlistTitles : {},
       extraPlaylists: Array.isArray(parsed.extraPlaylists) ? parsed.extraPlaylists : [],
       extraVideos: Array.isArray(parsed.extraVideos) ? parsed.extraVideos : [],
+      playlistAdditions: isObject(parsed.playlistAdditions) ? parsed.playlistAdditions : {},
+      playlistOrder: Array.isArray(parsed.playlistOrder) ? parsed.playlistOrder : [],
+      mediaFiles: isObject(parsed.mediaFiles) ? parsed.mediaFiles : {},
     };
   } catch {
-    return { hiddenPlaylists: [], hiddenVideos: [], videoTitles: {}, playlistTitles: {}, extraPlaylists: [], extraVideos: [] };
+    return EMPTY_OVERRIDES;
   }
 }
 

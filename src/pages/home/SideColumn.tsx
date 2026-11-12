@@ -22,6 +22,12 @@ export const SideColumn = ({ placed, activeCategories, recentLesson, recentResum
                   <ChevronLeft className="hidden sm:block w-4 h-4" aria-hidden="true" />
                 </Link>
               </li>
+              <li>
+                <Link to="/reels" className="inline-flex max-w-full items-center min-h-11 px-4 rounded-full bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-200 hover:bg-gold-soft/40 dark:hover:bg-stone-700 sm:flex sm:justify-between sm:rounded-lg sm:px-3 sm:bg-transparent dark:sm:bg-transparent">
+                  الريلز
+                  <ChevronLeft className="hidden sm:block w-4 h-4" aria-hidden="true" />
+                </Link>
+              </li>
               {activeCategories.map((cat) => (
                 <li key={cat.id}>
                   <Link

@@ -61,7 +61,7 @@ export const Home: React.FC = () => {
 
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <FeaturedColumn placed={placed} latestItems={latestItems} categoryOptions={categoryOptions} loading={!dataLoaded} />
+          <FeaturedColumn placed={placed} latestItems={latestItems} categoryOptions={categoryOptions} loading={!dataLoaded} feature={content.feature} featureLoading={!loaded} />
 
           <SciencesColumn placed={placed} activeCategories={activeCategories} loading={!dataLoaded} />
 

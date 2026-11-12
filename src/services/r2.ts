@@ -9,7 +9,7 @@ export const R2_PUBLIC_URL = String(import.meta.env.VITE_R2_PUBLIC_URL || '').re
 
 const ENDPOINT = '/api/r2';
 
-export type R2Kind = 'pdf' | 'cover' | 'audio' | 'logo';
+export type R2Kind = 'pdf' | 'cover' | 'audio' | 'logo' | 'hero' | 'video';
 
 async function adminToken(): Promise<string> {
   const { data } = await supabase.auth.getSession();

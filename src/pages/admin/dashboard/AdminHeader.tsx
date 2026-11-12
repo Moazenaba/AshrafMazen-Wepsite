@@ -20,6 +20,7 @@ const tabLabels = (c: HeaderCounts): { id: AdminTab; label: string }[] => [
   { id: 'stats', label: 'الإحصائيات' },
   { id: 'requests', label: `الطلبات${c.requests ? ` (${c.requests})` : ''}` },
   { id: 'videos', label: 'فيديوهات القناة' },
+  { id: 'reels', label: 'الريلز' },
   { id: 'lessons', label: `إدارة الدروس (${c.lessons})` },
   { id: 'series', label: `إدارة السلاسل (${c.series})` },
   { id: 'categories', label: `إدارة الأقسام (${c.categories})` },
