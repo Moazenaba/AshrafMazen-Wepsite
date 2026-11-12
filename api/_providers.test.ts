@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cobaltRequest, isChannelVideo, parseCobalt, parseInvidious, parsePiped, providersFrom } from './_providers';
+import { cobaltLinkNeedsCheck, cobaltRequest, isChannelVideo, parseCobalt, parseInvidious, parsePiped, providersFrom } from './_providers';
 
 describe('download services', () => {
   it('reads the service lists, with keys, and falls back to the built-in ones', () => {
@@ -27,5 +27,23 @@ describe('download services', () => {
   it('accepts only the channel videos', () => {
     expect(isChannelVideo({ author_url: 'https://www.youtube.com/@Ashrafmazen' }, 'Ashrafmazen', 'UCx')).toBe(true);
     expect(isChannelVideo({ author_url: 'https://www.youtube.com/@other' }, 'Ashrafmazen', 'UCx')).toBe(false);
+  });
+});
+
+describe('cobaltLinkNeedsCheck', () => {
+  const relay = 'https://api.cobalt.liubquanti.click';
+  it("checks a link on the relay's own address (it came back empty)", () => {
+    expect(cobaltLinkNeedsCheck(relay, `${relay}/tunnel/x?id=1`, 'audio')).toBe(true);
+    expect(cobaltLinkNeedsCheck(relay, `${relay}/tunnel/x?id=1`, 'video')).toBe(true);
+  });
+  it('trusts a converted download straight from a server behind the relay', () => {
+    expect(cobaltLinkNeedsCheck(relay, 'https://nuko-c.meowing.de/tunnel?id=1', 'audio')).toBe(false);
+  });
+  it('always checks the sound to play on the site', () => {
+    expect(cobaltLinkNeedsCheck(relay, 'https://nuko-c.meowing.de/tunnel?id=1', 'listen')).toBe(true);
+  });
+  it('asks the original sound for listening', () => {
+    const body = JSON.parse(String(cobaltRequest({ type: 'cobalt', base: relay } as any, 'abcdefghijk', 'listen').init.body));
+    expect(body).toMatchObject({ downloadMode: 'audio', audioFormat: 'best' });
   });
 });
