@@ -98,6 +98,24 @@ export async function downloadSource(source: DownloadSource, kind: DownloadKind)
 // It opens their page with the download ready; the visitor presses «Download» there.
 export const savefromUrl = (videoId: string) => `https://sfrom.net/https://www.youtube.com/watch?v=${videoId}`;
 
+export const youtubeUrl = (videoId: string) => `https://www.youtube.com/watch?v=${videoId}`;
+
+// Download sites the visitor can open when our services fail, in order. Each is opened by the visitor's own tap
+// (never by the page later, which the browser would block). A site that cannot take the video in its address
+// gets the video's link copied first, so the visitor only pastes it there. Checked by hand on 2026-11-12;
+// add or reorder sites here (their own pages only: their hidden APIs are not ours to call).
+export interface FallbackSite {
+  name: string;
+  url: (videoId: string) => string;
+  // The video is already filled in when the page opens
+  prefilled: boolean;
+}
+
+export const FALLBACK_SITES: FallbackSite[] = [
+  { name: 'SaveFrom', url: savefromUrl, prefilled: true },
+  { name: 'Y2mate', url: () => 'https://v42.www-y2mate.com/', prefilled: false },
+];
+
 // One after another, with a short pause, so the browser accepts them all (it may ask once to allow several downloads).
 // A video that fails is counted and skipped.
 export async function downloadAll(
