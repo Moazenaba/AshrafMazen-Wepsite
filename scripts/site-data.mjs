@@ -92,7 +92,7 @@ export async function loadSiteData() {
     }
   };
 
-  const [categories, series, lessons, books, hidden, socials] = await Promise.all([
+  const [categories, series, lessons, books, hidden, socials, nameFont] = await Promise.all([
     fetchAll('categories', 'id,slug,name,description,sort_order', (q) => q.order('sort_order', { ascending: true })),
     fetchAll('series', 'id,slug,title,description,category_id,sort_order', (q) => q.order('sort_order', { ascending: true })),
     fetchAll('lessons', 'id,title,series_id,lesson_number,youtube_url,audio_url,transcript,published_at,created_at', (q) =>
@@ -101,6 +101,8 @@ export async function loadSiteData() {
     readBooks(),
     readOverrides(),
     fetchAll('social_links', 'platform,url', (q) => q.eq('is_active', true)).catch(() => []),
+    // The font the admin chose for the sheikh's name
+    supabase.from('site_settings').select('value').eq('key', 'banner_font').maybeSingle().then(({ data }) => data?.value || '', () => ''),
   ]);
 
   // The channel's playlists and videos as visitors see them: without the hidden ones, with the admin's titles
@@ -113,5 +115,5 @@ export async function loadSiteData() {
     }))
     .filter((p) => p.videos.length > 0);
 
-  return { categories, series, lessons, books, hidden, socials, library };
+  return { categories, series, lessons, books, hidden, socials, library, nameFont };
 }
