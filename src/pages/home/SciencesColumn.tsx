@@ -13,7 +13,7 @@ import { CategoryGridSkeleton } from './Skeletons';
 import { isSermonCategory, JUMUAH_PLAYLIST_ID, JUMUAH_LABEL } from './sermons';
 
 export const SciencesColumn = ({ placed, activeCategories, loading }: { placed: Placed; activeCategories: CategoryWithPortalData[]; loading: boolean }) => (
-      <div className="min-w-0 space-y-5 sm:space-y-8 lg:col-start-1 lg:row-start-2">
+      <div className="defer-render min-w-0 space-y-5 sm:space-y-8 lg:col-start-1 lg:row-start-2">
         {/* The sciences: the categories, one card each */}
         <Panel title="العلوم الشرعية والمتون" id="sciences-heading" anchor="categories">
           <div className="space-y-5">

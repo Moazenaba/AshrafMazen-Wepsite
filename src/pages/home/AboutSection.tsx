@@ -5,7 +5,7 @@ import { bandHeading } from './Panel';
 export const AboutSection = ({ aboutText }: { aboutText: string }) => (
   <>
         {aboutText && (
-          <section data-reveal aria-labelledby="about-heading" className="rounded-xl bg-white dark:bg-stone-800 overflow-hidden">
+          <section data-reveal aria-labelledby="about-heading" className="defer-render rounded-xl bg-white dark:bg-stone-800 overflow-hidden">
             <h2 id="about-heading" className={`${bandHeading} text-center`}>
               عن الشيخ
             </h2>
