@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ChevronLeft, Download, Music } from 'lucide-react';
 import { DownloadDialog } from '../components/DownloadDialog';
 import { useYoutubeLibrary } from '../lib/youtubeLibrary';
+import { namedTitle, usePageMeta } from '../lib/pageMeta';
 import { LessonThumb } from '../components/LessonThumb';
 import { isLessonWatched } from '../services/progressService';
 
@@ -11,6 +12,7 @@ export const PlaylistView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const library = useYoutubeLibrary();
   const playlist = library.find((p) => p.id === id);
+  usePageMeta(playlist ? { title: namedTitle(playlist.title), description: `${playlist.title}: ${playlist.videos.length} فيديو للشيخ أشرف مازن.` } : null);
   const [downloading, setDownloading] = useState(false);
 
   // The library arrives a moment after the page; until then keep the space instead of saying "not found"

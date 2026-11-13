@@ -93,24 +93,28 @@ function merge(base: LibraryPlaylist[], newest: Map<string, LibraryVideo[]>): Li
   });
 }
 
-// Playlists the admin added from the admin screen (kept in site_settings, "youtube_overrides"). Their newest videos
-// come from the same RSS feed, so a new playlist shows up without changing any code.
-async function extraPlaylists(): Promise<{ id: string; title: string }[]> {
+// The admin's saved settings (site_settings "youtube_overrides"), {} when there are none or they cannot be read
+export async function loadOverrides(): Promise<Record<string, any>> {
   const url = (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '').replace(/\/+$/, '');
   const key = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
-  if (!url || !key) return [];
+  if (!url || !key) return {};
   try {
     const response = await fetch(`${url}/rest/v1/site_settings?select=value&key=eq.youtube_overrides`, {
       headers: { apikey: key, Authorization: `Bearer ${key}` },
     });
-    if (!response.ok) return [];
+    if (!response.ok) return {};
     const rows = (await response.json()) as { value?: string }[];
     const parsed = JSON.parse(rows[0]?.value || '{}');
-    const list = Array.isArray(parsed.extraPlaylists) ? parsed.extraPlaylists : [];
-    return list.filter((p: any) => /^[A-Za-z0-9_-]{10,60}$/.test(p?.id) && typeof p?.title === 'string').slice(0, 30);
+    return parsed && typeof parsed === 'object' ? parsed : {};
   } catch {
-    return [];
+    return {};
   }
+}
+
+// Playlists the admin added from the admin screen (their newest videos come from YouTube like the others')
+async function extraPlaylists(): Promise<{ id: string; title: string }[]> {
+  const list = (await loadOverrides()).extraPlaylists;
+  return (Array.isArray(list) ? list : []).filter((p: any) => /^[A-Za-z0-9_-]{10,60}$/.test(p?.id) && typeof p?.title === 'string').slice(0, 30);
 }
 
 // Playlists on the channel that neither the saved library nor the admin has: they are added by themselves
@@ -150,7 +154,8 @@ async function build(admins: { id: string; title: string }[]): Promise<string> {
   return JSON.stringify({ updatedAt: new Date().toISOString(), playlists: latest ? [latest, ...playlists] : playlists });
 }
 
-export default async function handler(req: any, res: any) {
+// The library as JSON text: the stored copy, rebuilt when it is older than TTL_MS
+export async function loadLibrary(): Promise<string> {
   const known = new Set(YOUTUBE_LIBRARY.map((p) => p.id));
   const extras = (await extraPlaylists()).filter((p) => !known.has(p.id));
   const signature = extras.map((p) => `${p.id}:${p.title}`).sort().join('|');
@@ -164,7 +169,12 @@ export default async function handler(req: any, res: any) {
       // Keep the copy we already have; if there is none, the site shows its saved library
     }
   }
+  return entry?.body ?? JSON.stringify({ updatedAt: null, playlists: YOUTUBE_LIBRARY });
+}
+
+export default async function handler(req: any, res: any) {
+  const body = await loadLibrary();
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=21600');
-  res.status(200).send(entry?.body ?? JSON.stringify({ updatedAt: null, playlists: YOUTUBE_LIBRARY }));
+  res.status(200).send(body);
 }

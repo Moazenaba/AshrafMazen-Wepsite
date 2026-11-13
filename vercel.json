@@ -9,6 +9,7 @@
     }
   ],
   "rewrites": [
+    { "source": "/sitemap-videos.xml", "destination": "/api/sitemap-videos" },
     { "source": "/((?!api/|assets/|\\.well-known/|sitemap\\.xml|robots\\.txt|llms\\.txt|favicon|.*\\.[A-Za-z0-9]+$).*)", "destination": "/app.html" }
   ],
   "headers": [
