@@ -9,6 +9,7 @@ import { parseContact, parseHero, parseQuotes, SITE_CONTENT_KEYS, type SiteConte
 import { parseHomeFeature } from './homeFeatureRules';
 import { parseSideMenu } from './sideMenuRules';
 import { parseWelcomeSound } from './welcomeSoundRules';
+import { parseLiveStream } from './liveStreamRules';
 import { DEFAULT_NAME_FONT } from '../../constants/nameFonts';
 import type { LessonWithRelations } from './shared';
 
@@ -56,6 +57,7 @@ export function bundleContent(bundle: SiteBundle): SiteContent {
     feature: parseHomeFeature(map.get(SITE_CONTENT_KEYS.feature)),
     menu: parseSideMenu(map.get(SITE_CONTENT_KEYS.menu)),
     welcome: parseWelcomeSound(map.get(SITE_CONTENT_KEYS.welcome)),
+    live: parseLiveStream(map.get(SITE_CONTENT_KEYS.live)),
   };
 }
 

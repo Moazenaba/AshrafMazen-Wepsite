@@ -7,6 +7,7 @@ export const LessonView = lazy(() => import('../pages/LessonView').then((m) => (
 export const SearchPage = lazy(() => import('../pages/SearchPage').then((m) => ({ default: m.SearchPage })));
 export const BookmarksPage = lazy(() => import('../pages/BookmarksPage').then((m) => ({ default: m.BookmarksPage })));
 export const PlaylistView = lazy(() => import('../pages/PlaylistView').then((m) => ({ default: m.PlaylistView })));
+export const LivePage = lazy(() => import('../pages/LivePage').then((m) => ({ default: m.LivePage })));
 export const ReelsPage = lazy(() => import('../pages/ReelsPage').then((m) => ({ default: m.ReelsPage })));
 export const VideoView = lazy(() => import('../pages/VideoView').then((m) => ({ default: m.VideoView })));
 // Development only: the admin panels with made-up data (the condition is a constant in the build, so it is dropped)
