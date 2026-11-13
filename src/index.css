@@ -378,3 +378,10 @@
 .font-name {
   font-family: var(--name-font, var(--font-ruqaa));
 }
+
+/* Sections below the first screen: the browser skips their style and layout work until they come near the view
+   (the first paint gets there sooner); "auto" in the size remembers the real height once seen, so the page does not jump */
+.defer-render {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 720px;
+}

@@ -19,6 +19,13 @@ export function storedSiteBundle(): SiteBundle | null {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
     if (isSiteBundle(parsed)) current = parsed;
   } catch {}
+  // A first visit: the copy the build wrote into the page (scripts/prerender.mjs), replaced by the fresh answer a moment later
+  if (!current) {
+    try {
+      const parsed = JSON.parse(document.getElementById('site-seed')?.textContent || 'null');
+      if (isSiteBundle(parsed)) current = parsed;
+    } catch {}
+  }
   return current;
 }
 

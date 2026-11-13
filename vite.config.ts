@@ -1,8 +1,29 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig, loadEnv} from 'vite';
+import {defineConfig, loadEnv, type Plugin} from 'vite';
 import {apiDevServer} from './scripts/vite-api-dev';
+
+// The site's stylesheet is written into index.html instead of linked, so the first paint does not wait
+// for a second request (Lighthouse "render-blocking requests"). The file stays in assets/ for anything that links it.
+function inlineEntryCss(): Plugin {
+  return {
+    name: 'inline-entry-css',
+    apply: 'build',
+    enforce: 'post',
+    generateBundle(_options, bundle) {
+      const html = Object.values(bundle).find((f) => f.type === 'asset' && f.fileName === 'index.html');
+      if (!html || html.type !== 'asset') return;
+      let source = String(html.source);
+      source = source.replace(/<link rel="stylesheet"[^>]*href="\/([^"]+\.css)"[^>]*>/g, (tag, file: string) => {
+        const css = bundle[file];
+        if (!css || css.type !== 'asset') return tag;
+        return `<style>${String(css.source).replace(/<\/style/gi, '<\\/style')}</style>`;
+      });
+      html.source = source;
+    },
+  };
+}
 
 export default defineConfig(({mode}) => {
   // The server functions in api/ read their settings (R2 keys and so on) from .env.local during development,
@@ -11,7 +32,7 @@ export default defineConfig(({mode}) => {
   for (const [name, value] of Object.entries(env)) if (process.env[name] === undefined) process.env[name] = value;
 
   return {
-    plugins: [react(), tailwindcss(), apiDevServer()],
+    plugins: [react(), tailwindcss(), apiDevServer(), inlineEntryCss()],
     build: {
       rolldownOptions: {
         output: {

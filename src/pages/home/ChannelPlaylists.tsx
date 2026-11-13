@@ -8,7 +8,7 @@ import { type LibraryPlaylist } from '../../data/youtube-library';
 export const ChannelPlaylists = ({ visibleLibrary }: { visibleLibrary: LibraryPlaylist[] }) => (
   <>
         {visibleLibrary.length > 0 && (
-          <section data-reveal aria-labelledby="channel-heading" className="rounded-xl bg-white dark:bg-stone-800 overflow-hidden">
+          <section data-reveal aria-labelledby="channel-heading" className="defer-render rounded-xl bg-white dark:bg-stone-800 overflow-hidden">
             <h2 id="channel-heading" className={bandHeading}>
               من قناة الشيخ على يوتيوب
             </h2>

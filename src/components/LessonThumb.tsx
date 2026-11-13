@@ -19,7 +19,10 @@ export const LessonThumb: React.FC<LessonThumbProps> = ({ youtubeUrl, audioUrl, 
   const id = getYouTubeId(youtubeUrl);
   // Tries the medium size first (320x180, true 16:9, a third of the bytes), then the larger one, then gives up on pictures
   const [step, setStep] = useState(0);
-  const sources = id ? [`https://i.ytimg.com/vi/${id}/mqdefault.jpg`, getYouTubeThumbnail(youtubeUrl)] : [];
+  // WebP first (about a third smaller than the JPEG), then the JPEG for videos YouTube has no WebP for yet
+  const sources = id
+    ? [`https://i.ytimg.com/vi_webp/${id}/mqdefault.webp`, `https://i.ytimg.com/vi/${id}/mqdefault.jpg`, getYouTubeThumbnail(youtubeUrl)]
+    : [];
   const thumb = sources[step] || null;
   const Icon = youtubeUrl ? Video : audioUrl ? Headphones : FileText;
 

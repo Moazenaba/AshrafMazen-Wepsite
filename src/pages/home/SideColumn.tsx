@@ -33,7 +33,7 @@ export const SideColumn = ({ placed, activeCategories, recentLesson, recentResum
           </Panel>
         </aside>
 
-        <div className="min-w-0 space-y-8 lg:col-start-2 lg:row-start-2">
+        <div className="defer-render min-w-0 space-y-8 lg:col-start-2 lg:row-start-2">
           {recentLesson && (
             <ContinueCard
               href={continueHref(recentLesson.id)}
