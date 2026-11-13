@@ -6,3 +6,4 @@ Disallow: /bookmarks
 Disallow: /dev/
 
 Sitemap: https://ashraf-mazen.vercel.app/sitemap.xml
+Sitemap: https://ashraf-mazen.vercel.app/sitemap-videos.xml
