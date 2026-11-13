@@ -2,6 +2,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Menu, X, Search, LogIn } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
+import { applyNameFont } from '../lib/applyNameFont';
 import { MobileMenuSheet } from './nav/MobileMenuSheet';
 import { FloatingMenuButton } from './nav/FloatingMenuButton';
 import { useBookmarks } from '../services/bookmarkService';
@@ -23,7 +24,10 @@ export const Navbar: React.FC = () => {
 
     getSiteSettings()
       .then((data) => {
-        if (isMounted) setSettings(data);
+        if (isMounted) {
+          setSettings(data);
+          applyNameFont(data.banner_font);
+        }
       })
       .catch(() => {});
 
@@ -103,7 +107,7 @@ export const Navbar: React.FC = () => {
             ) : (
               // One line on every width: the size follows the screen, and a very narrow phone ends it with an ellipsis
               <span
-                className="block truncate font-ruqaa font-bold leading-snug text-emerald-950 dark:text-emerald-100"
+                className="block truncate font-name font-bold leading-snug text-emerald-950 dark:text-emerald-100"
                 style={{ fontSize: 'clamp(0.9375rem, 0.2rem + 3.9vw, 1.75rem)' }}
               >
                 {banner_name || 'الشيخ أشرف مازن'}

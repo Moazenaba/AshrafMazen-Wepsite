@@ -4,7 +4,6 @@
 // the first that works is returned. The file itself goes from that service straight to the visitor, never through
 // this server or R2. Only videos of the sheikh's channel are accepted, so this is not a downloader for any video.
 import {
-  cobaltLinkNeedsCheck,
   cobaltRequest,
   invidiousRequest,
   isChannelVideo,
@@ -134,10 +133,10 @@ export default async function handler(req: any, res: any) {
           tried.push({ service, why });
           break;
         }
-        // The other services' links are always checked to give bytes; cobalt's only when it may be empty
-        // (see cobaltLinkNeedsCheck: checking a link it converts slowed it down and used up its request limit)
-        const check = p.type !== 'cobalt' || cobaltLinkNeedsCheck(p.base, link.url, kind);
-        if (!check || (await works(link, STEP_MS))) return { ...link, provider: p.type };
+        // Every link is checked to send real bytes before it is handed out: a cobalt link can answer 200 and then
+        // send nothing (its server could not get the video), which saved as a 0 KB file. The first bytes come in
+        // 2-6 s; a link that gives none makes the server ask cobalt once more, which often answers from another server.
+        if (await works(link, STEP_MS)) return { ...link, provider: p.type };
         tried.push({ service, why: 'link gave no file' });
         if (Date.now() - started > RETRY_UNTIL_MS) break;
       }
@@ -149,7 +148,7 @@ export default async function handler(req: any, res: any) {
 
   try {
     const link = await Promise.any(providersFrom(process.env).map(attempt));
-    console.log(`media-link ok ${id} ${kind} via ${link.provider} in ${Date.now() - started} ms`);
+    console.log(`media-link ok ${id} ${kind} via ${link.provider} ${new URL(link.url).host} in ${Date.now() - started} ms`);
     return res.status(200).send(JSON.stringify(link));
   } catch {
     // Written to the Vercel logs, so a failure can be read there (which service, and why)

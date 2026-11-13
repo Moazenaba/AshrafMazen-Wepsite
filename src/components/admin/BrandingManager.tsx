@@ -1,5 +1,6 @@
 import React from 'react';
 import { BannerSettings } from './branding/BannerSettings';
+import { NameFontSettings } from './branding/NameFontSettings';
 import { SocialLinks } from './branding/SocialLinks';
 import { ContactSettings } from './branding/ContactSettings';
 import { HomeFeatureSettings } from './branding/HomeFeatureSettings';
@@ -10,6 +11,7 @@ import { WelcomeSoundSettings } from './branding/WelcomeSoundSettings';
 export const BrandingManager: React.FC = () => (
   <div className="space-y-10 font-cairo">
     <BannerSettings />
+    <NameFontSettings />
     <HomeFeatureSettings />
     <SideMenuSettings />
     <WelcomeSoundSettings />

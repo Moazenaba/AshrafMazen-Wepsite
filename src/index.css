@@ -373,3 +373,8 @@
 .font-ruqaa {
   font-family: var(--font-ruqaa);
 }
+
+/* The sheikh's name: the font the admin chose (--name-font, set from the saved settings), else the ruqaa */
+.font-name {
+  font-family: var(--name-font, var(--font-ruqaa));
+}

@@ -92,5 +92,7 @@ export interface SiteSettings {
   banner_name: string;
   banner_logo_url: string | null;
   about_sheikh?: string;
+  // The id of the font of the sheikh's name (constants/nameFonts)
+  banner_font?: string;
 }
 
