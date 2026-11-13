@@ -98,10 +98,28 @@ function withNameFont(html, id) {
     .replace(/<html ([^>]*)>/, (tag, attrs) => (attrs.includes('style=') ? tag : `<html ${attrs} style="--name-font: ${esc(font.family)}">`));
 }
 
+// The same answer /api/site gives, written into every page as inert JSON: a first-time visitor's first render already has
+// the texts, lessons and featured card (a returning visitor has the copy from the last visit), and the fresh answer replaces
+// it a moment later. When the database cannot be read here, pages are written without it and fetch as before.
+async function withSiteSeed(html) {
+  try {
+    const url = (process.env.VITE_SUPABASE_URL || '').replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
+    const key = process.env.VITE_SUPABASE_ANON_KEY || '';
+    const { readSiteData } = await import('../api/site.ts');
+    const json = JSON.stringify(await readSiteData(url, key)).replace(/</g, '\u003c');
+    return html.replace('</body>', () => `<script type="application/json" id="site-seed">${json}</script>
+  </body>`);
+  } catch (err) {
+    console.warn(`site seed skipped: ${err.message}`);
+    return html;
+  }
+}
+
 let data;
 try {
   data = await loadSiteData();
   template = withNameFont(template, data.nameFont);
+  template = await withSiteSeed(template);
   // The fallback shell again, now with the chosen font
   writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true }), 'utf8');
 } catch (err) {
