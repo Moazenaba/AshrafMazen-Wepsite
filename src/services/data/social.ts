@@ -2,12 +2,17 @@
 import { supabase } from '../../lib/supabase';
 import { translateSupabaseError } from '../../utils/supabaseErrors';
 import type { SocialLink } from '../../types';
+import { loadSiteBundle } from './siteBundle';
 
 let cachedActiveSocialLinks: SocialLink[] | null = null;
 
 export async function getActiveSocialLinks(forceRefresh = false): Promise<SocialLink[]> {
   if (cachedActiveSocialLinks && !forceRefresh) {
     return cachedActiveSocialLinks;
+  }
+  if (!forceRefresh) {
+    const bundle = await loadSiteBundle();
+    if (bundle) return (cachedActiveSocialLinks = bundle.social);
   }
 
   try {

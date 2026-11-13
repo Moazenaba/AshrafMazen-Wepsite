@@ -4,6 +4,8 @@ import { translateSupabaseError } from '../../utils/supabaseErrors';
 import { deleteFromR2, isR2Url, uploadToR2 } from '../r2';
 import type { SiteSettings } from '../../types';
 import { DEFAULT_NAME_FONT } from '../../constants/nameFonts';
+import { loadSiteBundle } from './siteBundle';
+import { bundleSettings } from './siteBundleRules';
 
 let cachedSiteSettings: SiteSettings | null = null;
 
@@ -18,6 +20,10 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
 export async function getSiteSettings(forceRefresh = false): Promise<SiteSettings> {
   if (cachedSiteSettings && !forceRefresh) {
     return cachedSiteSettings;
+  }
+  if (!forceRefresh) {
+    const bundle = await loadSiteBundle();
+    if (bundle) return (cachedSiteSettings = bundleSettings(bundle));
   }
   try {
     // Only the three values the header and footer show (the table also holds the library and other large records)

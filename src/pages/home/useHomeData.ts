@@ -1,4 +1,6 @@
 // Loads what the home page shows: the sciences, the featured, latest, most viewed and sermon lessons, and the site settings.
+// The copy saved on the last visit draws the page at once; the one request to /api/site then brings it up to date.
+// If that request fails (or an admin is signed in) the lists are read from the database one by one, as before.
 import { useEffect, useState } from 'react';
 import {
   DEFAULT_SITE_SETTINGS,
@@ -8,46 +10,53 @@ import {
   getLatestLessons,
   getSiteSettings,
   getTopViewedLessons,
-  type CategoryWithPortalData,
-  type LessonWithRelations,
 } from '../../services/dataService';
+import { loadSiteBundle, storedSiteBundle } from '../../services/data/siteBundle';
+import { bundleSettings, buildHomeLists, type HomeLists, type SiteBundle } from '../../services/data/siteBundleRules';
 import type { SiteSettings } from '../../types';
 
+const EMPTY: HomeLists = { categories: [], featuredList: [], latestList: [], viewedList: [], sermonList: [] };
+
+type HomeState = HomeLists & { settings: SiteSettings; loaded: boolean };
+
+const fromBundle = (bundle: SiteBundle): HomeState => ({ ...buildHomeLists(bundle), settings: bundleSettings(bundle), loaded: true });
+
+function initialState(): HomeState {
+  const saved = storedSiteBundle();
+  return saved ? fromBundle(saved) : { ...EMPTY, settings: DEFAULT_SITE_SETTINGS, loaded: false };
+}
+
+async function loadOneByOne(): Promise<HomeState> {
+  const settings = getSiteSettings().catch(() => DEFAULT_SITE_SETTINGS);
+  try {
+    const [categories, featuredList, latestList, viewedList, sermonList] = await Promise.all([
+      getCategoriesWithPortalData(1),
+      getFeaturedLessons(3),
+      getLatestLessons(30),
+      getTopViewedLessons(6),
+      getKhutabLessons(8),
+    ]);
+    return { categories, featuredList, latestList, viewedList, sermonList, settings: await settings, loaded: true };
+  } catch (err) {
+    console.error('Error loading home data:', err);
+    return { ...EMPTY, settings: await settings, loaded: true };
+  }
+}
+
 export function useHomeData() {
-  const [categories, setCategories] = useState<CategoryWithPortalData[]>([]);
-  const [featuredList, setFeaturedList] = useState<LessonWithRelations[]>([]);
-  const [latestList, setLatestList] = useState<LessonWithRelations[]>([]);
-  const [viewedList, setViewedList] = useState<LessonWithRelations[]>([]);
-  const [sermonList, setSermonList] = useState<LessonWithRelations[]>([]);
-  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
-  const [loaded, setLoaded] = useState(false);
+  const [state, setState] = useState<HomeState>(initialState);
 
   useEffect(() => {
     let isMounted = true;
-    getSiteSettings()
-      .then((data) => {
-        if (isMounted) setSettings(data);
-      })
-      .catch(() => {});
-
-    Promise.all([getCategoriesWithPortalData(1), getFeaturedLessons(3), getLatestLessons(30), getTopViewedLessons(6), getKhutabLessons(8)])
-      .then(([cats, featured, latest, viewed, sermons]) => {
-        if (!isMounted) return;
-        setCategories(cats);
-        setFeaturedList(featured);
-        setLatestList(latest);
-        setViewedList(viewed);
-        setSermonList(sermons);
-      })
-      .catch((err) => console.error('Error loading home data:', err))
-      .finally(() => {
-        if (isMounted) setLoaded(true);
+    loadSiteBundle()
+      .then((bundle) => (bundle ? fromBundle(bundle) : loadOneByOne()))
+      .then((next) => {
+        if (isMounted) setState((prev) => (prev.loaded && next.latestList.length === 0 && prev.latestList.length > 0 ? prev : next));
       });
-
     return () => {
       isMounted = false;
     };
   }, []);
 
-  return { categories, featuredList, latestList, viewedList, sermonList, settings, loaded };
+  return state;
 }
