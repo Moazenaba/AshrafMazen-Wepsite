@@ -19,13 +19,8 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
     "id": "PLHcd1VuAeT_NcmgwOimYSUQVJVK9WwM3_",
     "title": "خطب الجمعة",
     "count": "136 فيديو",
-    "latestVideoId": "KN3BR-84F5w",
+    "latestVideoId": "7mVnceb1DWk",
     "videos": [
-      {
-        "id": "KN3BR-84F5w",
-        "title": "خطبة الجمعة | حقيقة التوسل |# الشيخ _ أشرف _ مازن",
-        "published": "2026-11-02T04:34:17+00:00"
-      },
       {
         "id": "7mVnceb1DWk",
         "title": "الوابل الصيب (19)| محبطات الأعمال الصالحة | #الشيخ _ أشرف _ مازن",
