@@ -20,7 +20,9 @@ export default defineConfig(({mode}) => {
           codeSplitting: {
             groups: [
               { name: 'react', test: /node_modules[\\/](react|react-dom|scheduler|react-router|react-router-dom)[\\/]/ },
-              { name: 'supabase', test: /node_modules[\\/](@supabase|iceberg-js|tslib)[\\/]/ },
+              // PostgREST is what every page reads rows with; the rest of Supabase (sign-in) loads only for admins
+              { name: 'postgrest', test: /node_modules[\\/]@supabase[\\/]postgrest-js[\\/]/ },
+              { name: 'supabase', test: /node_modules[\\/](@supabase[\\/](?!postgrest-js)|iceberg-js[\\/]|tslib[\\/])/ },
             ],
           },
         },

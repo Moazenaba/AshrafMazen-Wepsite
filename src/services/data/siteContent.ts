@@ -16,6 +16,8 @@ import {
 } from './siteContentRules';
 import type { TickerQuote } from '../../constants/tickerQuotes';
 import { cleanSideMenu, parseSideMenu, type SideMenuConfig } from './sideMenuRules';
+import { loadSiteBundle } from './siteBundle';
+import { bundleContent } from './siteBundleRules';
 import { cleanHomeFeature, parseHomeFeature, validateHomeFeature, type HomeFeature } from './homeFeatureRules';
 import { cleanWelcomeSound, parseWelcomeSound, validateWelcomeSound, type WelcomeSound } from './welcomeSoundRules';
 
@@ -23,6 +25,10 @@ let cached: SiteContent | null = null;
 
 export async function getSiteContent(forceRefresh = false): Promise<SiteContent> {
   if (cached && !forceRefresh) return cached;
+  if (!forceRefresh) {
+    const bundle = await loadSiteBundle();
+    if (bundle) return (cached = bundleContent(bundle));
+  }
   try {
     const keys = Object.values(SITE_CONTENT_KEYS);
     const { data, error } = await supabase.from('site_settings').select('key, value').in('key', keys);

@@ -38,7 +38,7 @@ export async function getTopViewedLessons(limit = 8): Promise<LessonWithRelation
   return getLatestLessons(limit);
 }
 
-const isSermonCategory = (c: Category) => c.slug === 'khutab' || c.name.includes('خطب') || c.name.includes('مواعظ');
+export const isSermonCategory = (c: Category) => c.slug === 'khutab' || c.name.includes('خطب') || c.name.includes('مواعظ');
 
 // The newest lessons of the sermons category; an empty list when there is none
 export async function getKhutabLessons(limit = 8): Promise<LessonWithRelations[]> {

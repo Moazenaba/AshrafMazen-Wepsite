@@ -1,5 +1,5 @@
 // Admin sign-in with Supabase Auth and the admins table.
-import { supabase } from '../../lib/supabase';
+import { hasStoredSession, supabase } from '../../lib/supabase';
 import { translateSupabaseError } from '../../utils/supabaseErrors';
 import type { AdminUser } from '../../types';
 
@@ -45,6 +45,8 @@ export async function login(email: string, password: string): Promise<AdminUser>
  * Check if the current logged-in user is an admin
  */
 export async function checkCurrentAdmin(): Promise<AdminUser | null> {
+  // No saved session in this browser: not signed in, and no need to download the sign-in client to find that out
+  if (!hasStoredSession()) return null;
   try {
     const {
       data: { user },
