@@ -12,10 +12,11 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { excerpt, loadSiteData, root, siteUrl, youtubeId } from './site-data.mjs';
+import { DEFAULT_NAME_FONT_ID, NAME_FONT_LIST } from '../src/constants/nameFontList.js';
 
 const soft = process.argv.includes('--soft');
 const dist = resolve(root, 'dist');
-const template = readFileSync(resolve(dist, 'index.html'), 'utf8');
+let template = readFileSync(resolve(dist, 'index.html'), 'utf8');
 
 const SITE_NAME = 'الشيخ أشرف مازن';
 const DEFAULT_DESCRIPTION =
@@ -88,9 +89,21 @@ function write(page) {
 // The fallback shell, written first so a failure below still leaves the site working
 writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true }), 'utf8');
 
+// The sheikh's name is drawn in the admin's font from the first paint, and that font's file is the one preloaded,
+// so the big name on the home page never changes font (and height) after the page appears
+function withNameFont(html, id) {
+  const font = NAME_FONT_LIST.find((f) => f.id === id) ?? NAME_FONT_LIST.find((f) => f.id === DEFAULT_NAME_FONT_ID);
+  return html
+    .replace(/(<link rel="preload" id="name-font-preload" href=")[^"]*(")/, `$1${font.file}$2`)
+    .replace(/<html ([^>]*)>/, (tag, attrs) => (attrs.includes('style=') ? tag : `<html ${attrs} style="--name-font: ${esc(font.family)}">`));
+}
+
 let data;
 try {
   data = await loadSiteData();
+  template = withNameFont(template, data.nameFont);
+  // The fallback shell again, now with the chosen font
+  writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true }), 'utf8');
 } catch (err) {
   if (soft) {
     console.warn(`prerender skipped (pages will render in the browser only): ${err.message}`);
