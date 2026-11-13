@@ -21,6 +21,10 @@ import { YOUTUBE_LIBRARY } from '../src/data/youtube-library.js';
 const CHANNEL_HANDLE = process.env.YOUTUBE_CHANNEL_HANDLE || 'Ashrafmazen';
 const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || 'UCisGvsFtKyDU6NTFywaITzQ';
 const STEP_MS = 9000;
+// How long a link may take to send its first bytes before it counts as empty (a cobalt video can take 20 s or more)
+const PROBE_MS = 30000;
+// The function may run 60 s (vercel.json): every wait is cut so the answer is sent before that
+const DEADLINE_MS = 56000;
 // A cobalt video can take 20 s or more to answer; the function may run 60 s (vercel.json)
 const COBALT_MS = 45000;
 // A second ask to cobalt only while there is time left for it to answer (the function may run 60 s)
@@ -80,19 +84,20 @@ async function works(link: MediaLink, ms: number): Promise<boolean> {
   }
 }
 
-async function ask(p: Provider, id: string, kind: MediaKind): Promise<{ link: MediaLink | null; why: string }> {
+// `room`: the most this ask may take (what is left of the function's time)
+async function ask(p: Provider, id: string, kind: MediaKind, room = COBALT_MS): Promise<{ link: MediaLink | null; why: string }> {
   let data: any;
   let link: MediaLink | null;
   if (p.type === 'cobalt') {
     const req = cobaltRequest(p, id, kind);
     // cobalt prepares the file before it answers (an MP3 can take several seconds), so it gets longer
-    data = await json(req.url, req.init, COBALT_MS);
+    data = await json(req.url, req.init, Math.min(COBALT_MS, room));
     link = parseCobalt(data);
   } else if (p.type === 'invidious') {
-    data = await json(invidiousRequest(p, id));
+    data = await json(invidiousRequest(p, id), undefined, Math.min(STEP_MS, room));
     link = parseInvidious(p, data, kind);
   } else {
-    data = await json(pipedRequest(p, id));
+    data = await json(pipedRequest(p, id), undefined, Math.min(STEP_MS, room));
     link = parsePiped(data, kind);
   }
   return { link, why: link ? '' : reason(data) };
@@ -128,7 +133,9 @@ export default async function handler(req: any, res: any) {
     const rounds = p.type === 'cobalt' ? 2 : 1;
     try {
       for (let round = 0; round < rounds; round++) {
-        const { link, why } = await ask(p, id, kind);
+        const room = DEADLINE_MS - (Date.now() - started) - 1500;
+        if (room < 3000) break;
+        const { link, why } = await ask(p, id, kind, room);
         if (!link) {
           tried.push({ service, why });
           break;
@@ -136,7 +143,8 @@ export default async function handler(req: any, res: any) {
         // Every link is checked to send real bytes before it is handed out: a cobalt link can answer 200 and then
         // send nothing (its server could not get the video), which saved as a 0 KB file. The first bytes come in
         // 2-6 s; a link that gives none makes the server ask cobalt once more, which often answers from another server.
-        if (await works(link, STEP_MS)) return { ...link, provider: p.type };
+        const left = DEADLINE_MS - (Date.now() - started);
+        if (left > 1500 && (await works(link, Math.min(PROBE_MS, left)))) return { ...link, provider: p.type };
         tried.push({ service, why: 'link gave no file' });
         if (Date.now() - started > RETRY_UNTIL_MS) break;
       }
