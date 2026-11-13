@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cobaltLinkNeedsCheck, cobaltRequest, isChannelVideo, parseCobalt, parseInvidious, parsePiped, providersFrom } from './_providers';
+import { cobaltRequest, isChannelVideo, parseCobalt, parseInvidious, parsePiped, providersFrom } from './_providers';
 
 describe('download services', () => {
   it('reads the service lists, with keys, and falls back to the built-in ones', () => {
@@ -30,18 +30,8 @@ describe('download services', () => {
   });
 });
 
-describe('cobaltLinkNeedsCheck', () => {
+describe('cobaltRequest for listening', () => {
   const relay = 'https://api.cobalt.liubquanti.click';
-  it("checks a link on the relay's own address (it came back empty)", () => {
-    expect(cobaltLinkNeedsCheck(relay, `${relay}/tunnel/x?id=1`, 'audio')).toBe(true);
-    expect(cobaltLinkNeedsCheck(relay, `${relay}/tunnel/x?id=1`, 'video')).toBe(true);
-  });
-  it('trusts a converted download straight from a server behind the relay', () => {
-    expect(cobaltLinkNeedsCheck(relay, 'https://nuko-c.meowing.de/tunnel?id=1', 'audio')).toBe(false);
-  });
-  it('always checks the sound to play on the site', () => {
-    expect(cobaltLinkNeedsCheck(relay, 'https://nuko-c.meowing.de/tunnel?id=1', 'listen')).toBe(true);
-  });
   it('asks the original sound for listening', () => {
     const body = JSON.parse(String(cobaltRequest({ type: 'cobalt', base: relay } as any, 'abcdefghijk', 'listen').init.body));
     expect(body).toMatchObject({ downloadMode: 'audio', audioFormat: 'best' });

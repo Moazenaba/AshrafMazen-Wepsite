@@ -58,19 +58,6 @@ export function cobaltRequest(p: Provider, videoId: string, kind: MediaKind): { 
   return { url: `${p.base}/`, init: { method: 'POST', headers, body: JSON.stringify(body) } };
 }
 
-// Whether a cobalt link must be checked to give bytes before it is handed out. A link on the relay's own address
-// (it passes the file on from a server behind it) came back empty (200 and 0 bytes) when that server failed: a
-// visitor got a 0 KB file or silence. Links straight from the servers behind it worked. The sound to play on the
-// site is always checked: it is not converted, so its first bytes come within ~2 s.
-export function cobaltLinkNeedsCheck(base: string, url: string, kind: MediaKind): boolean {
-  if (kind === 'listen') return true;
-  try {
-    return new URL(url).host === new URL(base).host;
-  } catch {
-    return true;
-  }
-}
-
 export function parseCobalt(data: any): MediaLink | null {
   if (!data || (data.status !== 'tunnel' && data.status !== 'redirect') || typeof data.url !== 'string') return null;
   return { url: data.url, filename: typeof data.filename === 'string' ? data.filename : undefined, attachment: data.status === 'tunnel' };

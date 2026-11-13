@@ -3,12 +3,14 @@ import { supabase } from '../../lib/supabase';
 import { translateSupabaseError } from '../../utils/supabaseErrors';
 import { deleteFromR2, isR2Url, uploadToR2 } from '../r2';
 import type { SiteSettings } from '../../types';
+import { DEFAULT_NAME_FONT } from '../../constants/nameFonts';
 
 let cachedSiteSettings: SiteSettings | null = null;
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   banner_name: 'أبو عبد الرحمن أشرف بن طه بن مازن',
   banner_logo_url: '',
+  banner_font: DEFAULT_NAME_FONT,
   about_sheikh:
     'الشيخ أشرف مازن، من علماء وأساتذة العلوم الشرعية المعاصرين. يُعنى بنشر العلم الشرعي المؤصل، وشرح المتون العلمية في الفقه، والعقيدة، والحديث، والأصول وعلوم التزكية وفق منهج أهل السنة والجماعة.',
 };
@@ -22,7 +24,7 @@ export async function getSiteSettings(forceRefresh = false): Promise<SiteSetting
     const { data, error } = await supabase
       .from('site_settings')
       .select('key, value')
-      .in('key', ['banner_name', 'banner_logo_url', 'about_sheikh']);
+      .in('key', ['banner_name', 'banner_logo_url', 'about_sheikh', 'banner_font']);
     if (!error && data) {
       const settingsMap: Record<string, string> = {};
       data.forEach((row) => {
@@ -33,6 +35,7 @@ export async function getSiteSettings(forceRefresh = false): Promise<SiteSetting
         banner_name: settingsMap.banner_name || DEFAULT_SITE_SETTINGS.banner_name,
         banner_logo_url: settingsMap.banner_logo_url || '',
         about_sheikh: settingsMap.about_sheikh || DEFAULT_SITE_SETTINGS.about_sheikh,
+        banner_font: settingsMap.banner_font || DEFAULT_NAME_FONT,
       };
       return cachedSiteSettings;
     }
