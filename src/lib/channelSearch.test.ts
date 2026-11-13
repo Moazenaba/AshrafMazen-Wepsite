@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { categoryOfPlaylist, channelVideos, guessCategory, NO_CATEGORY } from './channelSearch';
+import { categoryOfPlaylist, channelPlaylists, channelVideos, guessCategory, NO_CATEGORY } from './channelSearch';
 
 const cats = [
   { name: 'العقيدة', slug: 'aqeedah' },
@@ -44,5 +44,24 @@ describe('channelVideos', () => {
 
   it('finds by words', () => {
     expect(channelVideos(library, { query: 'التوبة', categorySlug: '', categories: cats }).map((v) => v.id)).toEqual(['c']);
+  });
+});
+
+describe('channelPlaylists', () => {
+  const lists = [
+    { id: 'P1', title: 'شرح العقيدة الواسطية', count: '38 فيديو' },
+    { id: 'P2', title: 'خطب الجمعة', count: '130 فيديو' },
+    { id: 'P3', title: 'الوابل الصيب', count: '17 فيديو' },
+  ];
+  it("finds a playlist by its name, even though no video's title has the word", () => {
+    expect(channelPlaylists(lists, { query: 'الواسطية', categorySlug: '', categories: cats }).map((p) => p.id)).toEqual(['P1']);
+    expect(channelPlaylists(lists, { query: 'الوابل', categorySlug: '', categories: cats })[0]).toMatchObject({ id: 'P3', count: '17 فيديو' });
+  });
+  it('lists the playlists of a chosen category when there are no words', () => {
+    expect(channelPlaylists(lists, { query: '', categorySlug: 'aqeedah', categories: cats }).map((p) => p.id)).toEqual(['P1']);
+    expect(channelPlaylists(lists, { query: '', categorySlug: 'khutab', categories: cats }).map((p) => p.id)).toEqual(['P2']);
+  });
+  it('finds nothing for words no playlist has', () => {
+    expect(channelPlaylists(lists, { query: 'زززز', categorySlug: '', categories: cats })).toEqual([]);
   });
 });

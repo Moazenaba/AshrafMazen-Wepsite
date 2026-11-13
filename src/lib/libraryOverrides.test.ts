@@ -19,6 +19,29 @@ describe('library overrides', () => {
     expect(result[0].videos.map((v) => v.id)).toEqual(['n', 'b']);
   });
 
+  it('what the admin removed stays removed when YouTube gives it again, in any playlist, found or not', () => {
+    // YouTube's data brings back the removed video 'a', in its old playlist and in a playlist found on the channel later
+    const again = lib();
+    again.push({ id: 'found', title: 'found later', count: '', latestVideoId: 'a', videos: [{ id: 'a', title: 'A' }, { id: 'z', title: 'Z' }] });
+    const result = applyOverrides(again, o({ hiddenVideos: ['a'] }));
+    expect(result.flatMap((p) => p.videos.map((v) => v.id))).not.toContain('a');
+    expect(result.find((p) => p.id === 'found')?.videos.map((v) => v.id)).toEqual(['z']);
+  });
+
+  it('a playlist the admin hid stays hidden, also when it was found on the channel by itself', () => {
+    const again = lib();
+    again.push({ id: 'found', title: 'found later', count: '', latestVideoId: 'z', videos: [{ id: 'z', title: 'Z' }] });
+    expect(applyOverrides(again, o({ hiddenPlaylists: ['found'] })).map((p) => p.id)).toEqual(['p1', 'p2']);
+  });
+
+  it('a video taken out of one playlist stays out of it when YouTube gives it again, and stays in the others', () => {
+    const again = lib();
+    again[1].videos.push({ id: 'a', title: 'A' });
+    const result = applyOverrides(again, o({ playlistRemovals: { p1: ['a'] } }));
+    expect(result[0].videos.map((v) => v.id)).toEqual(['b']);
+    expect(result[1].videos.map((v) => v.id)).toContain('a');
+  });
+
   it('adds the admin videos to the top of a playlist, once', () => {
     const result = applyOverrides(lib(), o({ playlistAdditions: { p2: [{ id: 'up-1', title: 'Upload', src: 'https://f/v.mp4', kind: 'video' }, { id: 'c', title: 'C' }] } }));
     expect(result[1].videos.map((v) => v.id)).toEqual(['up-1', 'c']);

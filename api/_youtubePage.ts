@@ -1,6 +1,6 @@
-// Reads the videos of a YouTube playlist page or of the channel's "videos" page (their ytInitialData), for when the
-// RSS feeds (videos.xml) answer 404, which YouTube does now. Pure functions: the function that fetches is in
-// youtube-library.ts.
+// Reads the videos of a YouTube playlist page or of the channel's "videos" page, and the playlists of the channel's
+// "playlists" page (their ytInitialData), for when the RSS feeds (videos.xml) answer 404, which YouTube does now.
+// Pure functions: the function that fetches is in youtube-library.ts.
 
 export interface PageVideo {
   id: string;
@@ -42,5 +42,24 @@ export function parseVideos(html: string): PageVideo[] {
     Object.values(node).forEach(walk);
   };
   walk(data);
+  return [...found.entries()].map(([id, title]) => ({ id, title }));
+}
+
+const PLAYLIST_ID = /^(PL|OL)[A-Za-z0-9_-]{10,60}$/;
+
+// The playlists on the channel's "playlists" page, in its order, each once (a podcast is a playlist too)
+export function parsePlaylists(html: string): PageVideo[] {
+  const found = new Map<string, string>();
+  const walk = (node: any): void => {
+    if (!node || typeof node !== 'object') return;
+    if (Array.isArray(node)) return node.forEach(walk);
+    const lockup = node.lockupViewModel;
+    if (lockup && (lockup.contentType === 'LOCKUP_CONTENT_TYPE_PLAYLIST' || lockup.contentType === 'LOCKUP_CONTENT_TYPE_PODCAST')) {
+      const title = textOf(lockup.metadata?.lockupMetadataViewModel?.title);
+      if (typeof lockup.contentId === 'string' && PLAYLIST_ID.test(lockup.contentId) && title && !found.has(lockup.contentId)) found.set(lockup.contentId, title);
+    }
+    Object.values(node).forEach(walk);
+  };
+  walk(pageData(html));
   return [...found.entries()].map(([id, title]) => ({ id, title }));
 }
