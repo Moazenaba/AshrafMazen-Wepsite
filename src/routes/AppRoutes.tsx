@@ -10,6 +10,7 @@ import {
   BookmarksPage,
   PlaylistView,
   VideoView,
+  LivePage,
   ReelsPage,
   AdminHarness,
   Contribute,
@@ -31,6 +32,7 @@ export const AppRoutes: React.FC = () => (
       <Route path="/bookmarks" element={<BookmarksPage />} />
       <Route path="/playlist/:id" element={<PlaylistView />} />
       <Route path="/video/:videoId" element={<VideoView />} />
+      <Route path="/live" element={<LivePage />} />
       <Route path="/reels" element={<ReelsPage />} />
       <Route path="/contribute" element={<Contribute />} />
       {AdminHarness && <Route path="/dev/admin" element={<AdminHarness />} />}

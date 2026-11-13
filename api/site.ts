@@ -15,6 +15,7 @@ export const SETTING_KEYS = [
   'home_feature',
   'side_menu',
   'welcome_sound',
+  'live_stream',
   'lesson_extras',
 ];
 

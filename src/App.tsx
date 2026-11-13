@@ -8,6 +8,7 @@ import { MiniPlayer, MINI_PLAYER_SPACE } from './components/MiniPlayer';
 import { WelcomeSound } from './components/WelcomeSound';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Navbar } from './components/Navbar';
+import { LiveBanner } from './components/LiveBanner';
 import { Footer } from './components/Footer';
 import { useScrollToHash } from './hooks/useScrollToHash';
 import { useScrollReveal } from './hooks/useScrollReveal';
@@ -43,6 +44,7 @@ function AppLayout() {
         تخطَّ إلى المحتوى
       </a>
       <Navbar />
+      {!isAdmin && <LiveBanner />}
       <main id="main" tabIndex={-1} key={location.pathname} className="flex-1 page-enter focus:outline-none">
         {/* While a page's file arrives, the space it will fill stays reserved so the footer does not jump */}
         <ErrorBoundary key={location.pathname}>

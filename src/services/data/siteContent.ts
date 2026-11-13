@@ -19,6 +19,7 @@ import { cleanSideMenu, parseSideMenu, type SideMenuConfig } from './sideMenuRul
 import { loadSiteBundle } from './siteBundle';
 import { bundleContent } from './siteBundleRules';
 import { cleanHomeFeature, parseHomeFeature, validateHomeFeature, type HomeFeature } from './homeFeatureRules';
+import { cleanLiveStream, parseLiveStream, validateLiveStream, type LiveStream } from './liveStreamRules';
 import { cleanWelcomeSound, parseWelcomeSound, validateWelcomeSound, type WelcomeSound } from './welcomeSoundRules';
 
 let cached: SiteContent | null = null;
@@ -41,6 +42,7 @@ export async function getSiteContent(forceRefresh = false): Promise<SiteContent>
         feature: parseHomeFeature(byKey.get(SITE_CONTENT_KEYS.feature)),
         menu: parseSideMenu(byKey.get(SITE_CONTENT_KEYS.menu)),
         welcome: parseWelcomeSound(byKey.get(SITE_CONTENT_KEYS.welcome)),
+        live: parseLiveStream(byKey.get(SITE_CONTENT_KEYS.live)),
       };
       return cached;
     }
@@ -92,5 +94,13 @@ export async function saveWelcomeSound(sound: WelcomeSound): Promise<WelcomeSoun
   const problem = validateWelcomeSound(clean);
   if (problem) throw new Error(problem);
   await write(SITE_CONTENT_KEYS.welcome, clean);
+  return clean;
+}
+
+export async function saveLiveStream(live: LiveStream): Promise<LiveStream> {
+  const clean = cleanLiveStream(live);
+  const problem = validateLiveStream(clean);
+  if (problem) throw new Error(problem);
+  await write(SITE_CONTENT_KEYS.live, clean);
   return clean;
 }
