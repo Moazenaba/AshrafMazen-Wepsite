@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseVideos } from './_youtubePage';
+import { parsePlaylists, parseVideos } from './_youtubePage';
 
 const page = (data: unknown) => `<html><script>var ytInitialData = ${JSON.stringify(data)};</script></html>`;
 const lockup = (id: string, title: string, type = 'LOCKUP_CONTENT_TYPE_VIDEO') => ({ lockupViewModel: { contentId: id, contentType: type, metadata: { lockupMetadataViewModel: { title: { content: title } } } } });
@@ -23,5 +23,23 @@ describe('parseVideos', () => {
   it('gives nothing for a page without data, or with broken data', () => {
     expect(parseVideos('<html>consent</html>')).toEqual([]);
     expect(parseVideos('<script>var ytInitialData = {oops;</script>')).toEqual([]);
+  });
+});
+
+describe('parsePlaylists', () => {
+  it('reads the playlists of the channel page, each once; videos and other things are left out', () => {
+    const html = page({
+      contents: [
+        lockup('PLHcd1VuAeT_NcmgwOimYSUQVJVK9WwM3_', 'خطب الجمعة', 'LOCKUP_CONTENT_TYPE_PLAYLIST'),
+        lockup('PLHcd1VuAeT_OaS9laiTEk1qiTT4Tvcm2E', 'سؤال وجواب', 'LOCKUP_CONTENT_TYPE_PODCAST'),
+        lockup('PLHcd1VuAeT_NcmgwOimYSUQVJVK9WwM3_', 'مرة ثانية', 'LOCKUP_CONTENT_TYPE_PLAYLIST'),
+        lockup('aaaaaaaaaaa', 'فيديو'),
+        lockup('short', 'x', 'LOCKUP_CONTENT_TYPE_PLAYLIST'),
+      ],
+    });
+    expect(parsePlaylists(html)).toEqual([
+      { id: 'PLHcd1VuAeT_NcmgwOimYSUQVJVK9WwM3_', title: 'خطب الجمعة' },
+      { id: 'PLHcd1VuAeT_OaS9laiTEk1qiTT4Tvcm2E', title: 'سؤال وجواب' },
+    ]);
   });
 });

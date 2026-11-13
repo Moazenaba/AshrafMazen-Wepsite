@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ListVideo } from 'lucide-react';
 import { useYoutubeLibrary } from '../lib/youtubeLibrary';
 import { getPublishedBooks, type BookWithCategory } from '../services/dataService';
 import { LessonThumb } from './LessonThumb';
 import { BookCover } from './BookCover';
-import { channelVideos, type CategoryRef } from '../lib/channelSearch';
+import { channelPlaylists, channelVideos, type CategoryRef } from '../lib/channelSearch';
 import { searchScore } from '../utils/arabicSearch';
 
 const MAX_VIDEOS = 24;
@@ -35,15 +36,47 @@ export const SiteSearchExtras: React.FC<{
     [library, needle, categorySlug, categories]
   );
 
+  // The playlists whose name matches, shown by name (a playlist is found even when no video title has the word)
+  const playlists = useMemo(
+    () => (needle || categorySlug ? channelPlaylists(library, { query: needle, categorySlug, categories }) : []),
+    [library, needle, categorySlug, categories]
+  );
+
   const matchedBooks = useMemo(
     () => (needle && showBooks ? books.filter((b) => searchScore(`${b.title} ${b.author} ${b.description}`, needle) > 0) : []),
     [books, needle, showBooks]
   );
 
-  if ((!needle && !categorySlug) || (videos.length === 0 && matchedBooks.length === 0)) return null;
+  if ((!needle && !categorySlug) || (videos.length === 0 && matchedBooks.length === 0 && playlists.length === 0)) return null;
 
   return (
     <>
+      {playlists.length > 0 && (
+        <section aria-labelledby="search-playlists-heading" className="space-y-4">
+          <h2 id="search-playlists-heading" className="font-amiri text-2xl sm:text-3xl font-bold text-emerald-950 dark:text-stone-100">
+            القوائم ({new Intl.NumberFormat('ar-EG').format(playlists.length)})
+          </h2>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+            {playlists.map((playlist) => (
+              <li key={playlist.id}>
+                <Link
+                  to={`/playlist/${playlist.id}`}
+                  className="press flex items-center gap-3 min-h-14 px-3 py-2 rounded-xl bg-white dark:bg-stone-800 hover:bg-gold-soft/40 dark:hover:bg-stone-700 transition-colors"
+                >
+                  <span aria-hidden="true" className="shrink-0 w-10 h-10 rounded-full bg-mushaf/10 dark:bg-gold/10 text-mushaf dark:text-gold-soft flex items-center justify-center">
+                    <ListVideo className="w-5 h-5" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-semibold leading-snug text-stone-900 dark:text-stone-100 line-clamp-2">{highlight(playlist.title, query)}</span>
+                    {playlist.count && <span className="block text-xs text-stone-600 dark:text-stone-400">{playlist.count}</span>}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {matchedBooks.length > 0 && (
         <section aria-labelledby="search-books-heading" className="space-y-4">
           <h2 id="search-books-heading" className="font-amiri text-2xl sm:text-3xl font-bold text-emerald-950 dark:text-stone-100">

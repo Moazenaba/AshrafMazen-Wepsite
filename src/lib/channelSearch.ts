@@ -73,3 +73,25 @@ export function channelVideos(library: Playlist[], options: { query: string; cat
   const hits = [...found.values()];
   return needle ? hits.sort((a, b) => b.score - a.score) : hits.sort((a, b) => b.published.localeCompare(a.published));
 }
+
+export interface PlaylistHit {
+  id: string;
+  title: string;
+  count: string;
+}
+
+// The playlists for a search: those whose name matches the words (best first), or, with a category chosen and no
+// words, that category's playlists. A playlist shows by its name even if none of its videos' titles match.
+export function channelPlaylists(
+  library: { id: string; title: string; count?: string; category?: string }[],
+  options: { query: string; categorySlug: string; categories: CategoryRef[] }
+): PlaylistHit[] {
+  const needle = options.query.trim();
+  const hits: (PlaylistHit & { score: number })[] = [];
+  for (const playlist of library) {
+    if (options.categorySlug && categoryOfPlaylist(playlist, options.categories) !== options.categorySlug) continue;
+    const score = needle ? searchScore(playlist.title, needle) : 1;
+    if (score > 0) hits.push({ id: playlist.id, title: playlist.title, count: playlist.count ?? '', score });
+  }
+  return needle ? hits.sort((a, b) => b.score - a.score) : hits;
+}
