@@ -52,7 +52,9 @@ export default async function handler(_req: any, res: any) {
     // after that it waits for the new one. (It used to serve a copy up to a day old to the first visitor after a quiet
     // spell, so an admin's edit could stay hidden for hours.) An edit therefore reaches visitors within about half a
     // minute, two at most (admins themselves always read live).
-    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=120');
+    // max-age=15: a browser reuses its copy for 15 seconds instead of asking on every page (each ask was a 304 in the
+    // logs); with the CDN's 30 s an edit reaches visitors within about 45 seconds
+    res.setHeader('Cache-Control', 'public, max-age=15, s-maxage=30, stale-while-revalidate=120');
     return res.status(200).send(body);
   } catch (err) {
     console.error('api/site:', err);

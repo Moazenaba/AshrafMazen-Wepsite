@@ -7,6 +7,7 @@ import { Volume2, X } from 'lucide-react';
 import { getSiteContent } from '../services/data/siteContent';
 import { isQuietPage, isShortWelcome, MAX_WELCOME_SECONDS, shouldWelcome, type WelcomeSound as Sound } from '../services/data/welcomeSoundRules';
 import { useAudio } from '../context/AudioContext';
+import { fileSrc } from '../lib/fileLinks';
 
 const PLAYED_KEY = 'welcome_played';
 // What a browser accepts as the visitor's own gesture (a scroll is not one)
@@ -56,7 +57,7 @@ export const WelcomeSound: React.FC = () => {
         else console.warn(`welcome sound not played: ${Math.round(probe.duration)} s is longer than ${MAX_WELCOME_SECONDS} s`);
         probe.removeAttribute('src');
       };
-      probe.src = c.welcome.url;
+      probe.src = fileSrc(c.welcome.url);
     });
     return () => {
       alive = false;
@@ -68,7 +69,7 @@ export const WelcomeSound: React.FC = () => {
     if (!sound || !shouldWelcome(sound, played(), firstPath.current, window.location.pathname)) return;
     const onGesture = () => {
       if (audioRef.current || !shouldWelcome(sound, played(), firstPath.current, window.location.pathname)) return;
-      const audio = new Audio(sound.url);
+      const audio = new Audio(fileSrc(sound.url));
       audio.volume = sound.volume / 100;
       audio.onended = stop;
       audio.onerror = stop;
