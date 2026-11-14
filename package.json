@@ -17,6 +17,7 @@
     "sitemap": "node scripts/generate-sitemap.mjs",
     "sync:youtube": "node scripts/sync-youtube.mjs",
     "build:library": "node scripts/build-youtube-library.mjs",
+    "refresh:youtube": "node scripts/refresh-youtube-library.mjs",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "test": "vitest run",
     "test:watch": "vitest"
