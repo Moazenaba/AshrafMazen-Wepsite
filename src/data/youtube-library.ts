@@ -175,7 +175,7 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "HTrNNRuWr1w",
-        "title": "Friday Sermon | Calling to God with wisdom and good counsel | #Sheikh_Ashraf_Mazen FULL HD File Q..."
+        "title": "خطبة الجمعة | الدعوة إلى الله بالحكمة والموعظة الحسنة | #الشيخ_أشرف_مازن جودة الملف FULL HD"
       },
       {
         "id": "AULACydfWvo",
@@ -279,7 +279,7 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "649Qx8bI1aQ",
-        "title": "خطبة الجمعة بتاريخ 11 10 2019 بأسم فقه بناء الدول"
+        "title": "خطبة الجمعة  بتاريخ 11 10 2019 بأسم  فقه بناء الدول"
       },
       {
         "id": "4hhyQNRS97k",
@@ -347,7 +347,7 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "1q5NgJeOt0g",
-        "title": "البرُّ بالأوطَانِ مِن شمائلِ الإيمَانِ"
+        "title": "البرُّ بالأوطَانِ مِن شمائلِ الإيمَانِ"
       },
       {
         "id": "MMBYwChC2Es",
@@ -355,7 +355,7 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "QOzSInNjBjI",
-        "title": "حقوق الطفل قبل ولادته- الشيخ اشرف مازن"
+        "title": "حقوق الطفل قبل ولادته- الشيخ اشرف مازن`"
       },
       {
         "id": "SGuo1lB0nEE",
@@ -443,7 +443,7 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "wi6kk2Qeiiw",
-        "title": "المسلمون فى رمضان الشيخ أشرف بن طه آل مازن 4 5 2018"
+        "title": "المسلمون فى رمضان الشيخ أشرف بن طه آل مازن\n4 5 2018"
       },
       {
         "id": "qM5l5OeFVto",
@@ -805,7 +805,7 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "FDF7NZlJhxw",
-        "title": "200 Questions and Answers (51) / The Publication of the Records on the Day of Resurrection"
+        "title": "200سؤال وجواب (51 )/نشر الصحف يوم القيامة ووزن الأعمال/# لفضيلة الشيخ أشرف -مازن"
       },
       {
         "id": "oHByZRxQvN8",
@@ -817,7 +817,7 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "0C0G9N2K-wU",
-        "title": "200 Questions and Answers (54) | Who is Intercession for and When Does it Occur? | #Sheikh_Ashraf"
+        "title": "200سؤال وجواب( 54) | لمن تكون الشفاعة و متى تكون ؟ |#الشيخ_أشرف_مازن"
       },
       {
         "id": "9RPSuHFe8e8",
@@ -825,7 +825,7 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "fvwVRiob65k",
-        "title": "200 Q&A (56) | The Believer Hopes for His Lord's Mercy and Fears His Sins | #SheikhAshrafMazen"
+        "title": "200 سؤال وجواب (56) |المؤمن يرجو رحمة ربه و يخاف ذنوبه|#الشيخ_أشرف_مازن"
       },
       {
         "id": "VdVyXwDR8Jw",
@@ -837,7 +837,7 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "GiQE1d1afUU",
-        "title": "200 Questions and Answers (60) | Not Every Ignorant Person Is Excused | #SheikhAshrafMazen"
+        "title": "200 سؤال وجواب (60 )|ليس كل جاهل معذورا|#الشيخ أشرف مازن"
       },
       {
         "id": "u71fnbHMy5o",
@@ -877,7 +877,7 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "rnPR2gG_Ovc",
-        "title": "200 Q&A (70) | Is Disbelief (Kufr) One Type or Multiple? | #Sheikh_Ashraf_Mazen"
+        "title": "200 سؤال وجواب (70)| هل الكفر نوع واحد أم أنواع ؟|#الشيخ _ أشرف _ مازن"
       },
       {
         "id": "UMQRf01SMaQ",
@@ -897,23 +897,23 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "b6Ud8AAFueQ",
-        "title": "200 Q&A (76) | What is 'al-Nushra' (untying magic) and what is its ruling? | #Sheikh_Ashraf_Mazen"
+        "title": "200 سؤال وجواب (76)| ما هي النشرة و ما حكمها ؟| # الشيخ _ أشرف _ مازن"
       },
       {
         "id": "2CEw9LI1C18",
-        "title": "200 Questions and Answers (77) | The Ruling on Wearing Amulets, Strings, and Talismans | #Sheikh"
+        "title": "200 سؤال وجواب (77)|  حُكْمُ لبْس الْحَظاظات وَالْخُيُوطِ وَالتَّمَائِم | # الشيخ _ أشرف _ مازن"
       },
       {
         "id": "1t9PnZpJ3Uk",
-        "title": "200 Questions and Answers (78) | The Ruling on Wearing Quranic Amulets | #Sheikh_Ashraf_Mazen"
+        "title": "200 سؤال وجواب(78) | حُكْمُ تَعْلِيق التَّمَائِمِ الْقُرْءَانيه | # الشيخ _ أشرف _ مازن"
       },
       {
         "id": "Pe6w_JcNhGk",
-        "title": "200 Questions and Answers 79: What is the Ruling on Soothsayers and Fortune Tellers?"
+        "title": "200 سؤال وجواب 79 مَا حَكَمَ الْكُهَّان وَالْعِرَافين؟وَ ما حُكْمُ مَنْ يُصَدِّقْهُمْ؟|#الشيخ  أشرف"
       },
       {
         "id": "3dSFhLP2Vc8",
-        "title": "200 Questions and Answers (80) A Decisive Stand Must Be Taken Against Them | #Sheikh_Ashraf_Mazen"
+        "title": "200 سؤال وجواب (80)  لا بد من وقفة حاسمة مع هؤلاء| #الشيخ _ أشرف _ مازن"
       },
       {
         "id": "2ssbW6Do_vQ",
@@ -921,7 +921,7 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "9Q_T1EiDyYk",
-        "title": "200 Questions and Answers (82) | Why Would One of You Kill His Brother | #Sheikh_Ashraf_Mazen"
+        "title": "200سؤال وجواب (82) | علام يقتل أحدكم أخاه | # الشيخ _ أشرف _ مازن"
       }
     ]
   },
@@ -1036,7 +1036,7 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "wCUxxe5zhG4",
-        "title": "العقيدة الواسطية (12) | ذكر بعض الصفات الذاتية والفعلية للرب جل وعلا | #الشيخ_أشرف_مازن"
+        "title": "العقيدة الواسطية (12) | ذكر بعض الصفات الذاتية والفعلية للرب جل وعلاتعديل | #الشيخ_أشرف_مازن"
       },
       {
         "id": "9IbEFcG8LUs",
@@ -1064,7 +1064,7 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "RmUzIzDpK1A",
-        "title": "شرح العقيدة الواسطية (3) | عقيدة الفرقة الناجية | #الشيخ_أشرف_مازن"
+        "title": "شرح العقيدة الواسطية  (3) | عقيدة الفرقة الناجية | #الشيخ_أشرف_مازن"
       },
       {
         "id": "3-n34SWnLs0",
@@ -1088,7 +1088,7 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "0R24-OwE6Eg",
-        "title": "شرح العقيدة الواسطية | التصديق بكرامات الأولياء | #الشيخ_أشرف_مازن"
+        "title": "شرح العقيدة الواسطية  | التصديق بكرامات الأولياء | #الشيخ_أشرف_مازن"
       },
       {
         "id": "HS7TQ7Ln6ao",
@@ -1183,11 +1183,11 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "4uoTsumwndE",
-        "title": "كتاب التوبة(١٦)/ هَلْ يَجُوزُ الِاسْتِدْلَالُ بِالْقَدْرِ عَلَي وُقُوعِ الذَّنْبِ٣؟#الشيخ أشرف مازن"
+        "title": "كتاب التوبة(١٦)/ هَلْ يَجُوزُ الِاسْتِدْلَالُ بِالْقَدْرِ عَلَي وُقُوعِ الذَّنْبِ٣؟#الشيخ أشرف مازن"
       },
       {
         "id": "J8BCJzvRAIA",
-        "title": "The Book of Repentance (17) / Can God's decree be averted by God's decree? / By Sheikh Ashraf Mazen"
+        "title": "كتاب التوبة( 17)/ هل يرد قدرالله بقدرالله؟/# لفضيلة الشيخ أشرف -مازن"
       },
       {
         "id": "AP_DASdVTEE",
@@ -1219,15 +1219,15 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "V9J1JGeZZrU",
-        "title": "كتاب التوبة (26)| فَرَحُ الرَّبِّ بِتَوْبَةِ الْعَبْدِ|#الشيخ_أشرف_مازن"
+        "title": "كتاب التوبة (26)| فَرَحُ الرَّبِّ بِتَوْبَةِ الْعَبْدِ|#الشيخ_أشرف_مازن"
       },
       {
         "id": "7CPc6_Id410",
-        "title": "كتاب التوبة (27)| سَرَائِرُ التَّوْبَةِ 4|#الشيخ_أشرف_مازن"
+        "title": "كتاب التوبة (27)| سَرَائِرُ التَّوْبَةِ 4\\#الشيخ_أشرف_مازن"
       },
       {
         "id": "R3VKIVcigg0",
-        "title": "كتاب التوبة (28)|سَرَائِرُ التَّوْبَةِ5|#الشيخ_أشرف_مازن"
+        "title": "كتاب التوبة (28)|سَرَائِرُ التَّوْبَةِ5|#الشيخ_أشرف_مازن"
       },
       {
         "id": "QWlO8NzgsFw",
@@ -1239,7 +1239,7 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "BaQtVoxYSac",
-        "title": "The Book of Repentance (31) | The Soul Inclined to Evil as a Source of Sin | #Sheikh_Ashraf_Mazen"
+        "title": "كتاب التوبة (31)| النفس الأمارة بالسوء مصدراً للمعصية|# الشيخ - أشرف - مازن"
       },
       {
         "id": "3bfIg6wqoz4",
@@ -1255,15 +1255,15 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "VGdqewjTAsQ",
-        "title": "كتاب التوبة (35)| مَدَاخِلُ الشَّيْطَانِ لِلْإِنْسَانِ | # الشيخ _ أشرف _ مازن"
+        "title": "كتاب التوبة (35)|  مَدَاخِلُ الشَّيْطَانِ لِلْإِنْسَانِ | # الشيخ _ أشرف _ مازن"
       },
       {
         "id": "Ne65F4FH2Ug",
-        "title": "كتاب التوبة (36)| مَدَاخِلُ الشَّيْطَانِ لِلْإِنْسَانِ 2| # الشيخ _ الشيخ _ أشرف _ مازن"
+        "title": "كتاب التوبة (36)| مَدَاخِلُ الشَّيْطَانِ لِلْإِنْسَانِ 2| # الشيخ _ الشيخ _ أشرف _ مازن"
       },
       {
         "id": "L9MqUCl21UQ",
-        "title": "Book of Repentance (37) | Ibn al-Qayyim's Response to al-Harawi | #SheikhAshrafMazen"
+        "title": "كتاب التوبة (37)| رد ابن القيم على الهروي | # الشيخ أشرف _ مازن"
       }
     ]
   },
@@ -1360,11 +1360,11 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
       },
       {
         "id": "yTbHlTAqedU",
-        "title": "Al-Wabil al-Sayyib (17) | Perfect Love and Absolute Humility to God, Lord of the Worlds | #Sheikh_Ashraf_Mazen"
+        "title": "الوابل الصيب(17)|الْحَب الْكَامِل وَالذُّل التَّام لِلَّهِ رَبِّ الْعَالَمِينَ| # الشيخ  أشرف _ مازن"
       },
       {
         "id": "KItqZipgmjw",
-        "title": "Al-Wabil al-Sayyib 18: The Superiority of Deeds Based on the Truths of Faith in the Hearts | #Sheikh_Ashraf_Mazen"
+        "title": "الوابل الصيب 18 تَفَاضُل الْأَعْمَال بِتَفَاضُل مَا فِي الْقُلُوبِ مِنْ حَقَائِقِ الْإِيمَانِ|الشيخ"
       }
     ]
   },

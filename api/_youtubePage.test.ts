@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parsePlaylists, parseVideos } from './_youtubePage';
+import { continuationIn, innertubeOf, parsePlaylists, parseVideos, videosIn, withArabic } from './_youtubePage';
 
 const page = (data: unknown) => `<html><script>var ytInitialData = ${JSON.stringify(data)};</script></html>`;
 const lockup = (id: string, title: string, type = 'LOCKUP_CONTENT_TYPE_VIDEO') => ({ lockupViewModel: { contentId: id, contentType: type, metadata: { lockupMetadataViewModel: { title: { content: title } } } } });
@@ -41,5 +41,28 @@ describe('parsePlaylists', () => {
       { id: 'PLHcd1VuAeT_NcmgwOimYSUQVJVK9WwM3_', title: 'خطب الجمعة' },
       { id: 'PLHcd1VuAeT_OaS9laiTEk1qiTT4Tvcm2E', title: 'سؤال وجواب' },
     ]);
+  });
+});
+
+describe('long playlists and language', () => {
+  it('finds the next-page token in the old and the new layout', () => {
+    expect(continuationIn({ a: [{ continuationItemRenderer: { continuationEndpoint: { continuationCommand: { token: 'T1' } } } }] })).toBe('T1');
+    expect(continuationIn({ continuationItemRenderer: { continuationEndpoint: { commandExecutorCommand: { commands: [{ x: 1 }, { continuationCommand: { token: 'T2' } }] } } } })).toBe('T2');
+    expect(continuationIn({ nothing: true })).toBeNull();
+  });
+
+  it('reads videos from the answer for a next page', () => {
+    const answer = { onResponseReceivedActions: [{ appendContinuationItemsAction: { continuationItems: [{ playlistVideoRenderer: { videoId: 'loVFoAlqeCc', title: { runs: [{ text: 'درس' }] } } }] } }] };
+    expect(videosIn(answer)).toEqual([{ id: 'loVFoAlqeCc', title: 'درس' }]);
+  });
+
+  it('reads the client key and version from the page', () => {
+    expect(innertubeOf('x"INNERTUBE_API_KEY":"K1",y"INNERTUBE_CLIENT_VERSION":"2.2026"')).toEqual({ key: 'K1', version: '2.2026' });
+    expect(innertubeOf('<html></html>')).toBeNull();
+  });
+
+  it('asks YouTube for the Arabic page', () => {
+    expect(withArabic('https://www.youtube.com/playlist?list=PL1')).toBe('https://www.youtube.com/playlist?list=PL1&hl=ar&gl=EG');
+    expect(withArabic('https://www.youtube.com/channel/UC1/videos')).toBe('https://www.youtube.com/channel/UC1/videos?hl=ar&gl=EG');
   });
 });
