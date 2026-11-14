@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, Save } from 'lucide-react';
 import { getSiteContent, saveHomeFeature } from '../../../services/data/siteContent';
-import { DEFAULT_BUTTON_LABEL, EMPTY_FEATURE, type HomeFeature } from '../../../services/data/homeFeatureRules';
+import { DEFAULT_BUTTON_LABEL, EMPTY_FEATURE, FEATURE_STATUS_TEXT, featureStatus, withUploadedImage, type HomeFeature } from '../../../services/data/homeFeatureRules';
 import { FileUploadButton } from '../FileUploadButton';
 
 const input =
@@ -25,7 +25,9 @@ export const HomeFeatureSettings: React.FC = () => {
       setSaving(true);
       setMessage(null);
       setDraft(await saveHomeFeature(draft));
-      setMessage({ type: 'ok', text: draft.enabled ? 'تم الحفظ، والصورة ظاهرة الآن في الصفحة الرئيسية.' : 'تم الحفظ. البطاقة مطفأة، ويظهر مكانها الدرس المميز.' });
+      if (draft.enabled) setMessage({ type: 'ok', text: 'تم الحفظ، والصورة ظاهرة الآن في الصفحة الرئيسية (خلال ثوانٍ).' });
+      else if (draft.imageUrl) setMessage({ type: 'error', text: 'تم الحفظ، لكن البطاقة مطفأة فلن تظهر الصورة. علّم مربع «إظهار هذه البطاقة في الصفحة الرئيسية» ثم احفظ.' });
+      else setMessage({ type: 'ok', text: 'تم الحفظ. البطاقة مطفأة، ويظهر مكانها الدرس المميز.' });
     } catch (err: any) {
       setMessage({ type: 'error', text: err?.message || 'تعذّر الحفظ.' });
     } finally {
@@ -56,7 +58,10 @@ export const HomeFeatureSettings: React.FC = () => {
           <div>
             <span className={label}>الصورة</span>
             <div className="flex flex-wrap items-center gap-2">
-              <FileUploadButton kind="hero" label="رفع صورة" onUploaded={(url) => set('imageUrl', url)} onError={(text) => setMessage({ type: 'error', text })} />
+              <FileUploadButton kind="hero" label="رفع صورة" onUploaded={(url) => {
+                  setDraft((d) => withUploadedImage(d, url));
+                  setMessage({ type: 'ok', text: draft.videoUrl ? 'تم رفع الصورة وتفعيل البطاقة. اضغط «حفظ» لتظهر في الموقع.' : 'تم رفع الصورة. الصق رابط الفيديو ثم علّم «إظهار هذه البطاقة» واضغط «حفظ».' });
+                }} onError={(text) => setMessage({ type: 'error', text })} />
               <input aria-label="أو رابط صورة" dir="ltr" value={draft.imageUrl} onChange={(e) => set('imageUrl', e.target.value)} placeholder="https://..." className={`${input} flex-1 min-w-48`} />
             </div>
             <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">الأنسب صورة عرضية بنسبة ١٦:٩ (مثلاً ١٢٨٠×٧٢٠)، حتى ٨ ميجابايت.</p>
@@ -87,6 +92,10 @@ export const HomeFeatureSettings: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <p role="status" className={`text-sm font-semibold ${featureStatus(draft) === 'shown' ? 'text-emerald-800 dark:text-emerald-300' : 'text-amber-800 dark:text-amber-300'}`}>
+        {FEATURE_STATUS_TEXT[featureStatus(draft)]}
+      </p>
 
       {message && (
         <p role={message.type === 'error' ? 'alert' : 'status'} className={`p-3 rounded-xl text-sm font-semibold ${message.type === 'error' ? 'bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-300' : 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300'}`}>

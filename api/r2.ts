@@ -98,7 +98,10 @@ function serveFile(cfg: R2Config, req: any, res: any) {
     if (!name.toLowerCase().endsWith(`.${ext}`)) name = `${name}.${ext}`;
     extra['response-content-disposition'] = `attachment; filename="file.${ext}"; filename*=UTF-8''${encodeURIComponent(name)}`;
   }
-  res.setHeader('Cache-Control', req.query?.download ? 'no-store' : 'private, max-age=3600');
+  // The redirect is the same for everyone and the files are the site's own public ones (the folder check above), so
+  // the CDN keeps it for an hour: a picture on the home page no longer calls this function for every visitor.
+  // (A replaced file has a new name, so nothing stale is shown.)
+  res.setHeader('Cache-Control', req.query?.download ? 'no-store' : 'public, max-age=3600, s-maxage=3600');
   res.statusCode = 302;
   res.setHeader('Location', presign(cfg, 'GET', key, LINK_SECONDS, extra));
   res.end();

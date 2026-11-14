@@ -64,3 +64,24 @@ export function validateHomeFeature(f: HomeFeature): string | null {
   if (!f.videoUrl) return 'الصق رابط الفيديو الذي يفتحه زر «شاهد واستمع الآن».';
   return null;
 }
+
+// Why the featured card does or does not show on the home page, so the admin screen can say it plainly
+export type FeatureStatus = 'shown' | 'off' | 'no-image' | 'no-video';
+
+export function featureStatus(f: HomeFeature): FeatureStatus {
+  if (!f.enabled) return 'off';
+  if (!f.imageUrl) return 'no-image';
+  if (!f.videoUrl) return 'no-video';
+  return 'shown';
+}
+
+export const FEATURE_STATUS_TEXT: Record<FeatureStatus, string> = {
+  shown: 'الحالة: ستظهر البطاقة بالصورة في الصفحة الرئيسية بعد الحفظ.',
+  off: 'الحالة: البطاقة مطفأة، فلن تظهر الصورة. يظهر مكانها الدرس المميز. علّم مربع «إظهار هذه البطاقة» لتظهر.',
+  'no-image': 'الحالة: ناقصة الصورة. ارفع صورة أو الصق رابطها.',
+  'no-video': 'الحالة: ناقص رابط الفيديو الذي يفتحه الزر. الصقه لتظهر البطاقة.',
+};
+
+// A new picture means the admin wants the card shown: it is switched on when the video link is already there
+// (without one the card could not be saved as shown)
+export const withUploadedImage = (f: HomeFeature, imageUrl: string): HomeFeature => ({ ...f, imageUrl, enabled: f.videoUrl ? true : f.enabled });

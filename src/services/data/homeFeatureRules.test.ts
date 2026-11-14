@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { EMPTY_FEATURE, featureTarget, isFeatureShown, parseHomeFeature, validateHomeFeature } from './homeFeatureRules';
+import { EMPTY_FEATURE, featureStatus, featureTarget, isFeatureShown, parseHomeFeature, validateHomeFeature, withUploadedImage } from './homeFeatureRules';
 
 const f = (over = {}) => ({ ...EMPTY_FEATURE, enabled: true, imageUrl: 'https://x/img.jpg', videoUrl: 'https://youtu.be/loVFoAlqeCc', ...over });
 
@@ -24,5 +24,18 @@ describe('home feature', () => {
   it('reads bad saved data as off', () => {
     expect(parseHomeFeature('{bad')).toEqual(EMPTY_FEATURE);
     expect(parseHomeFeature(null)).toEqual(EMPTY_FEATURE);
+  });
+
+  it('says why the card is or is not shown', () => {
+    expect(featureStatus(f())).toBe('shown');
+    expect(featureStatus(f({ enabled: false }))).toBe('off');
+    expect(featureStatus(f({ imageUrl: '' }))).toBe('no-image');
+    expect(featureStatus(f({ videoUrl: '' }))).toBe('no-video');
+  });
+
+  it('switches the card on when a picture is uploaded and the video link is there', () => {
+    const off = f({ enabled: false, imageUrl: '' });
+    expect(withUploadedImage(off, '/api/r2?file=x.jpeg')).toMatchObject({ enabled: true, imageUrl: '/api/r2?file=x.jpeg' });
+    expect(withUploadedImage({ ...off, videoUrl: '' }, '/api/r2?file=x.jpeg').enabled).toBe(false);
   });
 });
