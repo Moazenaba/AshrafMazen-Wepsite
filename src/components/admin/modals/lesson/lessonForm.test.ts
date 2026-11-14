@@ -46,6 +46,16 @@ describe('formFromLesson', () => {
 describe('validateLessonForm', () => {
   it('accepts a complete lesson', () => expect(validateLessonForm(valid(), existing)).toBeNull());
 
+  it('accepts a recording uploaded to the site (a site link, not a full address) and a full https link', () => {
+    expect(validateLessonForm(valid({ audioUrl: '/api/r2?file=audio%2Fx.ogg' }), existing)).toBeNull();
+    expect(validateLessonForm(valid({ audioUrl: 'https://example.com/a.mp3' }), existing)).toBeNull();
+  });
+
+  it('refuses an audio link that is neither', () => {
+    expect(validateLessonForm(valid({ audioUrl: 'example.com/a.mp3' }), existing)).toMatch(/رابط الملف الصوتي/);
+    expect(validateLessonForm(valid({ audioUrl: 'javascript:alert(1)' }), existing)).toMatch(/رابط الملف الصوتي/);
+  });
+
   it('needs a title', () => expect(validateLessonForm(valid({ title: '  ' }), existing)).toBe('يرجى إدخال عنوان الدرس'));
   it('needs a series', () => expect(validateLessonForm(valid({ seriesId: '' }), existing)).toBe('يرجى اختيار السلسلة العلمية'));
 
