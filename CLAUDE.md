@@ -27,7 +27,7 @@ No visitor accounts. Visitors send requests via `api/submit`; nothing changes un
 `smoke <url>` (every page and function) · `sitemap` · `refresh:youtube` / `build:library`.
 
 **YouTube library:** new channel videos are added to `src/data/youtube-library.ts` automatically by `.github/workflows/sync-youtube.yml`
-(every 15 minutes, or on a `repository_dispatch` event `youtube-upload`); it commits as the owner so Vercel deploys. The old `sync:youtube`
+(every 30 minutes, or on a `repository_dispatch` event `youtube-upload`); it commits as the owner so Vercel deploys. The old `sync:youtube`
 script reads RSS feeds that YouTube now answers with 404, so do not use it. Run `npm run refresh:youtube -- --dry` to see what is new.
 
 **SEO:** `npm run build` = sitemap → vite build → `scripts/prerender.mjs`, which writes a real HTML page per public URL into

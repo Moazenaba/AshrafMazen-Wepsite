@@ -6,7 +6,9 @@ name: Sync YouTube
 # lets Google find them.)
 #
 # Triggers:
-#   schedule            every 15 minutes (GitHub may start it a few minutes late)
+#   schedule            every 30 minutes (GitHub may start it a few minutes late). The repository is private, where the free plan
+#                       gives 2000 Actions minutes a month and every run counts as at least one: 48 runs a day is about 1440 a month.
+#                       Do not make it more frequent without checking the plan; use repository_dispatch for an instant start.
 #   workflow_dispatch   the "Run workflow" button in the Actions tab
 #   repository_dispatch event type "youtube-upload": for anything that can call the GitHub API the moment a video goes up
 #                       (a Make/Zapier/IFTTT "new YouTube video" step, for example)
@@ -15,7 +17,7 @@ name: Sync YouTube
 # GitHub then emails the repository owner.
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch:
   repository_dispatch:
     types: [youtube-upload]
