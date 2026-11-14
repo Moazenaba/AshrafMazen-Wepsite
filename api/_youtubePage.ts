@@ -9,6 +9,16 @@ export interface PageVideo {
 
 const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
 
+// Every request to YouTube asks for the Arabic page. Without it YouTube answers a server in the USA (Vercel, GitHub)
+// with its automatic English translation of the titles, and English titles reached the site.
+export const YOUTUBE_LANGUAGE = 'hl=ar&gl=EG';
+export const withArabic = (url: string) => `${url}${url.includes('?') ? '&' : '?'}${YOUTUBE_LANGUAGE}`;
+export const YOUTUBE_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36',
+  'Accept-Language': 'ar,en;q=0.5',
+  Cookie: 'CONSENT=YES+1; SOCS=CAI; PREF=hl=ar&gl=EG',
+};
+
 // The JSON the page carries for its own rendering
 export function pageData(html: string): unknown {
   const start = html.indexOf('var ytInitialData');
@@ -28,7 +38,11 @@ const textOf = (value: any): string => String(value?.content ?? value?.simpleTex
 // Every video in the page, in the page's order, each once. YouTube shows a video in one of three shapes
 // (the newer "lockup", or a playlist / list video renderer); all are read.
 export function parseVideos(html: string): PageVideo[] {
-  const data = pageData(html);
+  return videosIn(pageData(html));
+}
+
+// The same, from any part of YouTube's data: the page's own, or the answer for the next page of a long playlist
+export function videosIn(data: unknown): PageVideo[] {
   const found = new Map<string, string>();
   const add = (id: unknown, title: string) => {
     if (typeof id === 'string' && VIDEO_ID.test(id) && title && !found.has(id)) found.set(id, title);
@@ -62,4 +76,28 @@ export function parsePlaylists(html: string): PageVideo[] {
   };
   walk(pageData(html));
   return [...found.entries()].map(([id, title]) => ({ id, title }));
+}
+
+// A long playlist shows its first 100 videos; the rest come page by page. This is the token for the next page
+// (it sits in a continuationCommand, directly or inside a commandExecutorCommand in the newer layout), or null.
+export function continuationIn(data: unknown): string | null {
+  let token: string | null = null;
+  const walk = (node: any): void => {
+    if (token || !node || typeof node !== 'object') return;
+    if (Array.isArray(node)) return node.forEach(walk);
+    if (typeof node.continuationCommand?.token === 'string') {
+      token = node.continuationCommand.token;
+      return;
+    }
+    Object.values(node).forEach(walk);
+  };
+  walk(data);
+  return token;
+}
+
+// What the page says to ask for the next page with (YouTube's own web client key and version), or null
+export function innertubeOf(html: string): { key: string; version: string } | null {
+  const key = html.match(/"INNERTUBE_API_KEY":"([^"]+)"/)?.[1];
+  const version = html.match(/"INNERTUBE_CLIENT_VERSION":"([^"]+)"/)?.[1];
+  return key && version ? { key, version } : null;
 }

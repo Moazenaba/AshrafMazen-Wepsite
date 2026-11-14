@@ -11,10 +11,12 @@ function pretendYoutube(playlists: [string, string][], uploads: [string, string]
     'fetch',
     vi.fn(async (input: any) => {
       const url = String(input);
+      // Every page is asked for in Arabic (?hl=ar&gl=EG), so the address is matched by its path
+      const path = url.startsWith('http') ? new URL(url).pathname : url;
       const ok = (body: string) => ({ ok: true, status: 200, text: async () => body, json: async () => ({}) });
       if (url.includes('/feeds/videos.xml')) return { ok: false, status: 404, text: async () => '', json: async () => ({}) };
-      if (url.endsWith('/playlists')) return ok(page({ items: playlists.map(([id, title]) => lockup(id, title, 'LOCKUP_CONTENT_TYPE_PLAYLIST')) }));
-      if (url.endsWith('/videos')) return ok(page({ items: uploads.map(([id, title]) => video(id, title)) }));
+      if (path.endsWith('/playlists')) return ok(page({ items: playlists.map(([id, title]) => lockup(id, title, 'LOCKUP_CONTENT_TYPE_PLAYLIST')) }));
+      if (path.endsWith('/videos')) return ok(page({ items: uploads.map(([id, title]) => video(id, title)) }));
       const list = url.match(/playlist\?list=([^&]+)/)?.[1] ?? '';
       return ok(page({ items: (playlistVideos[list] ?? []).map(([id, title]) => video(id, title)) }));
     })
@@ -51,6 +53,14 @@ describe('youtube library function', () => {
     const result = await library();
     expect(result.playlists[0]).toMatchObject({ id: 'channel-latest' });
     expect(result.playlists[0].videos.map((v) => v.id)).toEqual(['uuuuuuuuuu1']);
+  });
+
+  it('asks YouTube for every page in Arabic', async () => {
+    pretendYoutube([], [], {});
+    await library();
+    const urls: string[] = (globalThis.fetch as any).mock.calls.map((call: any[]) => String(call[0])).filter((u: string) => u.includes('youtube.com'));
+    expect(urls.length).toBeGreaterThan(0);
+    for (const url of urls) expect(url).toContain('hl=ar');
   });
 
   it('asks YouTube for two pages only: no RSS feed, no re-reading of the saved playlists', async () => {

@@ -7,24 +7,20 @@
 // time from servers, which filled the logs with errors). The playlist pages are read with api/_youtubePage.ts.
 // (What the admin hid or removed is taken off on the site afterwards, so none of this brings it back.)
 import { YOUTUBE_LIBRARY, type LibraryPlaylist, type LibraryVideo } from '../src/data/youtube-library.js'; // Node on Vercel needs the extension
-import { parsePlaylists, parseVideos } from './_youtubePage.js';
+import { parsePlaylists, parseVideos, withArabic, YOUTUBE_HEADERS } from './_youtubePage.js';
 
 const TTL_MS = 60 * 60 * 1000;
 const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || 'UCisGvsFtKyDU6NTFywaITzQ';
 // The list of the channel's uploads that are in no playlist
 const LATEST_ID = 'channel-latest';
-const PAGE_HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36',
-  'Accept-Language': 'ar,en;q=0.8',
-  Cookie: 'CONSENT=YES+1; SOCS=CAI',
-};
 // One stored library per set of admin-added playlists: adding or removing one builds a new library at once
 // instead of waiting for the 6 hours to pass. The site asks with ?p=<those playlist ids>, so the CDN copy changes too.
 const cache = new Map<string, { at: number; body: string }>();
 
 async function fetchPage(url: string): Promise<string> {
   try {
-    const response = await fetch(url, { headers: PAGE_HEADERS });
+    // Always the Arabic page: from a US server YouTube would otherwise send its English translation of the titles
+    const response = await fetch(withArabic(url), { headers: YOUTUBE_HEADERS });
     return response.ok ? await response.text() : '';
   } catch {
     return '';

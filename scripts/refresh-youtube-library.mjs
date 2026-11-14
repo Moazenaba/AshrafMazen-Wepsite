@@ -1,32 +1,58 @@
-// Keeps the saved channel library (src/data/youtube-library.ts) current: asks YouTube for every playlist's newest videos,
-// adds the new ones (and any playlist made on the channel since), and leaves out videos YouTube no longer has.
+// Keeps the saved channel library (src/data/youtube-library.ts) the same as the channel on YouTube:
+//   - every playlist is read in full (a long one comes 100 videos a page) and in Arabic,
+//   - new videos are added, and any playlist made on the channel since,
+//   - a title the Sheikh changed on YouTube is changed here too (Arabic, as on YouTube),
+//   - videos YouTube no longer has are left out.
 // It is what makes a new upload reach the sitemap and the prerendered pages: those are built from the saved library.
-// Run by .github/workflows/sync-youtube.yml every few minutes, which commits the file when it changed and so starts a deploy.
+// Run by .github/workflows/sync-youtube.yml every 30 minutes, which commits the file when it changed and so starts a deploy.
 //
 //   node scripts/refresh-youtube-library.mjs          writes the file
 //   node scripts/refresh-youtube-library.mjs --dry    only says what it would change
 //
-// YouTube's RSS feeds answer 404 now, so the playlist pages are read (api/_youtubePage.ts, the same parser the site's
-// api/youtube-library.ts uses at run time). If YouTube answers no playlist at all (blocked, or the page changed) the
-// script fails loudly, so the workflow turns red instead of silently keeping an old library. It needs no npm packages.
-import { parsePlaylists, parseVideos } from '../api/_youtubePage.ts';
+// Every page is asked for in Arabic (hl=ar): GitHub's servers are in the USA, and there YouTube sends its automatic
+// English translation of the titles, which is how English titles once reached the site. YouTube's RSS feeds are not used
+// (they answer 403/404 most of the time). If YouTube answers no playlist at all (blocked, or the page changed) the script
+// fails loudly, so the workflow turns red instead of silently keeping an old library. It needs no npm packages.
+import { continuationIn, innertubeOf, pageData, parsePlaylists, videosIn, withArabic, YOUTUBE_HEADERS } from '../api/_youtubePage.ts';
 import { readLibraryFile, writeLibraryFile } from './youtube-library-file.mjs';
 
 const dry = process.argv.includes('--dry');
 const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || 'UCisGvsFtKyDU6NTFywaITzQ';
-const HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36',
-  'Accept-Language': 'ar,en;q=0.8',
-  Cookie: 'CONSENT=YES+1; SOCS=CAI',
-};
+const MAX_PAGES = 30;
 
 async function page(url) {
   try {
-    const response = await fetch(url, { headers: HEADERS });
+    const response = await fetch(withArabic(url), { headers: YOUTUBE_HEADERS });
     return response.ok ? await response.text() : '';
   } catch {
     return '';
   }
+}
+
+// All the videos of a playlist, in YouTube's order: the first page, then each next page YouTube offers
+async function playlistVideos(id) {
+  const html = await page(`https://www.youtube.com/playlist?list=${id}`);
+  const first = pageData(html);
+  const videos = videosIn(first);
+  const client = innertubeOf(html);
+  let token = continuationIn(first);
+  for (let n = 1; token && client && n < MAX_PAGES; n++) {
+    try {
+      const response = await fetch(`https://www.youtube.com/youtubei/v1/browse?key=${client.key}&prettyPrint=false`, {
+        method: 'POST',
+        headers: { ...YOUTUBE_HEADERS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ context: { client: { clientName: 'WEB', clientVersion: client.version, hl: 'ar', gl: 'EG' } }, continuation: token }),
+      });
+      if (!response.ok) break;
+      const next = await response.json();
+      videos.push(...videosIn(next));
+      token = continuationIn(next);
+    } catch {
+      break;
+    }
+  }
+  const seen = new Set();
+  return videos.filter((v) => !seen.has(v.id) && seen.add(v.id));
 }
 
 // "136 فيديو" + 2 -> "138 فيديو"; "فيديو واحد" + 1 -> "2 فيديو"
@@ -55,13 +81,22 @@ async function goneIds(ids) {
 const library = readLibraryFile();
 const now = new Date().toISOString();
 const added = [];
+const renamed = [];
 let answered = 0;
 
-// 1) New videos in the playlists we already have (newest first)
+// 1) Each saved playlist against YouTube: new videos (to the top, newest first) and changed titles
 for (const playlist of library) {
-  const found = parseVideos(await page(`https://www.youtube.com/playlist?list=${playlist.id}`));
+  const found = await playlistVideos(playlist.id);
   if (found.length === 0) continue;
   answered++;
+  const onYoutube = new Map(found.map((v) => [v.id, v.title]));
+  for (const video of playlist.videos) {
+    const title = onYoutube.get(video.id);
+    if (title && title !== video.title) {
+      renamed.push(`${playlist.title}: ${video.title}  ->  ${title}`);
+      video.title = title;
+    }
+  }
   const known = new Set(playlist.videos.map((v) => v.id));
   const fresh = found.filter((v) => !known.has(v.id)).map((v) => ({ id: v.id, title: v.title, published: now }));
   if (fresh.length === 0) continue;
@@ -80,7 +115,7 @@ if (answered === 0) {
 const knownPlaylists = new Set(library.map((p) => p.id));
 const discovered = parsePlaylists(await page(`https://www.youtube.com/channel/${CHANNEL_ID}/playlists`)).filter((p) => !knownPlaylists.has(p.id));
 for (const p of discovered.slice(0, 30)) {
-  const videos = parseVideos(await page(`https://www.youtube.com/playlist?list=${p.id}`)).map((v) => ({ id: v.id, title: v.title, published: now }));
+  const videos = (await playlistVideos(p.id)).map((v) => ({ id: v.id, title: v.title, published: now }));
   if (videos.length === 0) continue;
   library.push({ id: p.id, title: p.title, count: `${videos.length} فيديو`, latestVideoId: videos[0].id, videos });
   added.push(`New playlist: ${p.title} (${videos.length} videos)`);
@@ -96,8 +131,9 @@ if (gone.size) {
   }
 }
 
-console.log(`${added.length} new, ${gone.size} removed.`);
+console.log(`${added.length} new, ${renamed.length} renamed, ${gone.size} removed.`);
 added.forEach((line) => console.log(`  + ${line}`));
+renamed.forEach((line) => console.log(`  ~ ${line}`));
 [...gone].forEach((id) => console.log(`  - ${id}`));
 if (dry) console.log('--dry: nothing written.');
 else console.log(writeLibraryFile(library) ? 'Library file updated.' : 'Library file unchanged.');
