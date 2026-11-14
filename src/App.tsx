@@ -2,6 +2,7 @@
 import React from 'react';
 import { Suspense } from 'react';
 import { BrowserRouter, useLocation } from 'react-router-dom';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { ThemeProvider } from './context/ThemeContext';
 import { AudioProvider, useAudio } from './context/AudioContext';
 import { MiniPlayer, MINI_PLAYER_SPACE } from './components/MiniPlayer';
@@ -66,6 +67,7 @@ export default function App() {
       <AudioProvider>
         <BrowserRouter>
           <AppLayout />
+          <SpeedInsights />
         </BrowserRouter>
       </AudioProvider>
     </ThemeProvider>
