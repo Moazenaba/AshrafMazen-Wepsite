@@ -38,7 +38,7 @@ export async function createLesson(lessonData: Partial<Lesson>): Promise<Lesson>
     .single();
 
   if (error) throw new Error(translateSupabaseError(error));
-  await saveLessonExtras(data.id, { featured: Boolean(lessonData.featured), chapters: lessonData.chapters || [] });
+  await saveLessonExtras(data.id, { featured: Boolean(lessonData.featured), chapters: lessonData.chapters || [], image: lessonData.image || '' });
   return data;
 }
 
@@ -85,7 +85,7 @@ export async function deleteLesson(id: string): Promise<boolean> {
   // Its recording goes with it (a failure here is logged, never blocks the delete)
   await dropLessonAudio(before?.audio_url as string | undefined);
   try {
-    await saveLessonExtras(id, { featured: false, chapters: [] });
+    await saveLessonExtras(id, { featured: false, chapters: [], image: '' });
   } catch (err) {
     console.error('Lesson extras were not cleared:', err);
   }

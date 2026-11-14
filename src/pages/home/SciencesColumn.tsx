@@ -76,7 +76,7 @@ export const SciencesColumn = ({ placed, activeCategories, loading }: { placed: 
               {placed.sermons.map((lesson) => (
                 <li key={lesson.id}>
                   <Link to={`/lesson/${lesson.id}`} className="group block space-y-2">
-                    <LessonThumb youtubeUrl={lesson.youtube_url} audioUrl={lesson.audio_url} className="w-full" />
+                    <LessonThumb youtubeUrl={lesson.youtube_url} audioUrl={lesson.audio_url} imageUrl={lesson.image} className="w-full" />
                     <span className="block font-semibold leading-snug text-stone-900 dark:text-stone-100 group-hover:text-mushaf dark:group-hover:text-gold transition-colors">
                       {lesson.title}
                     </span>

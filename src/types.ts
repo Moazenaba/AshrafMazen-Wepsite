@@ -33,6 +33,8 @@ export type Lesson = {
   views?: number;
   featured?: boolean;
   chapters?: LessonChapter[];
+  // A picture the admin chose for the lesson (kept in lesson extras), shown instead of the YouTube one or the icon
+  image?: string;
 };
 
 // A point in the lesson the visitor can jump to; seconds from the start of the media

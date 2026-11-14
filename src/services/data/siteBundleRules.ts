@@ -1,6 +1,6 @@
 // Pure: turns the one answer of /api/site into what the pages show (the same lists the per-query functions build).
 import type { Category, Lesson, Series, SiteSettings, SocialLink } from '../../types';
-import { parseLessonExtras } from './extras';
+import { parseLessonExtras, withImages } from './extras';
 import { isSermonCategory } from './lessonLists';
 import type { CategoryWithPortalData } from './portal';
 import { attachWith } from './relations';
@@ -64,7 +64,8 @@ export function bundleContent(bundle: SiteBundle): SiteContent {
 // The same counts as getCategoriesWithPortalData(1), getFeaturedLessons(3), getLatestLessons(30),
 // getTopViewedLessons(6) and getKhutabLessons(8)
 export function buildHomeLists(bundle: SiteBundle, limits = { recent: 1, featured: 3, latest: 30, viewed: 6, sermons: 8 }): HomeLists {
-  const { categories, series, lessons } = bundle;
+  const { categories, series } = bundle;
+  const lessons = withImages(bundle.lessons, parseLessonExtras(settingsMap(bundle).get('lesson_extras') ?? null));
   const attach = (list: Lesson[]) => attachWith(list, series, categories);
   const latest = (n: number) => attach(lessons.slice(0, n));
 

@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Volume2, X } from 'lucide-react';
 import { getSiteContent } from '../services/data/siteContent';
-import { isQuietPage, shouldWelcome, type WelcomeSound as Sound } from '../services/data/welcomeSoundRules';
+import { isQuietPage, isShortWelcome, MAX_WELCOME_SECONDS, shouldWelcome, type WelcomeSound as Sound } from '../services/data/welcomeSoundRules';
 import { useAudio } from '../context/AudioContext';
 
 const PLAYED_KEY = 'welcome_played';
@@ -41,9 +41,26 @@ export const WelcomeSound: React.FC = () => {
     setPlaying(false);
   };
 
+  // The recording's length is read first (only its header is downloaded): anything longer than a short greeting, such as
+  // a lesson saved here by mistake, is never played to visitors
   useEffect(() => {
     if (played() || isQuietPage(firstPath.current)) return;
-    getSiteContent().then((c) => setSound(c.welcome));
+    let alive = true;
+    getSiteContent().then((c) => {
+      if (!alive || !c.welcome.enabled || !c.welcome.url) return;
+      const probe = new Audio();
+      probe.preload = 'metadata';
+      probe.onloadedmetadata = () => {
+        if (!alive) return;
+        if (isShortWelcome(probe.duration)) setSound(c.welcome);
+        else console.warn(`welcome sound not played: ${Math.round(probe.duration)} s is longer than ${MAX_WELCOME_SECONDS} s`);
+        probe.removeAttribute('src');
+      };
+      probe.src = c.welcome.url;
+    });
+    return () => {
+      alive = false;
+    };
   }, []);
 
   // Wait for the first tap, then play once
@@ -55,6 +72,10 @@ export const WelcomeSound: React.FC = () => {
       audio.volume = sound.volume / 100;
       audio.onended = stop;
       audio.onerror = stop;
+      // Never longer than a greeting, whatever the file
+      audio.ontimeupdate = () => {
+        if (audio.currentTime >= MAX_WELCOME_SECONDS) stop();
+      };
       audioRef.current = audio;
       audio
         .play()

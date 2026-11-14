@@ -2,12 +2,29 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Loader2, Pause, Play, Save } from 'lucide-react';
 import { getSiteContent, saveWelcomeSound } from '../../../services/data/siteContent';
-import { EMPTY_WELCOME, type WelcomeSound } from '../../../services/data/welcomeSoundRules';
+import { EMPTY_WELCOME, isShortWelcome, welcomeTooLongMessage, type WelcomeSound } from '../../../services/data/welcomeSoundRules';
 import { FileUploadButton } from '../FileUploadButton';
 
 const input =
   'w-full h-11 px-3 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-700';
 const label = 'block text-sm font-semibold text-stone-800 dark:text-stone-200 mb-1';
+
+// A recording's length in seconds from its header alone; null when the browser cannot tell (the save then goes ahead,
+// and the site itself still refuses to play anything long)
+function durationOf(url: string): Promise<number | null> {
+  return new Promise((resolve) => {
+    const probe = new Audio();
+    probe.preload = 'metadata';
+    const done = (value: number | null) => {
+      probe.removeAttribute('src');
+      resolve(value);
+    };
+    probe.onloadedmetadata = () => done(probe.duration);
+    probe.onerror = () => done(null);
+    window.setTimeout(() => done(null), 10_000);
+    probe.src = url;
+  });
+}
 
 export const WelcomeSoundSettings: React.FC = () => {
   const [draft, setDraft] = useState<WelcomeSound>(EMPTY_WELCOME);
@@ -51,6 +68,14 @@ export const WelcomeSoundSettings: React.FC = () => {
     try {
       setSaving(true);
       setMessage(null);
+      // A lesson saved here by mistake would play to every visitor: its length is checked before saving
+      if (draft.enabled && draft.url) {
+        const seconds = await durationOf(draft.url);
+        if (seconds !== null && !isShortWelcome(seconds)) {
+          setMessage({ type: 'error', text: welcomeTooLongMessage(seconds) });
+          return;
+        }
+      }
       const saved = await saveWelcomeSound(draft);
       setDraft(saved);
       setMessage({ type: 'ok', text: saved.enabled ? 'تم الحفظ. يسمعه الزائر مرة واحدة مع أول ضغطة في الموقع.' : 'تم الحفظ. الصوت الترحيبي مطفأ.' });

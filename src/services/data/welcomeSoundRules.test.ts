@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanWelcomeSound, parseWelcomeSound, shouldWelcome, validateWelcomeSound } from './welcomeSoundRules';
+import { cleanWelcomeSound, parseWelcomeSound, shouldWelcome, validateWelcomeSound, isShortWelcome, MAX_WELCOME_SECONDS, welcomeTooLongMessage } from './welcomeSoundRules';
 
 const on = { enabled: true, url: 'https://cdn.example/welcome.mp3', volume: 30 };
 
@@ -31,5 +31,16 @@ describe('welcome sound rules', () => {
     expect(shouldWelcome(on, false, '/', '/video/abcdefghijk')).toBe(false);
     expect(shouldWelcome(on, false, '/', '/admin')).toBe(false);
     expect(shouldWelcome(on, false, '/', '/videos')).toBe(true);
+  });
+
+  it('accepts only a short greeting, never a lesson recording', () => {
+    expect(isShortWelcome(8)).toBe(true);
+    expect(isShortWelcome(MAX_WELCOME_SECONDS)).toBe(true);
+    expect(isShortWelcome(31)).toBe(false);
+    expect(isShortWelcome(1380)).toBe(false);
+    expect(isShortWelcome(NaN)).toBe(false);
+    expect(isShortWelcome(Infinity)).toBe(false);
+    expect(welcomeTooLongMessage(1380)).toContain('23 دقيقة');
+    expect(welcomeTooLongMessage(45)).toContain('45 ثانية');
   });
 });

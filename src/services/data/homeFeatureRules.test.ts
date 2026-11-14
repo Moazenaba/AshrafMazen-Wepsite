@@ -18,7 +18,10 @@ describe('home feature', () => {
     expect(isFeatureShown(f())).toBe(true);
     expect(isFeatureShown(f({ enabled: false }))).toBe(false);
     expect(isFeatureShown(f({ imageUrl: '' }))).toBe(false);
-    expect(validateHomeFeature(f({ videoUrl: '' }))).toMatch(/رابط الفيديو/);
+    // A picture alone is enough: the video link is optional (without one the card has no button)
+    expect(isFeatureShown(f({ videoUrl: '' }))).toBe(true);
+    expect(validateHomeFeature(f({ videoUrl: '' }))).toBeNull();
+    expect(validateHomeFeature(f({ imageUrl: '' }))).toMatch(/صورة/);
   });
 
   it('reads bad saved data as off', () => {
@@ -30,12 +33,12 @@ describe('home feature', () => {
     expect(featureStatus(f())).toBe('shown');
     expect(featureStatus(f({ enabled: false }))).toBe('off');
     expect(featureStatus(f({ imageUrl: '' }))).toBe('no-image');
-    expect(featureStatus(f({ videoUrl: '' }))).toBe('no-video');
+    expect(featureStatus(f({ videoUrl: '' }))).toBe('shown');
   });
 
   it('switches the card on when a picture is uploaded and the video link is there', () => {
     const off = f({ enabled: false, imageUrl: '' });
     expect(withUploadedImage(off, '/api/r2?file=x.jpeg')).toMatchObject({ enabled: true, imageUrl: '/api/r2?file=x.jpeg' });
-    expect(withUploadedImage({ ...off, videoUrl: '' }, '/api/r2?file=x.jpeg').enabled).toBe(false);
+    expect(withUploadedImage({ ...off, videoUrl: '' }, '/api/r2?file=x.jpeg').enabled).toBe(true);
   });
 });

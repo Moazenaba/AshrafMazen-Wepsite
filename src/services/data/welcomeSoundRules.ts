@@ -51,3 +51,15 @@ export function shouldWelcome(sound: WelcomeSound, playedThisVisit: boolean, fir
 }
 
 export const isQuietPage = (path: string) => QUIET.test(path);
+
+// A welcome is a short greeting, never a lesson: a recording longer than this is refused by the admin screen and never
+// played to visitors (a 23-minute lesson saved here once played to every visitor on their first tap).
+export const MAX_WELCOME_SECONDS = 30;
+
+export const isShortWelcome = (seconds: number) => Number.isFinite(seconds) && seconds > 0 && seconds <= MAX_WELCOME_SECONDS;
+
+export function welcomeTooLongMessage(seconds: number): string {
+  const minutes = Math.round(seconds / 60);
+  const length = seconds >= 90 ? `${minutes} دقيقة` : `${Math.round(seconds)} ثانية`;
+  return `الصوت الترحيبي يجب أن يكون قصيراً (${MAX_WELCOME_SECONDS} ثانية أو أقل)، وهذا الملف مدته ${length}. إن كان تسجيل درس فارفعه من «إدارة الدروس».`;
+}

@@ -5,6 +5,8 @@ import { getYouTubeId, getYouTubeThumbnail } from '../lib/youtube';
 interface LessonThumbProps {
   youtubeUrl?: string | null;
   audioUrl?: string | null;
+  // The picture the admin chose for the lesson: shown first, before the YouTube one or the icon
+  imageUrl?: string | null;
   className?: string;
   // The first picture on the page (the largest paint): loaded at once and at high priority, never lazily
   priority?: boolean;
@@ -15,14 +17,16 @@ const PLACEHOLDER_WIDTH = 121;
 
 // A 16:9 frame for a lesson: the video's own thumbnail, or a calm placeholder for audio-only and text-only lessons.
 // When YouTube has no real picture yet, the frame falls back to the site's green with an icon rather than grey dots.
-export const LessonThumb: React.FC<LessonThumbProps> = ({ youtubeUrl, audioUrl, className = '', priority = false }) => {
+export const LessonThumb: React.FC<LessonThumbProps> = ({ youtubeUrl, audioUrl, imageUrl, className = '', priority = false }) => {
   const id = getYouTubeId(youtubeUrl);
   // Tries the medium size first (320x180, true 16:9, a third of the bytes), then the larger one, then gives up on pictures
   const [step, setStep] = useState(0);
-  // WebP first (about a third smaller than the JPEG), then the JPEG for videos YouTube has no WebP for yet
-  const sources = id
-    ? [`https://i.ytimg.com/vi_webp/${id}/mqdefault.webp`, `https://i.ytimg.com/vi/${id}/mqdefault.jpg`, getYouTubeThumbnail(youtubeUrl)]
-    : [];
+  // The admin's own picture first; then WebP (about a third smaller than the JPEG), then the JPEG for videos YouTube
+  // has no WebP for yet. A picture that fails to load is skipped, so a broken link never leaves an empty frame.
+  const sources = [
+    ...(imageUrl ? [imageUrl] : []),
+    ...(id ? [`https://i.ytimg.com/vi_webp/${id}/mqdefault.webp`, `https://i.ytimg.com/vi/${id}/mqdefault.jpg`, getYouTubeThumbnail(youtubeUrl)] : []),
+  ];
   const thumb = sources[step] || null;
   const Icon = youtubeUrl ? Video : audioUrl ? Headphones : FileText;
 
@@ -40,7 +44,8 @@ export const LessonThumb: React.FC<LessonThumbProps> = ({ youtubeUrl, audioUrl, 
           fetchPriority={priority ? 'high' : undefined}
           decoding="async"
           onLoad={(e) => {
-            if (e.currentTarget.naturalWidth < PLACEHOLDER_WIDTH) setStep((s) => s + 1);
+            // Only YouTube's grey placeholder is skipped; the admin's own picture is shown whatever its size
+            if (thumb?.includes('ytimg.com') && e.currentTarget.naturalWidth < PLACEHOLDER_WIDTH) setStep((s) => s + 1);
           }}
           onError={() => setStep((s) => s + 1)}
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
