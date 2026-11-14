@@ -48,6 +48,30 @@ const extrasKey = (o: YoutubeOverrides | null) =>
     .sort()
     .join('|');
 
+// One request per address, shared by every component that asks for the library at the same time (the menu, the home
+// page, the search and the video lists each call useYoutubeLibrary, and each used to send its own identical request: 3 to 5
+// per page, nearly all answered "304 not modified"). The answer is kept for 30 seconds, so moving between pages is free too.
+const SHARE_MS = 30_000;
+const requests = new Map<string, { at: number; result: Promise<LibraryPlaylist[] | null> }>();
+
+function fetchBackendLibrary(): Promise<LibraryPlaylist[] | null> {
+  return loadOverrides().then(() => {
+    const url = `${LIBRARY_URL}?p=${encodeURIComponent(extrasKey(overrides))}`;
+    const known = requests.get(url);
+    if (known && Date.now() - known.at < SHARE_MS) return known.result;
+    const result = fetch(url)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { playlists?: LibraryPlaylist[] } | null) => (data?.playlists?.length ? data.playlists : null))
+      .catch(() => null);
+    requests.set(url, { at: Date.now(), result });
+    // A failed or empty answer is not kept, so the next page tries again
+    void result.then((playlists) => {
+      if (!playlists && requests.get(url)?.result === result) requests.delete(url);
+    });
+    return result;
+  });
+}
+
 // The library from the backend, which keeps it cached and up to date with YouTube's newest videos.
 // The bundled library is loaded alongside it and shown while the backend answers; if the backend is not
 // reachable (for example during local development), the bundled library stays.
@@ -65,16 +89,12 @@ function useRawLibrary(): LibraryPlaylist[] {
       .catch(() => {});
 
     const fetchLibrary = () =>
-      loadOverrides()
-        .then(() => fetch(`${LIBRARY_URL}?p=${encodeURIComponent(extrasKey(overrides))}`))
-        .then((response) => (response.ok ? response.json() : null))
-        .then((data: { playlists?: LibraryPlaylist[] } | null) => {
-          if (!data?.playlists?.length) return;
-          cached = data.playlists;
-          fromBackend = true;
-          if (active) setLibrary(data.playlists);
-        })
-        .catch(() => {});
+      fetchBackendLibrary().then((playlists) => {
+        if (!playlists) return;
+        cached = playlists;
+        fromBackend = true;
+        if (active) setLibrary(playlists);
+      });
 
     fetchLibrary();
     // The admin saved new settings (perhaps a new playlist): ask again with the new key
