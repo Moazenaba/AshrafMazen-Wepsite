@@ -1,15 +1,31 @@
-// Pure rules for the live broadcast the admin switches on and off: a YouTube live plays inside the site (page /live),
-// a Telegram broadcast cannot be embedded, so it is a button that opens Telegram. No database or screen here.
-import { getYouTubeId } from '../../lib/youtube';
+// Pure rules for the live broadcast banner. Two sources, and only these two:
+//   - YouTube: the Sheikh's own channel, found automatically (api/live.ts); nothing to switch on, and a live of any
+//     other channel can never show. It plays inside the site (page /live).
+//   - Telegram: cannot be detected or embedded, so the admin switches it on and gives its link; it opens Telegram.
+// No database or screen here.
 
+// What the admin saves (the Telegram broadcast). An old saved copy may still carry a youtubeUrl: it is ignored and
+// dropped on the next save.
 export interface LiveStream {
   enabled: boolean;
   title: string;
-  youtubeUrl: string;
   telegramUrl: string;
 }
 
-export const EMPTY_LIVE: LiveStream = { enabled: false, title: '', youtubeUrl: '', telegramUrl: '' };
+export const EMPTY_LIVE: LiveStream = { enabled: false, title: '', telegramUrl: '' };
+
+// The answer of /api/live when the Sheikh's channel is broadcasting
+export interface AutoLive {
+  videoId: string;
+  title: string;
+}
+
+// What a visitor is shown
+export interface LiveView {
+  youtubeId: string | null;
+  telegram: string | null;
+  title: string;
+}
 
 const text = (value: unknown, max: number) => String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 
@@ -17,7 +33,6 @@ export function cleanLiveStream(data: Partial<LiveStream> | undefined): LiveStre
   return {
     enabled: !!data?.enabled,
     title: text(data?.title, 120),
-    youtubeUrl: text(data?.youtubeUrl, 500),
     telegramUrl: text(data?.telegramUrl, 500),
   };
 }
@@ -47,15 +62,20 @@ export function telegramHref(url: string | null | undefined): string | null {
   }
 }
 
-export const liveYoutubeId = (l: LiveStream) => getYouTubeId(l.youtubeUrl);
+const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
 
-// Shown only when switched on and at least one working link is there
-export const isLiveShown = (l: LiveStream) => l.enabled && (!!liveYoutubeId(l) || !!telegramHref(l.telegramUrl));
+// The broadcasts to show: the Sheikh's YouTube live when /api/live found one, and the Telegram one when the admin has it on
+export function liveView(auto: AutoLive | null | undefined, manual: LiveStream): LiveView {
+  const youtubeId = auto && VIDEO_ID.test(auto.videoId) ? auto.videoId : null;
+  const telegram = manual.enabled ? telegramHref(manual.telegramUrl) : null;
+  return { youtubeId, telegram, title: text(youtubeId ? auto?.title || manual.title : manual.title, 150) };
+}
+
+export const isLiveShown = (v: LiveView) => !!v.youtubeId || !!v.telegram;
 
 export function validateLiveStream(l: LiveStream): string | null {
   if (!l.enabled) return null;
-  if (l.youtubeUrl && !liveYoutubeId(l)) return 'رابط يوتيوب غير صحيح. الصق رابط البث كما يظهر في المتصفح.';
-  if (l.telegramUrl && !telegramHref(l.telegramUrl)) return 'رابط تليجرام غير صحيح. يجب أن يبدأ بـ t.me/';
-  if (!liveYoutubeId(l) && !telegramHref(l.telegramUrl)) return 'ضع رابط البث على يوتيوب أو على تليجرام (أو الاثنين).';
+  if (!l.telegramUrl) return 'ضع رابط البث على تليجرام.';
+  if (!telegramHref(l.telegramUrl)) return 'رابط تليجرام غير صحيح. يجب أن يبدأ بـ t.me/';
   return null;
 }

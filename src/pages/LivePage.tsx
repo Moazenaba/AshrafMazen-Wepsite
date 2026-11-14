@@ -2,16 +2,16 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Send } from 'lucide-react';
 import { useLiveStream } from '../hooks/useLiveStream';
-import { isLiveShown, liveYoutubeId, telegramHref } from '../services/data/liveStreamRules';
+import { isLiveShown } from '../services/data/liveStreamRules';
 import { namedTitle, usePageMeta } from '../lib/pageMeta';
 
 // The live broadcast: the YouTube live plays here (video only, no chat), Telegram opens outside
 export const LivePage: React.FC = () => {
-  const { live, loaded } = useLiveStream();
-  const shown = isLiveShown(live);
-  const id = liveYoutubeId(live);
-  const telegram = telegramHref(live.telegramUrl);
-  const title = live.title || 'البث المباشر';
+  const { view, loaded } = useLiveStream(true);
+  const shown = isLiveShown(view);
+  const id = view.youtubeId;
+  const telegram = view.telegram;
+  const title = view.title || 'البث المباشر';
   usePageMeta({ title: namedTitle(shown ? `بث مباشر: ${title}` : 'البث المباشر'), description: 'البث المباشر للشيخ أشرف مازن.' });
 
   if (!loaded) return <div className="min-h-[60vh]" aria-busy="true" />;
