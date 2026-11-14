@@ -91,6 +91,15 @@ function serveFile(cfg: R2Config, req: any, res: any) {
   const key = String(req.query?.file || '');
   // Only the site's own uploads, so this cannot be used to read anything else in the bucket
   if (!/^(library\/(files|covers)|audio|branding|media\/video)\//.test(key) || key.includes('..')) return send(res, 400, { error: 'رابط ملف غير صالح.' });
+  // With a public address (R2_PUBLIC_URL) every file but a library PDF is sent there for good: the browser remembers
+  // this permanent redirect for a year (each upload has its own unique name) and never asks the site again for it.
+  // PDFs stay here: the book viewer and the download under the book's title need this function.
+  if (cfg.publicUrl && !req.query?.download && !key.startsWith('library/files/')) {
+    res.statusCode = 308;
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    res.setHeader('Location', fileLink(cfg, key));
+    return res.end();
+  }
   const extra: Record<string, string> = {};
   if (req.query?.download) {
     // The file keeps its own extension, so a recording or a video downloads as such and not as a PDF

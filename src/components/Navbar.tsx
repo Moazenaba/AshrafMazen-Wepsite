@@ -9,6 +9,7 @@ import { useBookmarks } from '../services/bookmarkService';
 import { supabase } from '../lib/supabase';
 import { checkCurrentAdmin, getSiteSettings, DEFAULT_SITE_SETTINGS } from '../services/dataService';
 import type { SiteSettings } from '../types';
+import { fileSrc } from '../lib/fileLinks';
 
 // One header for the public site: the sheikh's name as the wordmark, a few plain links, search and theme.
 // The admin area is reached by its URL; a "لوحة التحكم" link appears only for a signed-in admin.
@@ -100,7 +101,7 @@ export const Navbar: React.FC = () => {
           <Link to="/" className="min-w-0 shrink rounded-lg min-h-11 flex items-center" aria-label="الصفحة الرئيسية">
             {banner_logo_url ? (
               <img
-                src={banner_logo_url}
+                src={fileSrc(banner_logo_url)}
                 alt={banner_name || 'الشيخ أشرف مازن'}
                 className="h-10 sm:h-12 w-auto max-w-full object-contain"
               />

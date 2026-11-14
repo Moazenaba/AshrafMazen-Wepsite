@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FileText, Headphones, Video } from 'lucide-react';
 import { getYouTubeId, getYouTubeThumbnail } from '../lib/youtube';
+import { fileSrc } from '../lib/fileLinks';
 
 interface LessonThumbProps {
   youtubeUrl?: string | null;
@@ -24,7 +25,7 @@ export const LessonThumb: React.FC<LessonThumbProps> = ({ youtubeUrl, audioUrl, 
   // The admin's own picture first; then WebP (about a third smaller than the JPEG), then the JPEG for videos YouTube
   // has no WebP for yet. A picture that fails to load is skipped, so a broken link never leaves an empty frame.
   const sources = [
-    ...(imageUrl ? [imageUrl] : []),
+    ...(imageUrl ? [fileSrc(imageUrl)] : []),
     ...(id ? [`https://i.ytimg.com/vi_webp/${id}/mqdefault.webp`, `https://i.ytimg.com/vi/${id}/mqdefault.jpg`, getYouTubeThumbnail(youtubeUrl)] : []),
   ];
   const thumb = sources[step] || null;

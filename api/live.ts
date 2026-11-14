@@ -14,7 +14,8 @@ export default async function handler(_req: any, res: any) {
     const response = await fetch(withArabic(`https://www.youtube.com/channel/${CHANNEL_ID}/live`), { headers: YOUTUBE_HEADERS, redirect: 'follow' });
     const live = response.ok ? parseLiveNow(await response.text(), CHANNEL_ID) : null;
     // A minute fresh, then one more minute served while the next answer is fetched
-    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=60');
+    // max-age=30: a browser reuses its answer for 30 seconds instead of asking again (each ask was a 304 in the logs)
+    res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=60');
     return res.status(200).send(JSON.stringify(live ? { live: true, ...live } : { live: false }));
   } catch (err) {
     console.error('api/live:', err);

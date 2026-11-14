@@ -4,7 +4,8 @@ import { readLiveStream } from '../services/data/siteContent';
 import { liveView, type AutoLive, type LiveStream, type LiveView } from '../services/data/liveStreamRules';
 
 const FIRST_CHECK_MS = 1500;
-const REFRESH_MS = 90_000;
+// Every 3 minutes while the tab is in front (each check is a request in the logs): a broadcast shows within a few minutes
+const REFRESH_MS = 180_000;
 const SHARE_MS = 20_000;
 
 // Is the Sheikh's own channel live on YouTube right now? One request shared by everything on the page that asks
@@ -23,7 +24,7 @@ function checkAutoLive(): Promise<AutoLive | null> {
 }
 
 // The broadcasts to show now: the Sheikh's YouTube live (found by /api/live, nothing to switch on) and the Telegram
-// one the admin switched on. Nothing shows until /api/live has answered, and both are asked again every 90 seconds and
+// one the admin switched on. Nothing shows until /api/live has answered, and both are asked again every 3 minutes and
 // whenever the tab comes back to the front, so a broadcast that starts or ends shows without the visitor reloading.
 // `quick` asks at once (the /live page); the banner on every page waits a moment so it never competes with the first paint.
 export function useLiveStream(quick = false): { view: LiveView; loaded: boolean } {

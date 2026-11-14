@@ -1,12 +1,13 @@
 import React from 'react';
 import type { Book } from '../types';
+import { fileSrc } from '../lib/fileLinks';
 
 // A book's cover at 3:4: the uploaded picture, or, when there is none, a cover set like the mushaf's binding:
 // the deep green field, a gold frame, and the title in Ruqaa
 export const BookCover: React.FC<{ book: Pick<Book, 'title' | 'author' | 'cover_url'>; className?: string }> = ({ book, className = '' }) => (
   <span aria-hidden="true" className={`relative block aspect-[3/4] overflow-hidden rounded-lg bg-mushaf ${className}`}>
     {book.cover_url ? (
-      <img src={book.cover_url} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" />
+      <img src={fileSrc(book.cover_url)} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" />
     ) : (
       <span className="absolute inset-[7%] flex flex-col items-center justify-center gap-[6%] rounded-md border-2 border-gold/80 px-[8%] text-center">
         <span className="pattern-stars absolute inset-0 opacity-[0.12]" />
