@@ -11,7 +11,8 @@ import { fileLink, isAdminToken, keyFromLink, presign, r2Config, type R2Config }
 const KINDS = {
   pdf: { folder: 'library/files', extensions: ['pdf'], maxMb: 200, type: 'application/pdf' },
   cover: { folder: 'library/covers', extensions: ['jpg', 'jpeg', 'png', 'webp'], maxMb: 5, type: '' },
-  audio: { folder: 'audio', extensions: ['mp3', 'm4a', 'wav', 'ogg'], maxMb: 500, type: '' },
+  // aac: recordings from an iPhone; opus: WhatsApp voice notes. Both play in current browsers.
+  audio: { folder: 'audio', extensions: ['mp3', 'm4a', 'aac', 'wav', 'ogg', 'opus'], maxMb: 500, type: '' },
   logo: { folder: 'branding', extensions: ['png', 'jpg', 'jpeg', 'webp'], maxMb: 2, type: '' },
   // The home page's featured picture
   hero: { folder: 'branding/hero', extensions: ['png', 'jpg', 'jpeg', 'webp'], maxMb: 8, type: '' },
@@ -26,7 +27,7 @@ const IMAGE_TYPES: Record<string, string> = {
   webp: 'image/webp',
   svg: 'image/svg+xml',
 };
-const AUDIO_TYPES: Record<string, string> = { mp3: 'audio/mpeg', m4a: 'audio/mp4', wav: 'audio/wav', ogg: 'audio/ogg' };
+const AUDIO_TYPES: Record<string, string> = { mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: 'audio/aac', wav: 'audio/wav', ogg: 'audio/ogg', opus: 'audio/ogg' };
 const VIDEO_TYPES: Record<string, string> = { mp4: 'video/mp4', m4v: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime' };
 
 const send = (res: any, status: number, body: unknown) => {

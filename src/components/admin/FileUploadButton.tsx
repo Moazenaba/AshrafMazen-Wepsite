@@ -6,7 +6,7 @@ import { uploadToR2, type R2Kind } from '../../services/r2';
 const ACCEPT: Partial<Record<R2Kind, string>> = {
   hero: 'image/png,image/jpeg,image/webp',
   video: 'video/mp4,video/webm,video/quicktime,.m4v',
-  audio: 'audio/mpeg,audio/mp4,audio/wav,audio/ogg,.m4a',
+  audio: 'audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/ogg,.m4a,.aac,.opus',
 };
 
 export const FileUploadButton: React.FC<{
