@@ -115,7 +115,10 @@ export const BookModal: React.FC<{
             </div>
             <p id="book-pdf-hint" className="mt-1.5 text-xs text-stone-600 dark:text-stone-400">حتى ٢٠٠ ميجابايت. أو الصق رابط ملف PDF منشور في مكان آخر:</p>
             <input
-              type="url"
+              // text, not url: an uploaded PDF is a site link (/api/r2?file=...), which a url field refuses (it blocked saving)
+              type="text"
+              inputMode="url"
+              autoComplete="off"
               dir="ltr"
               value={fileUrl}
               onChange={(e) => setFileUrl(e.target.value)}

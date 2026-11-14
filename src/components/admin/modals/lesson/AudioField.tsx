@@ -44,7 +44,11 @@ export const AudioField = ({ form, update, uploading, onFile }: FormProps & { up
           {form.audioInputType === 'url' ? (
             <div className="relative">
               <input
-                type="url"
+                // text, not url: a recording uploaded here is a site link (/api/r2?file=...), which a url field refuses,
+                // and that silently blocked saving the whole lesson; the link is checked in validateLessonForm instead
+                type="text"
+                inputMode="url"
+                autoComplete="off"
                 value={form.audioUrl.startsWith('data:') ? '' : form.audioUrl}
                 onChange={(e) => update({ audioUrl: e.target.value })}
                 placeholder="https://example.com/audio/lesson-1.mp3"

@@ -88,6 +88,10 @@ export function validateLessonForm(form: LessonFormState, lessons: LessonRef[], 
   if (form.youtubeUrl.trim() && !getYouTubeId(form.youtubeUrl)) {
     return 'رابط يوتيوب غير صحيح. الصق رابط الفيديو كما يظهر في يوتيوب (youtube.com/watch?v=... أو youtu.be/...).';
   }
+  const audio = form.audioUrl.trim();
+  if (audio && !/^(https?:\/\/|\/api\/r2\?)/i.test(audio)) {
+    return 'رابط الملف الصوتي غير صحيح: يجب أن يبدأ بـ https:// أو أن يكون ملفاً مرفوعاً على الموقع.';
+  }
   if (form.status === 'published' && !form.youtubeUrl.trim() && !form.audioUrl.trim() && !form.transcript.trim()) {
     return 'لا يمكن نشر درس بلا فيديو ولا صوت ولا تفريغ. أضف واحداً منها، أو احفظه مسودة.';
   }
