@@ -18,9 +18,24 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
   {
     "id": "PLHcd1VuAeT_NcmgwOimYSUQVJVK9WwM3_",
     "title": "خطب الجمعة",
-    "count": "136 فيديو",
-    "latestVideoId": "7mVnceb1DWk",
+    "count": "139 فيديو",
+    "latestVideoId": "XU7SftMHnR0",
     "videos": [
+      {
+        "id": "XU7SftMHnR0",
+        "title": "حَذَارِي أَنْ تَيْأَسَ مِنْ رَحْمَةِ اللَّهِ رَبِّ الْعَالَمِينَ| # الشيخ _ أشرف _ مازن",
+        "published": "2026-11-14T21:49:58.771Z"
+      },
+      {
+        "id": "XUoYsASBOe8",
+        "title": "خطبة الجمعة | العمل شرف | # الشيخ _ أشرف _ مازن",
+        "published": "2026-11-14T21:49:58.771Z"
+      },
+      {
+        "id": "LA3vC8C3fWU",
+        "title": "خطبة الجمعة | حقيقة التوسل | #الشيخ _ أشرف _ مازن",
+        "published": "2026-11-14T21:49:58.771Z"
+      },
       {
         "id": "7mVnceb1DWk",
         "title": "الوابل الصيب (19)| محبطات الأعمال الصالحة | #الشيخ _ أشرف _ مازن",
@@ -555,9 +570,24 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
   {
     "id": "PLHcd1VuAeT_OaS9laiTEk1qiTT4Tvcm2E",
     "title": "٢٠٠ سؤال وجواب",
-    "count": "86 فيديو",
-    "latestVideoId": "pyWf1uZYg2U",
+    "count": "89 فيديو",
+    "latestVideoId": "0-_yz1mbdKE",
     "videos": [
+      {
+        "id": "0-_yz1mbdKE",
+        "title": "خطبة الجمعة /الدفاع عن الأوطان/ # لفضيلة الشيخ أشرف -مازن",
+        "published": "2026-11-14T21:49:58.771Z"
+      },
+      {
+        "id": "h94ZcMAAsjM",
+        "title": "200 سؤال وجواب (83 )|  و الله لو لم تخرج إلا مع روحي لأخرجتها | #الشيخ _ أشرف _ مازن",
+        "published": "2026-11-14T21:49:58.771Z"
+      },
+      {
+        "id": "O8VRzKcfQ7A",
+        "title": "200 سؤال وجواب  (84)| هنا يفرح الله بعبده | # الشيخ _ أشرف _ مازن",
+        "published": "2026-11-14T21:49:58.771Z"
+      },
       {
         "id": "pyWf1uZYg2U",
         "title": "200 سؤال وجواب(1)/تعريف مختصر بالشيخ ومنهجه فى الكتاب/# لفضيلة الشيخ أشرف -مازن",
@@ -1240,9 +1270,19 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
   {
     "id": "PLHcd1VuAeT_OGrX6jYN80Rw8XaCkBqGTW",
     "title": "الوابل الصيب",
-    "count": "18 فيديو",
-    "latestVideoId": "mkeduM7jxtM",
+    "count": "20 فيديو",
+    "latestVideoId": "-qpAA8FYfpc",
     "videos": [
+      {
+        "id": "-qpAA8FYfpc",
+        "title": "الوابل الصيب (20 ) | سُبل استقامة القلب | # الشيخ _ أشرف _ مازن",
+        "published": "2026-11-14T21:49:58.771Z"
+      },
+      {
+        "id": "NiitMPq3kVk",
+        "title": "الوابل الصيب (21) |  اتباع الصراط المستقيم | # الشيخ _ أشرف _ مازن",
+        "published": "2026-11-14T21:49:58.771Z"
+      },
       {
         "id": "mkeduM7jxtM",
         "title": "الوابل الصيب (4)/ خطورة العجب/#الشيخ_أشرف_مازن",

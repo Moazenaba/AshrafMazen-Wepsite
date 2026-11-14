@@ -1,0 +1,57 @@
+name: Sync YouTube
+
+# A new video on the channel reaches the saved library (src/data/youtube-library.ts), and so the sitemap and the
+# prerendered pages, without anyone touching the repo. When the file changes the job commits it to main and Vercel
+# deploys. (The site itself already shows new videos within the hour through api/youtube-library; this job is what
+# lets Google find them.)
+#
+# Triggers:
+#   schedule            every 15 minutes (GitHub may start it a few minutes late)
+#   workflow_dispatch   the "Run workflow" button in the Actions tab
+#   repository_dispatch event type "youtube-upload": for anything that can call the GitHub API the moment a video goes up
+#                       (a Make/Zapier/IFTTT "new YouTube video" step, for example)
+#
+# If YouTube answers no playlist (blocked, or its page changed) the script exits with an error and this run turns red;
+# GitHub then emails the repository owner.
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [youtube-upload]
+
+# One run at a time: a second one waits instead of racing the first to push
+concurrency:
+  group: sync-youtube
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          # 22.18 or newer runs the .ts parser shared with the site's API without a build step
+          node-version: 22
+      - name: Look for new videos
+        run: node scripts/refresh-youtube-library.mjs
+      - name: Commit and push when the library changed
+        run: |
+          if git diff --quiet -- src/data/youtube-library.ts; then
+            echo "No change."
+            exit 0
+          fi
+          # The commit's author must be the GitHub account Vercel deploys for (Hobby blocks any other author)
+          git config user.name "Moazenaba"
+          git config user.email "335531902+Moazenaba@users.noreply.github.com"
+          git add src/data/youtube-library.ts
+          git commit -m "YouTube: new videos added to the library automatically"
+          git pull --rebase origin main
+          git push origin main
