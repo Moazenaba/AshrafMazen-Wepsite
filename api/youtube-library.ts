@@ -1,10 +1,11 @@
 // Vercel serverless function: the whole video library, served from the backend.
-// The saved library (src/data/youtube-library.ts) is the base. Once an hour this function asks YouTube for each
-// playlist's newest videos, merges any new ones in, and keeps the result. YouTube's RSS feeds are asked first; they
-// answer 404 now, so the playlist's own page is read then (api/_youtubePage.ts). The channel's uploads that are in
-// no playlist are listed under «أحدث فيديوهات القناة». A playlist made on the channel since the saved library was
-// built is found on the channel's "playlists" page and added with its videos. (What the admin hid or removed is
-// taken off on the site afterwards, so none of this brings it back.) Visitors get the stored copy with CDN caching.
+// The saved library (src/data/youtube-library.ts) is the base; the GitHub job .github/workflows/sync-youtube.yml adds new
+// videos to it every 30 minutes, so this function no longer re-reads every playlist. Once an hour it asks YouTube only
+// for what that file cannot have yet: the channel's newest uploads (listed under «أحدث فيديوهات القناة» until they are in a
+// saved playlist), a playlist made on the channel since the last sync, and the playlists the admin added. That is 2-3
+// requests to YouTube instead of about 30, and YouTube's RSS feeds are not asked at all (they answer 403/404 most of the
+// time from servers, which filled the logs with errors). The playlist pages are read with api/_youtubePage.ts.
+// (What the admin hid or removed is taken off on the site afterwards, so none of this brings it back.)
 import { YOUTUBE_LIBRARY, type LibraryPlaylist, type LibraryVideo } from '../src/data/youtube-library.js'; // Node on Vercel needs the extension
 import { parsePlaylists, parseVideos } from './_youtubePage.js';
 
@@ -21,24 +22,6 @@ const PAGE_HEADERS = {
 // instead of waiting for the 6 hours to pass. The site asks with ?p=<those playlist ids>, so the CDN copy changes too.
 const cache = new Map<string, { at: number; body: string }>();
 
-const decode = (text: string) =>
-  text
-    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
-
-const parseFeed = (xml: string): LibraryVideo[] =>
-  [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)]
-    .map(([, entry]) => ({
-      id: entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1] ?? '',
-      title: decode(entry.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? '').trim(),
-      published: entry.match(/<published>([^<]+)<\/published>/)?.[1] ?? '',
-    }))
-    .filter((video) => video.id && video.title);
-
 async function fetchPage(url: string): Promise<string> {
   try {
     const response = await fetch(url, { headers: PAGE_HEADERS });
@@ -48,22 +31,11 @@ async function fetchPage(url: string): Promise<string> {
   }
 }
 
-// How the playlists' videos were had in the last build, for the log (rss = the feed, page = the playlist's page)
-const via = { rss: 0, page: 0, none: 0 };
+// How many playlist pages answered in the last build, for the log
+const via = { page: 0, none: 0 };
 
+// A playlist's videos from its own page (newest first)
 async function fetchNewest(playlistId: string): Promise<LibraryVideo[]> {
-  try {
-    const response = await fetch(`https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`);
-    if (response.ok) {
-      const videos = parseFeed(await response.text());
-      if (videos.length > 0) {
-        via.rss++;
-        return videos;
-      }
-    }
-  } catch {
-    // the feed is unreachable: the page is tried
-  }
   const page = parseVideos(await fetchPage(`https://www.youtube.com/playlist?list=${playlistId}`));
   if (page.length === 0) {
     via.none++;
@@ -82,15 +54,6 @@ async function channelLatest(known: Set<string>): Promise<LibraryPlaylist | null
     .filter((v) => !known.has(v.id))
     .map((v) => ({ id: v.id, title: v.title, published: seen }));
   return videos.length === 0 ? null : { id: LATEST_ID, title: 'أحدث فيديوهات القناة', count: `${videos.length} فيديو`, latestVideoId: videos[0].id, videos };
-}
-
-// Newest videos go to the top of each playlist; videos already in the library are not repeated
-function merge(base: LibraryPlaylist[], newest: Map<string, LibraryVideo[]>): LibraryPlaylist[] {
-  return base.map((playlist) => {
-    const known = new Set(playlist.videos.map((v) => v.id));
-    const added = (newest.get(playlist.id) ?? []).filter((v) => !known.has(v.id));
-    return added.length === 0 ? playlist : { ...playlist, videos: [...added, ...playlist.videos] };
-  });
 }
 
 // The admin's saved settings (site_settings "youtube_overrides"), {} when there are none or they cannot be read
@@ -124,7 +87,7 @@ async function discoverPlaylists(known: Set<string>): Promise<{ id: string; titl
 }
 
 async function build(admins: { id: string; title: string }[]): Promise<string> {
-  via.rss = via.page = via.none = 0;
+  via.page = via.none = 0;
   const discovered = await discoverPlaylists(new Set([...YOUTUBE_LIBRARY.map((p) => p.id), ...admins.map((p) => p.id)]));
   const extras = [...admins, ...discovered];
   const extraVideos = new Map<string, LibraryVideo[]>();
@@ -142,15 +105,10 @@ async function build(admins: { id: string; title: string }[]): Promise<string> {
       videos: extraVideos.get(p.id) ?? [],
     }))
     .filter((p) => p.videos.length > 0);
-  const newest = new Map<string, LibraryVideo[]>();
-  await Promise.all(
-    YOUTUBE_LIBRARY.map(async (playlist) => {
-      newest.set(playlist.id, await fetchNewest(playlist.id));
-    })
-  );
-  const playlists = [...merge(YOUTUBE_LIBRARY, newest), ...addedPlaylists];
+  // The saved playlists are taken as they are: the GitHub job keeps them current
+  const playlists = [...YOUTUBE_LIBRARY, ...addedPlaylists];
   const latest = await channelLatest(new Set(playlists.flatMap((p) => p.videos.map((v) => v.id))));
-  console.log(`youtube-library built: ${playlists.length} playlists (${discovered.length} found on the channel by themselves); videos via feed ${via.rss}, via page ${via.page}, none ${via.none}; uploads in no playlist ${latest?.videos.length ?? 0}`);
+  console.log(`youtube-library built: ${playlists.length} playlists (${discovered.length} found on the channel by themselves, ${admins.length} added by the admin); extra playlist pages read ${via.page}, empty ${via.none}; uploads in no playlist ${latest?.videos.length ?? 0}`);
   return JSON.stringify({ updatedAt: new Date().toISOString(), playlists: latest ? [latest, ...playlists] : playlists });
 }
 

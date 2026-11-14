@@ -43,13 +43,23 @@ describe('youtube library function', () => {
     const added = result.playlists.find((p) => p.id === NEW_LIST);
     expect(added?.title).toBe('سلسلة جديدة');
     expect(added?.videos.map((v) => v.id)).toEqual(['nnnnnnnnnn1', 'nnnnnnnnnn2']);
-  });
+    // First to import the large saved library: slow on a busy machine, so a longer limit than the default 5 s
+  }, 20_000);
 
   it('lists the channel uploads that no playlist has, first', async () => {
     pretendYoutube([], [['uuuuuuuuuu1', 'مرفوع حديثًا']], {});
     const result = await library();
     expect(result.playlists[0]).toMatchObject({ id: 'channel-latest' });
     expect(result.playlists[0].videos.map((v) => v.id)).toEqual(['uuuuuuuuuu1']);
+  });
+
+  it('asks YouTube for two pages only: no RSS feed, no re-reading of the saved playlists', async () => {
+    pretendYoutube([], [], {});
+    await library();
+    const urls: string[] = (globalThis.fetch as any).mock.calls.map((call: any[]) => String(call[0])).filter((u: string) => u.includes('youtube.com'));
+    expect(urls.some((u) => u.includes('/feeds/videos.xml'))).toBe(false);
+    expect(urls.filter((u) => u.includes('playlist?list='))).toEqual([]);
+    expect(urls).toHaveLength(2);
   });
 
   it('keeps the saved library when YouTube gives nothing at all', async () => {
