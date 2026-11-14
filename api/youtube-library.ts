@@ -175,6 +175,8 @@ export async function loadLibrary(): Promise<string> {
 export default async function handler(req: any, res: any) {
   const body = await loadLibrary();
   res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=21600');
+  // max-age: a browser reuses the answer for five minutes without asking again (it used to ask on every page and get
+  // "304 not modified" each time); the CDN keeps it an hour. The admin's own changes do not depend on this answer.
+  res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=21600');
   res.status(200).send(body);
 }
