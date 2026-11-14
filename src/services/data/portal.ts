@@ -3,6 +3,7 @@ import type { Category, Lesson } from '../../types';
 import { getAllSeries, getCategories } from './catalog';
 import { publishedLessons, rowsOrThrow } from './db';
 import { attachWith } from './relations';
+import { withLessonPictures } from './extras';
 import type { LessonWithRelations } from './shared';
 
 export interface CategoryWithPortalData extends Category {
@@ -17,7 +18,8 @@ export async function getCategoriesWithPortalData(recentLimit = 5): Promise<Cate
     getAllSeries(),
     publishedLessons().order('published_at', { ascending: false }),
   ]);
-  const lessons = rowsOrThrow<Lesson>(lessonsResult);
+  // With each lesson's own picture
+  const lessons = await withLessonPictures(rowsOrThrow<Lesson>(lessonsResult));
 
   return categories.map((category) => {
     const series = allSeries.filter((s) => s.category_id === category.id);
