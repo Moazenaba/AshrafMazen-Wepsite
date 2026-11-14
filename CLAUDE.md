@@ -30,6 +30,10 @@ No visitor accounts. Visitors send requests via `api/submit`; nothing changes un
 (every 30 minutes, or on a `repository_dispatch` event `youtube-upload`); it commits as the owner so Vercel deploys. The old `sync:youtube`
 script reads RSS feeds that YouTube now answers with 404, so do not use it. Run `npm run refresh:youtube -- --dry` to see what is new.
 
+**Live broadcast:** the banner and `/live` show the Sheikh's own YouTube live automatically: `api/live.ts` asks YouTube once a minute
+(CDN-cached) whether the channel `YOUTUBE_CHANNEL_ID` is live, and a live of any other channel can never show (`api/_youtubeLive.ts` checks the
+channel id). The admin only controls Telegram (a manual switch + link in "الواجهة والتواصل"); there is no manual YouTube link.
+
 **SEO:** `npm run build` = sitemap → vite build → `scripts/prerender.mjs`, which writes a real HTML page per public URL into
 `dist/` (own title, description, canonical, schema.org, text with links; data from `scripts/site-data.mjs`). Pages added after
 a deploy fall back to `dist/app.html` (no canonical) and `useCanonical` sets it. The one public domain is `https://ashraf-mazen.vercel.app`;
