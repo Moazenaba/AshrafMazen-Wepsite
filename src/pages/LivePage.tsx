@@ -1,14 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Send } from 'lucide-react';
-import { useSiteContent } from '../hooks/useSiteContent';
+import { useLiveStream } from '../hooks/useLiveStream';
 import { isLiveShown, liveYoutubeId, telegramHref } from '../services/data/liveStreamRules';
 import { namedTitle, usePageMeta } from '../lib/pageMeta';
 
 // The live broadcast: the YouTube live plays here (video only, no chat), Telegram opens outside
 export const LivePage: React.FC = () => {
-  const { content, loaded } = useSiteContent();
-  const live = content.live;
+  const { live, loaded } = useLiveStream();
   const shown = isLiveShown(live);
   const id = liveYoutubeId(live);
   const telegram = telegramHref(live.telegramUrl);

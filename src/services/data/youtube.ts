@@ -1,6 +1,7 @@
 // The channel's videos: what the admin hid, renamed or added.
 import { supabase } from '../../lib/supabase';
 import { translateSupabaseError } from '../../utils/supabaseErrors';
+import { supabaseRecordStore } from './jsonRecord';
 import type { MediaFiles, SiteVideo } from '../../lib/libraryOverrides';
 
 export interface YoutubeOverrides {
@@ -39,8 +40,12 @@ const YOUTUBE_OVERRIDES_KEY = 'youtube_overrides';
 export async function getYoutubeOverrides(): Promise<YoutubeOverrides> {
   const { data, error } = await supabase.from('site_settings').select('value').eq('key', YOUTUBE_OVERRIDES_KEY).maybeSingle();
   if (error) throw new Error(translateSupabaseError(error));
+  return parseYoutubeOverrides(data?.value);
+}
+
+export function parseYoutubeOverrides(raw: string | null | undefined): YoutubeOverrides {
   try {
-    const parsed = JSON.parse(data?.value || '{}');
+    const parsed = JSON.parse(raw || '{}');
     return {
       hiddenPlaylists: Array.isArray(parsed.hiddenPlaylists) ? parsed.hiddenPlaylists : [],
       hiddenVideos: Array.isArray(parsed.hiddenVideos) ? parsed.hiddenVideos : [],
@@ -65,4 +70,21 @@ export async function saveYoutubeOverrides(overrides: YoutubeOverrides): Promise
     .from('site_settings')
     .upsert([{ key: YOUTUBE_OVERRIDES_KEY, value: JSON.stringify(overrides) }], { onConflict: 'key' });
   if (error) throw new Error(translateSupabaseError(error));
+}
+
+export const OVERRIDES_CONFLICT_MESSAGE =
+  'تعذّر الحفظ لأن إعدادات الفيديوهات تغيّرت من مكان آخر (مدير آخر أو نافذة أخرى) بعد أن فتحت الصفحة. حدّث الصفحة وأعد تعديلك، حتى لا يضيع عمل الآخر.';
+
+// The settings together with the exact text that was stored, so the next save can tell whether anyone saved in between
+export async function readYoutubeOverrides(): Promise<{ value: YoutubeOverrides; raw: string | null }> {
+  const raw = await supabaseRecordStore.read(YOUTUBE_OVERRIDES_KEY);
+  return { value: parseYoutubeOverrides(raw), raw };
+}
+
+// Saves only if the stored settings are still the ones that were read (`previousRaw`); otherwise it refuses instead of
+// silently overwriting another admin's change. Returns the text now stored (pass it as `previousRaw` next time).
+export async function saveYoutubeOverridesIfUnchanged(overrides: YoutubeOverrides, previousRaw: string | null): Promise<string> {
+  const json = JSON.stringify(overrides);
+  if (!(await supabaseRecordStore.writeIfUnchanged(YOUTUBE_OVERRIDES_KEY, previousRaw, json))) throw new Error(OVERRIDES_CONFLICT_MESSAGE);
+  return json;
 }

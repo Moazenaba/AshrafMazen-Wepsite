@@ -104,3 +104,11 @@ export async function saveLiveStream(live: LiveStream): Promise<LiveStream> {
   await write(SITE_CONTENT_KEYS.live, clean);
   return clean;
 }
+
+// The live broadcast straight from the database, not through the cached /api/site answer, so switching it on or off shows
+// within seconds. One small row; the banner asks for it a moment after the page appears and then every minute or two.
+export async function readLiveStream(): Promise<LiveStream> {
+  const { data, error } = await supabase.from('site_settings').select('value').eq('key', SITE_CONTENT_KEYS.live).maybeSingle();
+  if (error) throw new Error(translateSupabaseError(error));
+  return parseLiveStream(data?.value ?? null);
+}

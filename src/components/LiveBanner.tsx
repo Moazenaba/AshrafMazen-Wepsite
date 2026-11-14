@@ -2,15 +2,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Radio, Send } from 'lucide-react';
-import { useSiteContent } from '../hooks/useSiteContent';
+import { useLiveStream } from '../hooks/useLiveStream';
 import { isLiveShown, liveYoutubeId, telegramHref } from '../services/data/liveStreamRules';
 
 const button =
   'inline-flex items-center justify-center gap-1.5 min-h-11 px-4 rounded-lg bg-white text-red-800 hover:bg-red-50 font-bold text-sm transition-colors';
 
 export const LiveBanner: React.FC = () => {
-  const { content } = useSiteContent();
-  const live = content.live;
+  const { live } = useLiveStream();
   if (!isLiveShown(live)) return null;
   const hasVideo = !!liveYoutubeId(live);
   const telegram = telegramHref(live.telegramUrl);
