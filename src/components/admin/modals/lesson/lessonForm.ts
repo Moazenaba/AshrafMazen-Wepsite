@@ -14,6 +14,8 @@ export interface LessonFormState {
   chaptersText: string;
   featured: boolean;
   status: LessonStatus;
+  // The lesson's own picture (optional)
+  imageUrl: string;
 }
 
 // What the form hands to the dashboard when it is saved
@@ -27,6 +29,7 @@ export interface LessonSaveData {
   chapters: LessonChapter[];
   featured: boolean;
   status: LessonStatus;
+  image: string;
 }
 
 export type LessonRef = Pick<Lesson, 'id' | 'series_id' | 'lesson_number'>;
@@ -53,6 +56,7 @@ export function formFromLesson(lesson: Lesson): LessonFormState {
     chaptersText: formatChaptersText(lesson.chapters),
     featured: Boolean(lesson.featured),
     status: lesson.status,
+    imageUrl: lesson.image || '',
   };
 }
 
@@ -70,6 +74,7 @@ export function newLessonForm(prefill: Partial<Lesson> | null, firstSeriesId: st
     chaptersText: '',
     featured: false,
     status: prefill?.status || 'published',
+    imageUrl: '',
   };
 }
 
@@ -100,5 +105,6 @@ export function toSaveData(form: LessonFormState): LessonSaveData {
     chapters: parseChaptersText(form.chaptersText),
     featured: form.featured,
     status: form.status,
+    image: form.imageUrl.trim(),
   };
 }

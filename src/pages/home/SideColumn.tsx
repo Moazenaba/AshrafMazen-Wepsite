@@ -48,7 +48,7 @@ export const SideColumn = ({ placed, activeCategories, recentLesson, recentResum
             <Panel title="أحدث درس مرئي" id="video-heading">
               <Link to={`/lesson/${placed.video.id}`} className="group block space-y-3">
                 <span className="relative block">
-                  <LessonThumb youtubeUrl={placed.video.youtube_url} audioUrl={placed.video.audio_url} className="w-full" />
+                  <LessonThumb youtubeUrl={placed.video.youtube_url} audioUrl={placed.video.audio_url} imageUrl={placed.video.image} className="w-full" />
                   <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center">
                     <span className="flex items-center justify-center w-12 h-12 rounded-full bg-gold text-mushaf-deep">
                       <Play className="w-5 h-5 fill-current ms-0.5" />

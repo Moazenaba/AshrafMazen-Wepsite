@@ -5,6 +5,7 @@ import { type Category, type Series, type Lesson } from '../../../types';
 import { LessonIdentityFields } from './lesson/LessonIdentityFields';
 import { YoutubeField } from './lesson/YoutubeField';
 import { AudioField } from './lesson/AudioField';
+import { LessonImageField } from './lesson/LessonImageField';
 import { LessonTextFields } from './lesson/LessonTextFields';
 import { LessonPublishFields } from './lesson/LessonPublishFields';
 import { useLessonForm } from './lesson/useLessonForm';
@@ -80,6 +81,7 @@ export const LessonModal: React.FC<LessonModalProps> = ({
           <LessonIdentityFields form={form} update={update} seriesList={seriesList} categories={categories} lessons={lessons} editing={!!initialData} />
           <YoutubeField form={form} update={update} />
           <AudioField form={form} update={update} uploading={uploadingAudio} onFile={uploadAudio} />
+          <LessonImageField form={form} update={update} />
           <LessonTextFields form={form} update={update} />
           <LessonPublishFields form={form} update={update} />
 

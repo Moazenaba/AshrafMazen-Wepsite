@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
-import { DEFAULT_BUTTON_LABEL, featureTarget, type HomeFeature } from '../../services/data/homeFeatureRules';
+import { DEFAULT_BUTTON_LABEL, featureTarget, hasFeatureVideo, type HomeFeature } from '../../services/data/homeFeatureRules';
 
 // The featured card the admin sets: the admin's own picture, and a button that opens the video the admin chose
 const Go: React.FC<{ feature: HomeFeature; className: string; label?: string; children: React.ReactNode }> = ({ feature, className, label, children }) => {
@@ -23,23 +23,30 @@ export const HomeFeatureCard: React.FC<{ feature: HomeFeature }> = ({ feature })
       <div className="order-2 sm:order-none min-w-0 space-y-2 sm:space-y-4">
         {feature.title && <h3 className="font-sans text-base min-[360px]:text-lg sm:text-3xl font-bold leading-snug text-balance line-clamp-3 sm:line-clamp-none">{feature.title}</h3>}
         {feature.subtitle && <p className="-mt-1 sm:-mt-2 text-xs sm:text-sm text-gold-soft">{feature.subtitle}</p>}
-        <Go
+        {hasFeatureVideo(feature) && <Go
           feature={feature}
           className="press inline-flex items-center whitespace-nowrap gap-1.5 min-[360px]:gap-2 h-11 sm:h-12 px-2.5 min-[360px]:px-4 sm:px-6 rounded-lg bg-gold hover:bg-gold-soft text-mushaf-deep text-[13px] min-[360px]:text-sm sm:text-base font-bold"
         >
           <Play className="w-4 h-4 fill-current" aria-hidden="true" />
           {feature.buttonLabel || DEFAULT_BUTTON_LABEL}
-        </Go>
+        </Go>}
       </div>
       <div className="order-1 sm:order-none">
-        <Go feature={feature} label={feature.title || DEFAULT_BUTTON_LABEL} className="group relative block aspect-video w-full overflow-hidden rounded-lg bg-mushaf-deep">
-          <img src={feature.imageUrl} alt="" fetchPriority="high" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-[1.03]" />
-          <span aria-hidden="true" className="absolute inset-0 hidden sm:flex items-center justify-center">
-            <span className="flex items-center justify-center w-14 h-14 rounded-full bg-gold/90 text-mushaf-deep">
-              <Play className="w-6 h-6 fill-current ms-0.5" />
+        {hasFeatureVideo(feature) ? (
+          <Go feature={feature} label={feature.title || DEFAULT_BUTTON_LABEL} className="group relative block aspect-video w-full overflow-hidden rounded-lg bg-mushaf-deep">
+            <img src={feature.imageUrl} alt="" fetchPriority="high" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-[1.03]" />
+            <span aria-hidden="true" className="absolute inset-0 hidden sm:flex items-center justify-center">
+              <span className="flex items-center justify-center w-14 h-14 rounded-full bg-gold/90 text-mushaf-deep">
+                <Play className="w-6 h-6 fill-current ms-0.5" />
+              </span>
             </span>
+          </Go>
+        ) : (
+          // A picture alone (no video link): shown as it is, with no play sign and nothing to open
+          <span className="relative block aspect-video w-full overflow-hidden rounded-lg bg-mushaf-deep">
+            <img src={feature.imageUrl} alt={feature.title || ''} fetchPriority="high" className="absolute inset-0 w-full h-full object-cover" />
           </span>
-        </Go>
+        )}
       </div>
     </div>
   </article>

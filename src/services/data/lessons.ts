@@ -3,12 +3,14 @@ import { supabase } from '../../lib/supabase';
 import { translateSupabaseError } from '../../utils/supabaseErrors';
 import type { Lesson } from '../../types';
 import { rowsOrThrow } from './db';
-import { readLessonExtras, withExtras } from './extras';
+import { readLessonExtras, withExtras, withImages } from './extras';
 
 export async function getLessonsBySeries(seriesId: string, includeDrafts = false): Promise<Lesson[]> {
   let query = supabase.from('lessons').select('*').eq('series_id', seriesId).order('lesson_number', { ascending: true });
   if (!includeDrafts) query = query.eq('status', 'published');
-  return rowsOrThrow<Lesson>(await query);
+  const [lessons, extras] = await Promise.all([rowsOrThrow<Lesson>(await query), readLessonExtras()]);
+  // Each lesson's own picture, when the admin chose one
+  return withImages(lessons, extras);
 }
 
 // A draft is returned only when asked for (and the database gives it only to an admin)

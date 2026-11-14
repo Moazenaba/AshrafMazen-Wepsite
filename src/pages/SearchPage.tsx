@@ -231,7 +231,7 @@ export const SearchPage: React.FC = () => {
                     to={`/lesson/${lesson.id}`}
                     className="group flex items-center gap-4 sm:gap-6 px-4 py-4 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                   >
-                    <LessonThumb youtubeUrl={lesson.youtube_url} audioUrl={lesson.audio_url} className="w-28 sm:w-40 shrink-0" />
+                    <LessonThumb youtubeUrl={lesson.youtube_url} audioUrl={lesson.audio_url} imageUrl={lesson.image} className="w-28 sm:w-40 shrink-0" />
                     <span className="flex-1 min-w-0 flex flex-col gap-1.5">
                       <span className="block text-lg font-semibold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-emerald-300 transition-colors">
                         {highlight(lesson.title, trimmedQuery)}

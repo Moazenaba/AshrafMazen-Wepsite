@@ -159,7 +159,7 @@ export const SeriesView: React.FC = () => {
                   <span className="w-8 shrink-0 text-lg font-semibold text-amber-700 dark:text-amber-300 tabular-nums">
                     {new Intl.NumberFormat('ar-EG').format(lesson.lesson_number)}
                   </span>
-                  <LessonThumb youtubeUrl={lesson.youtube_url} audioUrl={lesson.audio_url} className="w-24 sm:w-36 shrink-0" />
+                  <LessonThumb youtubeUrl={lesson.youtube_url} audioUrl={lesson.audio_url} imageUrl={lesson.image} className="w-24 sm:w-36 shrink-0" />
                   <span className="flex-1 min-w-0 flex flex-col gap-1.5">
                     <span className="flex items-center gap-2 text-lg font-semibold text-stone-900 dark:text-stone-100 group-hover:text-emerald-800 dark:group-hover:text-emerald-300 transition-colors">
                       <span className="min-w-0">{lesson.title}</span>
