@@ -48,9 +48,11 @@ export default async function handler(_req: any, res: any) {
   }
   try {
     const body = JSON.stringify(await readSiteData(url, key));
-    // Fresh for a minute; after that the CDN still answers at once with its copy while it fetches a new one.
-    // An admin's edit therefore reaches visitors within about a minute (admins themselves always read live).
-    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=86400');
+    // Fresh for 30 seconds; for two more minutes the CDN answers at once with its copy while it fetches a new one, and
+    // after that it waits for the new one. (It used to serve a copy up to a day old to the first visitor after a quiet
+    // spell, so an admin's edit could stay hidden for hours.) An edit therefore reaches visitors within about half a
+    // minute, two at most (admins themselves always read live).
+    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=120');
     return res.status(200).send(body);
   } catch (err) {
     console.error('api/site:', err);

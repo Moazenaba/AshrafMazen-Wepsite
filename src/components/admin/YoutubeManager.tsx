@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Loader2, Save } from 'lucide-react';
-import { getYoutubeOverrides, saveYoutubeOverrides, type YoutubeOverrides } from '../../services/dataService';
+import { readYoutubeOverrides, saveYoutubeOverridesIfUnchanged, type YoutubeOverrides } from '../../services/dataService';
 import { overridesChanged, useRawYoutubeLibrary } from '../../lib/youtubeLibrary';
 import { getYouTubeId } from '../../lib/youtube';
 import { orderPlaylists } from '../../lib/libraryOverrides';
@@ -43,12 +43,15 @@ export const YoutubeManager: React.FC = () => {
   const [query, setQuery] = useState('');
   const [newList, setNewList] = useState('');
   const [newTitle, setNewTitle] = useState('');
+  // The stored text the draft started from: a save is refused if someone else saved since (saveYoutubeOverridesIfUnchanged)
+  const [baseRaw, setBaseRaw] = useState<string | null>(null);
 
   useEffect(() => {
-    getYoutubeOverrides()
-      .then((value) => {
+    readYoutubeOverrides()
+      .then(({ value, raw }) => {
         setSaved(value);
         setDraft(value);
+        setBaseRaw(raw);
       })
       .catch((err) => setMessage({ type: 'error', text: err?.message || 'تعذّر تحميل الإعدادات.' }))
       .finally(() => setLoading(false));
@@ -112,7 +115,7 @@ export const YoutubeManager: React.FC = () => {
         videoTitles: Object.fromEntries(Object.entries(draft.videoTitles).map(([k, v]) => [k, v.trim()])),
         playlistTitles: Object.fromEntries(Object.entries(draft.playlistTitles).map(([k, v]) => [k, v.trim()])),
       };
-      await saveYoutubeOverrides(cleaned);
+      setBaseRaw(await saveYoutubeOverridesIfUnchanged(cleaned, baseRaw));
       setSaved(cleaned);
       setDraft(cleaned);
       overridesChanged(cleaned);
