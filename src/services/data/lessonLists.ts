@@ -2,13 +2,13 @@
 import type { Category, Lesson } from '../../types';
 import { getCategories, getSeriesByCategory } from './catalog';
 import { publishedLessons, rowsOrThrow } from './db';
-import { readLessonExtras } from './extras';
+import { readLessonExtras, withLessonPictures } from './extras';
 import { attachRelations, attachWith } from './relations';
 import type { LessonWithRelations } from './shared';
 
 export async function getLatestLessons(limit = 6): Promise<LessonWithRelations[]> {
   const lessons = rowsOrThrow<Lesson>(await publishedLessons().order('published_at', { ascending: false }).limit(limit));
-  return attachRelations(lessons);
+  return withLessonPictures(await attachRelations(lessons));
 }
 
 // The lessons the admin pinned, most recently pinned first; the latest lessons stand in when none can be read
@@ -19,7 +19,7 @@ export async function getFeaturedLessons(limit = 5): Promise<LessonWithRelations
       const found = rowsOrThrow<Lesson>(await publishedLessons().in('id', ids));
       if (found.length > 0) {
         const pinned = found.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)).map((l) => ({ ...l, featured: true }));
-        return attachRelations(pinned);
+        return withLessonPictures(await attachRelations(pinned));
       }
     }
   } catch {
@@ -31,7 +31,7 @@ export async function getFeaturedLessons(limit = 5): Promise<LessonWithRelations
 export async function getTopViewedLessons(limit = 8): Promise<LessonWithRelations[]> {
   try {
     const lessons = rowsOrThrow<Lesson>(await publishedLessons().order('views', { ascending: false }).limit(limit));
-    if (lessons.length > 0) return attachRelations(lessons);
+    if (lessons.length > 0) return withLessonPictures(await attachRelations(lessons));
   } catch (err) {
     console.warn('getTopViewedLessons error:', err);
   }
@@ -53,7 +53,7 @@ export async function getKhutabLessons(limit = 8): Promise<LessonWithRelations[]
         .order('published_at', { ascending: false })
         .limit(limit)
     );
-    return attachWith(lessons, series, [category]);
+    return withLessonPictures(attachWith(lessons, series, [category]));
   } catch (err) {
     console.warn('getKhutabLessons error:', err);
     return [];
@@ -64,5 +64,5 @@ export async function getKhutabLessons(limit = 8): Promise<LessonWithRelations[]
 export async function getBookmarkedLessons(ids: string[] = []): Promise<LessonWithRelations[]> {
   if (ids.length === 0) return [];
   const lessons = rowsOrThrow<Lesson>(await publishedLessons().in('id', ids));
-  return (await attachRelations(lessons)).sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+  return (await withLessonPictures(await attachRelations(lessons))).sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
 }

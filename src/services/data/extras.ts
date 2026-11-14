@@ -75,3 +75,18 @@ export function lessonRow(data: Partial<Lesson>): Record<string, unknown> {
   void _image;
   return row;
 }
+
+// The extras read once and shared for a few seconds: one page asks for several lists at once (latest, featured,
+// most viewed, sermons, categories), and each would otherwise read the same record again
+const SHARE_MS = 15_000;
+let shared: { at: number; value: Promise<LessonExtras> } | null = null;
+function sharedLessonExtras(): Promise<LessonExtras> {
+  if (!shared || Date.now() - shared.at > SHARE_MS) shared = { at: Date.now(), value: readLessonExtras() };
+  return shared.value;
+}
+
+// Each lesson's own picture, for the lists read straight from the database (what an admin sees; visitors get the same
+// pictures through the site bundle, siteBundleRules.buildHomeLists)
+export async function withLessonPictures<T extends Lesson>(lessons: T[]): Promise<T[]> {
+  return withImages(lessons, await sharedLessonExtras());
+}
