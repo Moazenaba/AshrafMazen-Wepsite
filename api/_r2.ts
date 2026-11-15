@@ -52,7 +52,9 @@ export function presign(
   method: 'GET' | 'PUT' | 'DELETE',
   key: string,
   expires = 900,
-  extraQuery: Record<string, string> = {}
+  extraQuery: Record<string, string> = {},
+  // When given, the upload must send exactly this many bytes (the length is part of the signature)
+  contentLength?: number
 ): string {
   const { amzDate, date } = stamp();
   const host = hostOf(cfg);
@@ -64,13 +66,15 @@ export function presign(
     'X-Amz-Credential': `${cfg.accessKeyId}/${scope}`,
     'X-Amz-Date': amzDate,
     'X-Amz-Expires': String(expires),
-    'X-Amz-SignedHeaders': 'host',
+    'X-Amz-SignedHeaders': contentLength === undefined ? 'host' : 'content-length;host',
   };
   const canonicalQuery = Object.keys(query)
     .sort()
     .map((k) => `${encode(k)}=${encode(query[k])}`)
     .join('&');
-  const canonicalRequest = [method, path, canonicalQuery, `host:${host}\n`, 'host', 'UNSIGNED-PAYLOAD'].join('\n');
+  const signed = contentLength === undefined ? 'host' : 'content-length;host';
+  const headerLines = contentLength === undefined ? `host:${host}\n` : `content-length:${contentLength}\nhost:${host}\n`;
+  const canonicalRequest = [method, path, canonicalQuery, headerLines, signed, 'UNSIGNED-PAYLOAD'].join('\n');
   const toSign = ['AWS4-HMAC-SHA256', amzDate, scope, sha256(canonicalRequest)].join('\n');
   const signature = createHmac('sha256', signingKey(cfg, date)).update(toSign).digest('hex');
   return `https://${host}${path}?${canonicalQuery}&X-Amz-Signature=${signature}`;

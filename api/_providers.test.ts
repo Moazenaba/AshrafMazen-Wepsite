@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cobaltRequest, isChannelVideo, parseCobalt, parseInvidious, parsePiped, providersFrom } from './_providers';
+import { cobaltRequest, isChannelVideo, isSafeMediaUrl, parseCobalt, parseInvidious, parsePiped, providersFrom } from './_providers';
 
 describe('download services', () => {
   it('reads the service lists, with keys, and falls back to the built-in ones', () => {
@@ -35,5 +35,17 @@ describe('cobaltRequest for listening', () => {
   it('asks the original sound for listening', () => {
     const body = JSON.parse(String(cobaltRequest({ type: 'cobalt', base: relay } as any, 'abcdefghijk', 'listen').init.body));
     expect(body).toMatchObject({ downloadMode: 'audio', audioFormat: 'best' });
+  });
+});
+
+describe('isSafeMediaUrl', () => {
+  it('accepts a public https link', () => {
+    expect(isSafeMediaUrl('https://cdn.example.com/a.mp3')).toBe(true);
+  });
+
+  it('refuses everything else', () => {
+    for (const bad of ['http://cdn.example.com/a', 'https://localhost/x', 'https://127.0.0.1/x', 'https://10.1.2.3/x', 'https://172.20.0.1/x', 'https://192.168.1.1/x', 'https://169.254.169.254/x', 'https://[::1]/x', 'file:///etc/passwd', 'javascript:1', 'nope']) {
+      expect(isSafeMediaUrl(bad), bad).toBe(false);
+    }
   });
 });

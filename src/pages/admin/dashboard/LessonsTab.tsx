@@ -205,6 +205,7 @@ export const LessonsTab: React.FC<LessonsTabProps> = ({ lessons, seriesList, onA
                             <Link
                               to={`/lesson/${lesson.id}`}
                               target="_blank"
+                              rel="noopener noreferrer"
                               title={lesson.status === 'published' ? 'معاينة في الموقع' : 'معاينة المسودة (لا يراها الزوار)'}
                               className="p-1.5 rounded-lg text-stone-500 hover:text-emerald-800 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-800"
                             >

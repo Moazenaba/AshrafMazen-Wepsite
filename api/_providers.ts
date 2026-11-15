@@ -97,3 +97,19 @@ export function isChannelVideo(oembed: any, channelHandle: string, channelId: st
   const author = String(oembed?.author_url ?? '').toLowerCase();
   return author.endsWith(`/@${channelHandle.toLowerCase()}`) || author.endsWith(`/channel/${channelId.toLowerCase()}`);
 }
+
+// A link an outside service handed back may be probed only if it is https and not a private or local address
+export function isSafeMediaUrl(value: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return false;
+  }
+  if (url.protocol !== 'https:') return false;
+  const host = url.hostname.toLowerCase();
+  if (host === 'localhost' || host.endsWith('.localhost') || host.startsWith('[') || !host.includes('.')) return false;
+  if (/^(10|127)\./.test(host) || /^169\.254\./.test(host) || /^192\.168\./.test(host)) return false;
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(host)) return false;
+  return true;
+}

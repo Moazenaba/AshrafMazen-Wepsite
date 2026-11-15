@@ -63,4 +63,20 @@ describe('api/r2 POST', () => {
     await post({ action: 'delete', url: 'https://evil.test/x.pdf' });
     expect(res.statusCode).toBe(400);
   });
+
+  it('signs the exact upload length', async () => {
+    await post({ action: 'sign', kind: 'audio', filename: 'a.mp3', size: 1000 });
+    expect(json(res).uploadUrl).toContain('X-Amz-SignedHeaders=content-length%3Bhost');
+    expect(json(res).contentLength).toBe(1000);
+  });
+
+  it('delete refuses a key outside the site folders and calls no storage', async () => {
+    const f = database(true);
+    vi.stubGlobal('fetch', f);
+    await post({ action: 'delete', url: '/api/r2?file=private%2Fx.txt' });
+    expect(res.statusCode).toBe(400);
+    await post({ action: 'delete', url: '/api/r2?file=audio%2F..%2Fx' });
+    expect(res.statusCode).toBe(400);
+    expect(f.mock.calls.filter(([u]) => String(u).includes('r2.cloudflarestorage'))).toHaveLength(0);
+  });
 });
