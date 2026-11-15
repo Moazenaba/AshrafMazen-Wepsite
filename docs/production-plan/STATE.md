@@ -71,4 +71,33 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 
 ## Final review
 
-(written after step 16; see `GOAL.md` (repository root) section 8)
+### Totals (2026-11-15, on `prod/integration` plus the threshold change)
+
+- Tests: 470 unit, component and handler tests pass (1 skipped on purpose: the schema contract, until `docs/schema/tables.json` exists); 32 browser tests pass, three runs in a row; 3 read-only live browser checks exist (need `E2E_BASE_URL`).
+- Coverage: lines 38.6%, functions 33.8% (gate raised to 35 / 30). Entry script 45 kB gzip, budget 48.8 kB.
+- Files over 350 lines outside `src/data`: 0 (largest `src/context/AudioContext.tsx`, 349).
+- `npm run typecheck`, `npm run test:coverage`, `npm run build`, `npm run e2e` pass. `npm run lint` is only `tsc --noEmit` (see OPS-04 below). Live smoke test: ALL PASSED.
+
+### Problem ids
+
+closed by WP-09: TST-02, TST-03, TST-04, TST-05, INT-08; TST-01 closed for unit/handler/component/browser layers.
+closed by WP-01: SEC-01, SEC-02, SEC-03, SEC-05, SEC-06, SEC-07; SEC-04 closed in code (signed upload length), live upload check pending (see Needs the owner).
+closed by WP-02: REL-01. closed by WP-07: REL-02, REL-10. closed by WP-04: DAT-01, DAT-02, REL-11, SEC-11.
+closed by WP-03: DAT-05, PRF-02, REL-12. closed by WP-05: OBS-01, OBS-02, OBS-03, OBS-05, OBS-06, SEC-12; SEC-08 closed once the owner runs `2026-11-16-error-events.sql` (OWNER-09).
+closed by WP-06: OBS-04, PRF-04. closed by WP-11: REL-09, INT-02, INT-03, INT-09, DAT-06, DAT-07.
+closed by WP-12: REL-05, REL-06, INT-01, INT-04, INT-05, INT-06, OPS-02, OPS-03, TST-06. closed by WP-10: OPS-06.
+closed by WP-13: PRF-03. closed by WP-08: REL-03, INT-07 (the publish dates themselves still need one run, see Needs the owner).
+closed in code by WP-15: DAT-03 (schema file and backup proof wait for the owner: OWNER-07), DAT-04 phase A (phase B is a design file that needs the owner's decision).
+owner action: SEC-09 and OWNER-01 (rotate secrets), SEC-10 and OWNER-02 (two-factor), REL-08 and OWNER-03 (custom bucket domain), REL-13 and OWNER-05 (plans), OPS-05 and OWNER-08 (leftover files), REL-04 and OWNER-06 (keep or remove downloads).
+open: OPS-01 (`api/tsconfig.json` already existed; the Vercel preview log cannot be read without a push); OPS-04 (dependabot added, but no lint: typescript-eslint does not support TypeScript 7); PRF-01 (WP-13 Part A not applied: the hero is text, the score is limited by script time; full hydration is the next option); INT-10 and REL-07 (WP-14b blocked, below).
+
+### SQL files and owner actions still waiting
+
+SQL (in this order): `docs/migrations/2026-11-16-error-events.sql`, `docs/migrations/2026-11-16-hide-prev-copies.sql`. Then `npm run health` and `npm run schema` (commit `docs/schema/`).
+Owner actions: OWNER-01 .. OWNER-11 as in `OWNER-ACTIONS.md`, plus: set `SUPABASE_SERVICE_ROLE_KEY` in Vercel for the error log; upload one small picture from the admin after merging (checks the signed length); run `node scripts/refresh-youtube-library.mjs --redate` from a home connection; set `PRERENDER_STRICT=1` after one clean deploy; merge `prod/integration` (OWNER-10).
+
+### BLOCKED steps and what unblocks them
+
+- Step 14, WP-14b Quran page: another session is building `/quran` on `feat/quran-wire`. When it is finished, merge it into `prod/integration`, then add what WP-14 step 2 still asks for: `timedFetch` plus the `sessionStorage` cache and the `level: 'none'` fallback for the v4 service, the mp3quran hosts in the CSP, a reader highlight without per-frame `setState`, and the tests.
+- Parts done with a pending piece (not BLOCKED): WP-08 step 1 (publish dates), WP-12 lint.
+
