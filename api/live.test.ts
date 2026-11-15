@@ -56,4 +56,14 @@ describe('api/live', () => {
     await done;
     expect(json(res)).toEqual({ live: false });
   });
+
+  it('warns once across two calls when the page is not a YouTube page', async () => {
+    vi.resetModules();
+    const fresh = (await import('./live')).default;
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('<html>consent</html>')));
+    await fresh(fakeReq(), fakeRes());
+    await fresh(fakeReq(), fakeRes());
+    expect(warn).toHaveBeenCalledTimes(1);
+  });
 });

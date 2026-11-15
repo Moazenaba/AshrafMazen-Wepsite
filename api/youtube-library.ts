@@ -7,7 +7,7 @@
 // time from servers, which filled the logs with errors). The playlist pages are read with api/_youtubePage.ts.
 // (What the admin hid or removed is taken off on the site afterwards, so none of this brings it back.)
 import { YOUTUBE_LIBRARY, type LibraryPlaylist, type LibraryVideo } from '../src/data/youtube-library.js'; // Node on Vercel needs the extension
-import { parsePlaylists, parseVideos, withArabic, YOUTUBE_HEADERS } from './_youtubePage.js';
+import { inChannelOrder, parsePlaylists, parseVideos, withArabic, YOUTUBE_HEADERS } from './_youtubePage.js';
 import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
 import { logEvent } from './_log.js'; // Node on Vercel needs the extension
 
@@ -79,14 +79,15 @@ async function extraPlaylists(): Promise<{ id: string; title: string }[]> {
 }
 
 // Playlists on the channel that neither the saved library nor the admin has: they are added by themselves
-async function discoverPlaylists(known: Set<string>): Promise<{ id: string; title: string }[]> {
+// `channelIds` is every playlist id on that page, in the channel's own order
+async function discoverPlaylists(known: Set<string>): Promise<{ fresh: { id: string; title: string }[]; channelIds: string[] }> {
   const found = parsePlaylists(await fetchPage(`https://www.youtube.com/channel/${CHANNEL_ID}/playlists`));
-  return found.filter((p) => !known.has(p.id)).slice(0, 30);
+  return { fresh: found.filter((p) => !known.has(p.id)).slice(0, 30), channelIds: found.map((p) => p.id) };
 }
 
 async function build(admins: { id: string; title: string }[]): Promise<string> {
   via.page = via.none = 0;
-  const discovered = await discoverPlaylists(new Set([...YOUTUBE_LIBRARY.map((p) => p.id), ...admins.map((p) => p.id)]));
+  const { fresh: discovered, channelIds } = await discoverPlaylists(new Set([...YOUTUBE_LIBRARY.map((p) => p.id), ...admins.map((p) => p.id)]));
   const extras = [...admins, ...discovered];
   const extraVideos = new Map<string, LibraryVideo[]>();
   await Promise.all(
@@ -104,7 +105,8 @@ async function build(admins: { id: string; title: string }[]): Promise<string> {
     }))
     .filter((p) => p.videos.length > 0);
   // The saved playlists are taken as they are: the GitHub job keeps them current
-  const playlists = [...YOUTUBE_LIBRARY, ...addedPlaylists];
+  // In the order of the channel's own playlists page (the videos inside each are already newest first)
+  const playlists = inChannelOrder([...YOUTUBE_LIBRARY, ...addedPlaylists], channelIds);
   const latest = await channelLatest(new Set(playlists.flatMap((p) => p.videos.map((v) => v.id))));
   void logEvent('info', 'youtube-library', `built: ${playlists.length} playlists (${discovered.length} found on the channel by themselves, ${admins.length} added by the admin); extra playlist pages read ${via.page}, empty ${via.none}; uploads in no playlist ${latest?.videos.length ?? 0}`);
   return JSON.stringify({ updatedAt: new Date().toISOString(), playlists: latest ? [latest, ...playlists] : playlists });

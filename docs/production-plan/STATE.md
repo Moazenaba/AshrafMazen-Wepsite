@@ -14,7 +14,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 | 7 | WP-03 site bundle size | DONE | prod/wp-03-bundle-size | 2026-11-15 | 341 | lines 23%, functions 20% |
 | 8 | WP-05 error visibility | DONE | prod/wp-05-error-visibility | 2026-11-15 | 359 | lines 23%, functions 20% |
 | 9 | WP-06 monitoring | DONE | prod/wp-06-monitoring | 2026-11-15 | 364 | lines 23%, functions 20% |
-| 10 | WP-08 YouTube robustness | TODO | | | | |
+| 10 | WP-08 YouTube robustness | DONE (code); step 1 data pending | prod/wp-08-youtube-robustness | 2026-11-15 | 370 | lines 23%, functions 20% |
 | 11 | WP-11 admin forms | TODO | | | | |
 | 12 | WP-12 build, CI, documents | TODO | | | | |
 | 13 | WP-10 browser tests | TODO | | | | |
@@ -27,6 +27,9 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 - `docs/migrations/2026-11-16-error-events.sql` (OWNER-09): error log table + daily cap on `record_event` (per kind, from `daily_stats`; the data has no per-key daily total).
 
 ## Needs the owner
+
+- WP-08 step 1 (publish dates) NOT finished: on 2026-11-15 YouTube stopped answering for watch pages after the first request (`--dry` showed 4 waiting, the real run dated 0; 228 videos undated, 3 playlists not sorted: الوابل الصيب, كتاب التوبة, ٢٠٠ سؤال وجواب). The data file was left unchanged. Someone must run `node scripts/refresh-youtube-library.mjs --redate` from a home connection later (not more than 3 times an hour), then commit `src/data/youtube-library.ts`.
+- WP-08 step 5 skipped: OWNER-06 (keep or remove the download feature) is still undecided.
 
 - Files are deleted by key now; orphans created before WP-04 remain (clean-up is the owner's decision).
 
