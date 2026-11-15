@@ -3,6 +3,12 @@ import { hasStoredSession, supabase } from '../../lib/supabase';
 import { translateSupabaseError } from '../../utils/supabaseErrors';
 import type { AdminUser } from '../../types';
 
+// Logs only a message and a status, never a whole error object (it can carry tokens and addresses)
+const logError = (label: string, err: unknown) => {
+  const e = err as { message?: string; status?: number } | null;
+  console.error(label, e?.message ?? String(err), e?.status ?? '');
+};
+
 /**
  * Login with Supabase Auth and verify existence in admins table
  */
@@ -15,7 +21,7 @@ export async function login(email: string, password: string): Promise<AdminUser>
   });
 
   if (authErr || !authData.user) {
-    console.error('Login auth error:', authErr);
+    logError('Login auth error:', authErr);
     throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة');
   }
 
@@ -27,7 +33,7 @@ export async function login(email: string, password: string): Promise<AdminUser>
     .maybeSingle();
 
   if (adminErr || !adminRecord) {
-    console.error('User not in admins table:', adminErr || 'Not found');
+    logError('User not in admins table:', adminErr || 'Not found');
     await supabase.auth.signOut();
     throw new Error('ليس لديك صلاحية الدخول');
   }
@@ -41,46 +47,55 @@ export async function login(email: string, password: string): Promise<AdminUser>
   return adminUser;
 }
 
+export type AdminCheck = { state: 'admin'; user: AdminUser } | { state: 'not-admin' } | { state: 'signed-out' } | { state: 'unknown' };
+
+/**
+ * Who is signed in, and are they an admin? A failed request (offline, timeout) is `unknown`: it never signs anyone out.
+ */
+export async function checkAdminState(): Promise<AdminCheck> {
+  // No saved session in this browser: not signed in, and no need to download the sign-in client to find that out
+  if (!hasStoredSession()) return { state: 'signed-out' };
+  try {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError) {
+      // An expired or rejected session is a real sign-out; a network failure is not
+      const status = (userError as { status?: number }).status;
+      return status === 401 || status === 403 ? { state: 'signed-out' } : { state: 'unknown' };
+    }
+    if (!user) return { state: 'signed-out' };
+
+    const { data: adminRecord, error } = await supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle();
+    if (error) {
+      logError('checkAdminState admins query:', error);
+      return { state: 'unknown' };
+    }
+    if (!adminRecord) {
+      await supabase.auth.signOut();
+      return { state: 'not-admin' };
+    }
+    return { state: 'admin', user: { email: user.email || '', name: user.user_metadata?.name || 'مدير الموقع', role: 'admin' } };
+  } catch (err) {
+    logError('checkAdminState error:', err);
+    return { state: 'unknown' };
+  }
+}
+
 /**
  * Check if the current logged-in user is an admin
  */
 export async function checkCurrentAdmin(): Promise<AdminUser | null> {
-  // No saved session in this browser: not signed in, and no need to download the sign-in client to find that out
-  if (!hasStoredSession()) return null;
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) return null;
-
-    const { data: adminRecord } = await supabase
-      .from('admins')
-      .select('user_id')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (!adminRecord) {
-      await supabase.auth.signOut();
-      return null;
-    }
-
-    return {
-      email: user.email || '',
-      name: user.user_metadata?.name || 'مدير الموقع',
-      role: 'admin',
-    };
-  } catch (err) {
-    console.error('checkCurrentAdmin error:', err);
-    return null;
-  }
+  const result = await checkAdminState();
+  return result.state === 'admin' ? result.user : null;
 }
 
 export async function logout(): Promise<boolean> {
   try {
     await supabase.auth.signOut();
   } catch (err) {
-    console.error('Logout error:', err);
+    logError('Logout error:', err);
   }
   return true;
 }
@@ -97,7 +112,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
   });
 
   if (error) {
-    console.error('resetPasswordForEmail error:', error);
+    logError('resetPasswordForEmail error:', error);
   }
   // Neutral message always displayed as per requirement
 }

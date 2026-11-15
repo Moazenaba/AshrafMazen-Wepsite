@@ -8,7 +8,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 | 1 | WP-09 test foundation | DONE | prod/wp-09-test-foundation | 2026-11-15 | 285 | lines 23%, functions 20% (gate N=20) |
 | 2 | WP-14a finished branches | DONE | prod/wp-14a-finished-branches | 2026-11-15 | 289 | lines 23%, functions 20% |
 | 3 | WP-01 security | DONE | prod/wp-01-security | 2026-11-15 | 302 | lines 23%, functions 20% |
-| 4 | WP-02 admin session | TODO | | | | |
+| 4 | WP-02 admin session | DONE | prod/wp-02-admin-session | 2026-11-15 | 310 | lines 23%, functions 20% |
 | 5 | WP-07 timeouts and degraded states | TODO | | | | |
 | 6 | WP-04 file lifecycle | TODO | | | | |
 | 7 | WP-03 site bundle size | TODO | | | | |
