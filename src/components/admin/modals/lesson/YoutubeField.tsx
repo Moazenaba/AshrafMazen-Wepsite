@@ -12,7 +12,9 @@ export const YoutubeField = ({ form, update }: FormProps) => {
           </label>
           <div className="relative">
             <input
-              type="url"
+              type="text"
+              inputMode="url"
+              autoComplete="off"
               value={form.youtubeUrl}
               onChange={(e) => update({ youtubeUrl: e.target.value })}
               placeholder="https://www.youtube.com/watch?v=... أو https://youtu.be/..."

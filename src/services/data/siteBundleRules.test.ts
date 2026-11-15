@@ -16,6 +16,22 @@ const bundle = (over: Partial<SiteBundle> = {}): SiteBundle => ({
   ...over,
 });
 
+describe('transcripts', () => {
+  it('gives a lesson listed in transcripts a text marker and the others none', () => {
+    const lists = buildHomeLists(bundle({ transcripts: ['b'] }));
+    const byId = Object.fromEntries(lists.latestList.map((l) => [l.id, l.transcript]));
+    expect(byId.b?.trim()).toBeTruthy();
+    expect(byId.a).toBe('');
+  });
+
+  it('still accepts a saved copy without transcripts', () => {
+    const old = bundle();
+    delete old.transcripts;
+    expect(isSiteBundle(old)).toBe(true);
+    expect(buildHomeLists(old).latestList.every((l) => l.transcript === '')).toBe(true);
+  });
+});
+
 describe('buildHomeLists', () => {
   it('counts each science and keeps its newest lesson', () => {
     const [first, second] = buildHomeLists(bundle()).categories;

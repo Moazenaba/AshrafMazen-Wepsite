@@ -1,0 +1,25 @@
+# Problems: reliability (things that can break the site while it runs)
+
+Audit date: 2026-11-15, commit `2ead989`. Severity as in `01-security.md`.
+
+| ID | Sev | Problem | Where | Evidence | Fixed by |
+|---|---|---|---|---|---|
+| REL-01 | H | A transient network error signs the admin out. `checkCurrentAdmin` treats "the admins query failed" the same as "not an admin" and calls `signOut()`. | `src/services/data/auth.ts` `checkCurrentAdmin` (`if (!adminRecord)` ignores the query's `error`) | Read the code. | WP-02 |
+| REL-02 | H | Most network calls have no time limit. A hung outside service holds a server function until Vercel kills it at 60 s, and a hung request in the browser leaves a spinner forever. | `api/r2.ts`, `api/_r2.ts` (`isAdminToken`: 2 calls), `api/youtube-library.ts`, `api/live.ts`, `api/submit.ts`, `api/youtube-shorts.ts`, and 13 client files | Scripted count: only `api/media-link.ts` uses `AbortController`. | WP-07 |
+| REL-03 | H | Everything about YouTube is read by scraping YouTube's HTML: the live check, the runtime library, the 30-minute sync job, publish dates. YouTube limits a server that asks for hundreds of pages (seen: the date run got 372 answers, the next run 31, then HTTP 302). When the layout changes or the address is limited the site silently shows old data. Only the GitHub job fails loudly. | `api/_youtubePage.ts`, `api/_youtubeLive.ts`, `api/youtube-library.ts`, `api/live.ts`, `scripts/refresh-youtube-library.mjs` | Reproduced the limit on 2026-11-15. | WP-08 |
+| REL-04 | M | The "listen / download" feature depends on four volunteer-run outside services (cobalt, Invidious, Piped). They fail often and can vanish. It is also the only feature whose legality depends on YouTube's terms. | `api/_providers.ts` `DEFAULTS`, `api/media-link.ts` | Vercel log line `media-link ok … in 19009 ms`; code. | WP-08 (health + clear message), owner decision OWNER-06 |
+| REL-05 | H | `npm run build` uses `--soft` for the sitemap and the prerender: when the database cannot be read at build time the deploy still succeeds, with **no** prerendered pages and an old sitemap. Nothing reports it. | `package.json` `build`, `scripts/prerender.mjs`, `scripts/generate-sitemap.mjs` | Read the scripts. | WP-12 |
+| REL-06 | M | A lesson, book or playlist added by the admin gets no prerendered page and no sitemap entry until the next deploy (deploys happen only on a git push). | `scripts/prerender.mjs` runs at build only | Read the code; documented as open item 33. | WP-12 |
+| REL-07 | M | Text and word timings for the Quran page come from `api-staging.mp3quran.net` (a staging address, version `0.0.0`). It can change or stop without notice. | `feat/quran` branch, `src/services/quran/quranApi.ts` | Read the API's own spec. | WP-14 |
+| REL-08 | M | The public bucket address is an `r2.dev` address. Cloudflare documents `r2.dev` as rate-limited and meant for development, not production traffic. | Vercel env `R2_PUBLIC_URL`, `VITE_R2_PUBLIC_URL` | Cloudflare's R2 documentation ("public development URL"). | OWNER-03 |
+| REL-09 | M | Two forms failed to save silently because a field of `type="url"` refused the site's own file links. Fixed for the lesson audio and the book PDF; **no test guards the class of bug**, and other forms were not audited the same way. | `src/components/admin/**` | Found only by testing on the live site (2026-11-15). | WP-11 |
+| REL-10 | M | When `/api/site` fails, the public pages fall back to ~15 separate database queries per visitor; when the database is also unreachable the pages show built-in defaults with no message. | `src/services/data/siteContent.ts`, `src/pages/home/useHomeData.ts` `loadOneByOne` | Read the code. | WP-07 |
+| REL-11 | L | A save in the admin is several writes with no transaction: the lesson row, then the extras record, then the old file's deletion. A failure in the middle leaves a half-saved lesson (the error is shown, but the state is not rolled back). | `src/services/data/lessonsAdmin.ts` `createLesson`, `updateLesson`, `deleteLesson` | Read the code. | WP-04 |
+| REL-12 | L | The home page's saved copy (browser storage + the copy written into the HTML at build time) can show a banner or card that was removed, until the fresh answer arrives; if that request fails the stale copy stays. | `src/services/data/siteBundle.ts`, `scripts/prerender.mjs` `withSiteSeed` | Read the code. | WP-03 |
+| REL-13 | M | The site and its database run on free plans. Vercel Hobby forbids commercial use, keeps logs one hour, and blocks deploys from other authors; a free Supabase project pauses after a week without activity and has no point-in-time restore. | Vercel plan badge "Hobby"; Supabase plan | Seen in the dashboards and the build logs. | OWNER-05 |
+
+## Honest note on "0% errors"
+
+No system reaches zero errors. What this plan delivers is: every known failure has a test or a monitor, every
+failure is written somewhere the owner can read, and the site degrades (shows less) instead of breaking. The
+measurable targets are in `../wp/WP-06-monitoring.md` (availability and error-rate targets).

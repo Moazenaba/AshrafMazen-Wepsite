@@ -1,7 +1,9 @@
 // The library: books as PDF files, kept as one JSON record in site_settings.
 import { supabase } from '../../lib/supabase';
 import { translateSupabaseError } from '../../utils/supabaseErrors';
-import { deleteFromR2, isR2Url, r2DownloadUrl, uploadToR2 } from '../r2';
+import { isR2Url, r2DownloadUrl, uploadToR2 } from '../r2';
+import { deleteIfUnused } from './fileUsage';
+import { checkFile } from '../../constants/fileRules';
 import type { Category, Book } from '../../types';
 import { getCategories } from './catalog';
 import { updateSiteRecord } from './jsonRecord';
@@ -134,8 +136,7 @@ export async function updateBook(id: string, bookData: Partial<Book>): Promise<B
     [previous.file_url, book.file_url],
     [previous.cover_url, book.cover_url],
   ] as const) {
-    const stillUsed = after.some((b) => b.file_url === oldUrl || b.cover_url === oldUrl);
-    if (oldUrl && oldUrl !== newUrl && !stillUsed && isR2Url(oldUrl)) await deleteFromR2(oldUrl);
+    if (oldUrl && oldUrl !== newUrl) await deleteIfUnused(oldUrl);
   }
   return book;
 }
@@ -145,22 +146,16 @@ export async function deleteBook(book: Pick<Book, 'id' | 'file_url' | 'cover_url
   let remaining: Book[] = [];
   await updateLibrary((books) => (remaining = books.filter((b) => b.id !== book.id)));
   for (const url of [book.file_url, book.cover_url]) {
-    const stillUsed = remaining.some((b) => b.file_url === url || b.cover_url === url);
-    if (!stillUsed && isR2Url(url)) await deleteFromR2(url as string);
+    await deleteIfUnused(url);
   }
   return true;
 }
 
-const BOOK_FILE_RULES = {
-  pdf: { extensions: ['pdf'], maxMb: 200, message: 'يرجى اختيار ملف بصيغة PDF.' },
-  cover: { extensions: ['jpg', 'jpeg', 'png', 'webp'], maxMb: 5, message: 'يرجى اختيار صورة غلاف بصيغة jpg أو png أو webp.' },
-} as const;
+
 
 export async function uploadBookFile(file: File, kind: 'pdf' | 'cover'): Promise<string> {
-  const rules = BOOK_FILE_RULES[kind];
-  const extension = (file.name.split('.').pop() || '').toLowerCase();
-  if (!(rules.extensions as readonly string[]).includes(extension)) throw new Error(rules.message);
-  if (file.size > rules.maxMb * 1024 * 1024) throw new Error(`حجم الملف أكبر من ${rules.maxMb} ميجابايت.`);
+  const problem = checkFile(kind, file.name, file.size);
+  if (problem) throw new Error(problem);
 
   return uploadToR2(file, kind);
 }

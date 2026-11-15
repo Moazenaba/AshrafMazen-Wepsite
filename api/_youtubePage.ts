@@ -101,3 +101,40 @@ export function innertubeOf(html: string): { key: string; version: string } | nu
   const version = html.match(/"INNERTUBE_CLIENT_VERSION":"([^"]+)"/)?.[1];
   return key && version ? { key, version } : null;
 }
+
+// When a video was published, from its watch page, as an ISO time in UTC; null when the page does not say
+export function publishDateOf(html: string): string | null {
+  const raw = html.match(/"publishDate":"([^"]+)"/)?.[1] ?? html.match(/itemprop="datePublished" content="([^"]+)"/)?.[1];
+  if (!raw) return null;
+  const time = Date.parse(raw);
+  return Number.isNaN(time) ? null : new Date(time).toISOString();
+}
+
+// Newest first. A video with no date keeps its place after the dated ones, in the order it had.
+export function newestFirst<T extends { published?: string }>(videos: T[]): T[] {
+  return videos
+    .map((video, index) => ({ video, index, time: video.published ? Date.parse(video.published) : NaN }))
+    .sort((a, b) => {
+      const aDated = !Number.isNaN(a.time);
+      const bDated = !Number.isNaN(b.time);
+      if (aDated && bDated) return b.time - a.time || a.index - b.index;
+      if (aDated !== bDated) return aDated ? -1 : 1;
+      return a.index - b.index;
+    })
+    .map((entry) => entry.video);
+}
+
+// The playlists in the order of the channel's own page; one that is not on that page keeps its place after them
+export function inChannelOrder<T extends { id: string }>(playlists: T[], channelIds: string[]): T[] {
+  const position = new Map(channelIds.map((id, index) => [id, index]));
+  return playlists
+    .map((playlist, index) => ({ playlist, index }))
+    .sort((a, b) => {
+      const pa = position.get(a.playlist.id);
+      const pb = position.get(b.playlist.id);
+      if (pa !== undefined && pb !== undefined) return pa - pb;
+      if (pa !== undefined || pb !== undefined) return pa !== undefined ? -1 : 1;
+      return a.index - b.index;
+    })
+    .map((entry) => entry.playlist);
+}

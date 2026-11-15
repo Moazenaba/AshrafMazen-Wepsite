@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Menu, X, Search, LogIn } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
@@ -10,11 +10,22 @@ import { supabase } from '../lib/supabase';
 import { checkCurrentAdmin, getSiteSettings, DEFAULT_SITE_SETTINGS } from '../services/dataService';
 import type { SiteSettings } from '../types';
 import { fileSrc } from '../lib/fileLinks';
+import { countExisting } from '../services/bookmarkCount';
+import { storedSiteBundle } from '../services/data/siteBundle';
+import { useYoutubeLibrary } from '../lib/youtubeLibrary';
 
 // One header for the public site: the sheikh's name as the wordmark, a few plain links, search and theme.
 // The admin area is reached by its URL; a "لوحة التحكم" link appears only for a signed-in admin.
 export const Navbar: React.FC = () => {
-  const { count: bookmarkCount } = useBookmarks();
+  const { bookmarkedIds } = useBookmarks();
+  const library = useYoutubeLibrary();
+  // Only bookmarks that still point at a lesson or a channel video are counted
+  const bookmarkCount = useMemo(() => {
+    const bundle = storedSiteBundle();
+    if (!bundle) return bookmarkedIds.length;
+    const known = new Set<string>([...bundle.lessons.map((l) => l.id), ...library.flatMap((p) => p.videos.map((v) => v.id))]);
+    return countExisting(bookmarkedIds, known);
+  }, [bookmarkedIds, library]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);

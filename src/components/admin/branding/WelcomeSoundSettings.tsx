@@ -1,7 +1,7 @@
 // The welcome sound: a short recording the site plays once per visit, on the visitor's first tap, at the volume set here.
 import React, { useEffect, useRef, useState } from 'react';
-import { Loader2, Pause, Play, Save } from 'lucide-react';
-import { getSiteContent, saveWelcomeSound } from '../../../services/data/siteContent';
+import { Loader2, Pause, Play, Save, Trash2 } from 'lucide-react';
+import { getSiteContent, removeWelcomeSound, saveWelcomeSound } from '../../../services/data/siteContent';
 import { EMPTY_WELCOME, isShortWelcome, welcomeTooLongMessage, type WelcomeSound } from '../../../services/data/welcomeSoundRules';
 import { FileUploadButton } from '../FileUploadButton';
 
@@ -62,6 +62,23 @@ export const WelcomeSoundSettings: React.FC = () => {
     preview.current?.pause();
     preview.current = audio;
     audio.play().then(() => setPreviewing(true)).catch(() => setPreviewing(false));
+  };
+
+  // Deletes the sound for good (the setting and, when nothing else uses it, the file); asks first
+  const remove = async () => {
+    if (!window.confirm('حذف الصوت الترحيبي نهائياً؟ لن يُسمع أي صوت للزوار، ويُحذف الملف من التخزين.')) return;
+    try {
+      setSaving(true);
+      setMessage(null);
+      preview.current?.pause();
+      setPreviewing(false);
+      setDraft(await removeWelcomeSound(draft));
+      setMessage({ type: 'ok', text: 'تم حذف الصوت الترحيبي.' });
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err?.message || 'تعذّر الحذف.' });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const save = async () => {
@@ -136,15 +153,28 @@ export const WelcomeSoundSettings: React.FC = () => {
         </p>
       )}
 
-      <button
-        type="button"
-        onClick={save}
-        disabled={saving}
-        className="press inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-sm font-bold disabled:opacity-60"
-      >
-        {saving ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Save className="w-4 h-4" aria-hidden="true" />}
-        حفظ
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={save}
+          disabled={saving}
+          className="press inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-sm font-bold disabled:opacity-60"
+        >
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Save className="w-4 h-4" aria-hidden="true" />}
+          حفظ
+        </button>
+        {draft.url && (
+          <button
+            type="button"
+            onClick={remove}
+            disabled={saving}
+            className="press inline-flex items-center gap-2 h-11 px-4 rounded-xl text-sm font-bold text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 disabled:opacity-60"
+          >
+            <Trash2 className="w-4 h-4" aria-hidden="true" />
+            حذف الصوت الترحيبي
+          </button>
+        )}
+      </div>
     </section>
   );
 };

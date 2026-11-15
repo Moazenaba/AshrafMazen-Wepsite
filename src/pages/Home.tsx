@@ -20,7 +20,7 @@ import { useHomeData } from './home/useHomeData';
 
 export const Home: React.FC = () => {
   const library = useYoutubeLibrary();
-  const { categories, featuredList, latestList, viewedList, sermonList, settings, loaded: dataLoaded } = useHomeData();
+  const { categories, featuredList, latestList, viewedList, sermonList, settings, loaded: dataLoaded, failed } = useHomeData();
   const { content, loaded } = useSiteContent();
   const [recentLesson] = useState(getRecentLesson);
 
@@ -60,6 +60,14 @@ export const Home: React.FC = () => {
       )}
 
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10">
+        {failed && (
+          <div role="alert" className="rounded-2xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-4 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-stone-800 dark:text-stone-200 font-semibold">تعذّر تحميل المحتوى الآن. تحقق من اتصالك ثم أعد المحاولة.</p>
+            <button type="button" onClick={() => window.location.reload()} className="h-11 px-5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-semibold">
+              إعادة المحاولة
+            </button>
+          </div>
+        )}
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
           <FeaturedColumn placed={placed} latestItems={latestItems} categoryOptions={categoryOptions} loading={!dataLoaded} feature={content.feature} featureLoading={!loaded} />
 

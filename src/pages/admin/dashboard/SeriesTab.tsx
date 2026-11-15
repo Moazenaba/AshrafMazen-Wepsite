@@ -98,6 +98,7 @@ export const SeriesTab: React.FC<SeriesTabProps> = ({ seriesList, categories, le
                     <Link
                       to={`/series/${series.slug}`}
                       target="_blank"
+                      rel="noopener noreferrer"
                       className="text-emerald-800 dark:text-amber-400 hover:underline inline-flex items-center gap-1 font-semibold"
                     >
                       <Eye className="w-3.5 h-3.5" />

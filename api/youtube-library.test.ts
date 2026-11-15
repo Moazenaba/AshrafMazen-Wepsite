@@ -34,6 +34,15 @@ async function library() {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('youtube library function', () => {
+  it('puts the playlists in the order of the channel page', async () => {
+    const { YOUTUBE_LIBRARY } = await import('../src/data/youtube-library');
+    const last = YOUTUBE_LIBRARY[YOUTUBE_LIBRARY.length - 1];
+    pretendYoutube([[last.id, last.title], [NEW_LIST, 'سلسلة جديدة']], [], { [NEW_LIST]: [['nnnnnnnnnn1', 'حلقة']] });
+    const result = await library();
+    const ids = result.playlists.map((p) => p.id);
+    expect(ids.slice(0, 2)).toEqual([last.id, NEW_LIST]);
+  }, 20_000);
+
   it('adds a playlist made on the channel since the saved library, with its videos', async () => {
     const { YOUTUBE_LIBRARY } = await import('../src/data/youtube-library');
     pretendYoutube(

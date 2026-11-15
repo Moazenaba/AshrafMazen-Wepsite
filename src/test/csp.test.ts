@@ -37,4 +37,13 @@ describe('Content-Security-Policy (vercel.json)', () => {
     expect(csp).toContain('https://*.supabase.co');
     expect(csp).toContain('https://*.r2.cloudflarestorage.com');
   });
+
+  it('lets the browser reach a public R2 address', () => {
+    const connect = csp.split(';').find((d) => d.trim().startsWith('connect-src')) ?? '';
+    expect(connect).toContain('https://*.r2.dev');
+  });
+
+  it('sends violation reports to the site', () => {
+    expect(csp).toContain('report-uri /api/csp-report');
+  });
 });

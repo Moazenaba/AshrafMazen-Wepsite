@@ -65,3 +65,15 @@ npm run smoke https://دومين-الموقع           # نفس الفحص عل
 | كلمة سر الأدمن | لوحة الإدارة ← البيانات والتكامل ← تغيير كلمة المرور |
 | مفاتيح R2 | Cloudflare ← R2 ← Manage API Tokens ← Roll، ثم حدّث `.env.local` ومتغيرات Vercel وأعد النشر |
 | كلمة سر قاعدة بيانات Supabase | Project Settings ← Database ← Reset database password. الموقع لا يستخدمها، فلن يتأثر |
+
+## الموقع لا يمر فحص المراقبة
+
+المراقبة تعمل داخل مهمة `sync-youtube` كل نصف ساعة وتفشل المهمة (فيصلك بريد من GitHub) إذا فشل بند من `scripts/smoke-test.mjs`. كل بند وما يعنيه موجود في `docs/RUNBOOK.md`.
+
+### صفحة الموقع تفتح لكن دوال `api/` لا تجيب
+
+تحقق في Vercel من آخر نشر ومن سجل الدوال، ثم في تبويب «البيانات والتكامل» من «سجل الأخطاء». إن كان جدول `error_events` غير موجود شغّل `docs/migrations/2026-11-16-error-events.sql`.
+
+### فحص الترويسات الأمنية فشل
+
+افتح `vercel.json` وتأكد أن `Content-Security-Policy` و`Strict-Transport-Security` ما زالا في قسم `headers`، ثم أعد النشر.

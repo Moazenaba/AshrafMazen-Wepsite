@@ -7,18 +7,16 @@
 // Until the R2 settings are present it answers 501, and the admin screens say that file uploads are not set up yet.
 import { randomUUID } from 'node:crypto';
 import { fileLink, isAdminToken, keyFromLink, presign, r2Config, type R2Config } from './_r2.js'; // Node on Vercel needs the extension (the .ts file is compiled to .js)
+import { FILE_RULES } from '../src/constants/fileRules.js'; // the one list of what may be uploaded
+import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
+import { logEvent } from './_log.js'; // Node on Vercel needs the extension
 
-const KINDS = {
-  pdf: { folder: 'library/files', extensions: ['pdf'], maxMb: 200, type: 'application/pdf' },
-  cover: { folder: 'library/covers', extensions: ['jpg', 'jpeg', 'png', 'webp'], maxMb: 5, type: '' },
-  // aac: recordings from an iPhone; opus: WhatsApp voice notes. Both play in current browsers.
-  audio: { folder: 'audio', extensions: ['mp3', 'm4a', 'aac', 'wav', 'ogg', 'opus'], maxMb: 500, type: '' },
-  logo: { folder: 'branding', extensions: ['png', 'jpg', 'jpeg', 'webp'], maxMb: 2, type: '' },
-  // The home page's featured picture
-  hero: { folder: 'branding/hero', extensions: ['png', 'jpg', 'jpeg', 'webp'], maxMb: 8, type: '' },
-  // Videos the admin uploads to the site itself (R2 takes a single upload of up to 5 GB)
-  video: { folder: 'media/video', extensions: ['mp4', 'webm', 'mov', 'm4v'], maxMb: 4000, type: '' },
-} as const;
+// The folders of the site's own files. Admin deletes may touch these (and the status check's folder), visitors may read PUBLIC_FOLDERS
+export const SITE_FOLDERS = /^(library\/(files|covers)|audio|branding|media\/video|setup-check)\//;
+const PUBLIC_FOLDERS = /^(library\/(files|covers)|audio|branding|media\/video)\//;
+const isSiteKey = (key: string) => SITE_FOLDERS.test(key) && !key.includes('..');
+
+const KINDS = FILE_RULES as Record<string, { folder: string; extensions: string[]; maxMb: number; type: string }>;
 
 const IMAGE_TYPES: Record<string, string> = {
   jpg: 'image/jpeg',
@@ -43,29 +41,31 @@ function bearer(req: any): string | undefined {
 }
 
 async function sign(cfg: R2Config, body: any, res: any) {
-  const kind = body?.kind as keyof typeof KINDS;
+  const kind = String(body?.kind);
   const rules = KINDS[kind];
   if (!rules) return send(res, 400, { error: 'نوع الملف غير معروف.' });
   const extension = String(body?.filename || '').split('.').pop()?.toLowerCase() || '';
-  if (!(rules.extensions as readonly string[]).includes(extension)) {
+  if (!rules.extensions.includes(extension)) {
     return send(res, 400, { error: `صيغة الملف غير مدعومة. الصيغ المسموحة: ${rules.extensions.join('، ')}.` });
   }
   if (Number(body?.size) > rules.maxMb * 1024 * 1024) {
     return send(res, 400, { error: `حجم الملف أكبر من ${rules.maxMb} ميجابايت.` });
   }
+  const size = Number(body?.size) > 0 ? Number(body.size) : undefined;
   const key = `${rules.folder}/${randomUUID()}.${extension}`;
   const contentType = rules.type || IMAGE_TYPES[extension] || AUDIO_TYPES[extension] || VIDEO_TYPES[extension] || 'application/octet-stream';
   return send(res, 200, {
-    uploadUrl: presign(cfg, 'PUT', key, 15 * 60),
+    uploadUrl: presign(cfg, 'PUT', key, 15 * 60, {}, size),
     publicUrl: fileLink(cfg, key),
     contentType,
+    contentLength: size,
   });
 }
 
 async function remove(cfg: R2Config, body: any, res: any) {
   const key = keyFromLink(cfg, String(body?.url || ''));
-  if (!key) return send(res, 400, { error: 'هذا الرابط ليس ملفاً مرفوعاً على الموقع.' });
-  const response = await fetch(presign(cfg, 'DELETE', key, 60), { method: 'DELETE' });
+  if (!key || !isSiteKey(key)) return send(res, 400, { error: 'هذا الرابط ليس ملفاً مرفوعاً على الموقع.' });
+  const response = await fetchWithTimeout(presign(cfg, 'DELETE', key, 60), { method: 'DELETE' }, 10000);
   if (!response.ok && response.status !== 404) return send(res, 502, { error: 'تعذّر حذف الملف من التخزين.' });
   return send(res, 200, { deleted: key });
 }
@@ -76,8 +76,8 @@ async function status(cfg: R2Config, res: any) {
   let write = false;
   let remove = false;
   try {
-    write = (await fetch(presign(cfg, 'PUT', key, 60), { method: 'PUT', body: 'ok', headers: { 'Content-Type': 'text/plain' } })).ok;
-    remove = (await fetch(presign(cfg, 'DELETE', key, 60), { method: 'DELETE' })).ok;
+    write = (await fetchWithTimeout(presign(cfg, 'PUT', key, 60), { method: 'PUT', body: 'ok', headers: { 'Content-Type': 'text/plain' } }, 10000)).ok;
+    remove = (await fetchWithTimeout(presign(cfg, 'DELETE', key, 60), { method: 'DELETE' }, 10000)).ok;
   } catch {
     // reported below as false
   }
@@ -90,7 +90,7 @@ const LINK_SECONDS = 24 * 60 * 60;
 function serveFile(cfg: R2Config, req: any, res: any) {
   const key = String(req.query?.file || '');
   // Only the site's own uploads, so this cannot be used to read anything else in the bucket
-  if (!/^(library\/(files|covers)|audio|branding|media\/video)\//.test(key) || key.includes('..')) return send(res, 400, { error: 'رابط ملف غير صالح.' });
+  if (!PUBLIC_FOLDERS.test(key) || key.includes('..')) return send(res, 400, { error: 'رابط ملف غير صالح.' });
   // With a public address (R2_PUBLIC_URL) every file but a library PDF is sent there for good: the browser remembers
   // this permanent redirect for a year (each upload has its own unique name) and never asks the site again for it.
   // PDFs stay here: the book viewer and the download under the book's title need this function.
@@ -133,7 +133,7 @@ export default async function handler(req: any, res: any) {
     if (body.action === 'delete') return remove(cfg, body, res);
     return send(res, 400, { error: 'unknown-action' });
   } catch (err) {
-    console.error('r2 function error:', err);
+    await logEvent('error', 'r2', 'function error', { reason: err instanceof Error ? err.message : String(err) });
     return send(res, 500, { error: 'حدث خطأ في الخادم أثناء معالجة الملف.' });
   }
 }

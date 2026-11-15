@@ -2,10 +2,12 @@
 import React from 'react';
 import { KeyRound } from 'lucide-react';
 import { SystemStatus } from '../../../components/admin/SystemStatus';
+import { ErrorLog } from '../../../components/admin/ErrorLog';
 
 export const SystemTab: React.FC<{ onChangePassword: () => void }> = ({ onChangePassword }) => (
     <div className="max-w-3xl space-y-6">
       <SystemStatus />
+      <ErrorLog />
 
       <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 sm:p-8 border border-stone-200 dark:border-stone-800 shadow-sm space-y-4">
         <h3 className="font-amiri text-2xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">

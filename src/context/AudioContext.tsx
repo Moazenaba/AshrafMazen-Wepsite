@@ -3,6 +3,7 @@ import { getResumeSeconds, markLessonWatched, saveLessonPosition } from '../serv
 import { createPlaybackMeter, trackView } from '../services/analytics';
 import { SILENCE, youtubeAudioUrl } from '../lib/youtubeAudio';
 import { finite, isSilence, reachable, statsKey, useMediaSession } from './audioEngine';
+import { updateMediaPosition } from './mediaSession';
 
 // One recording the site can play: a lesson's audio (identified by the lesson's id), or a channel video's sound
 // (id "yt:<videoId>", with youtubeId: its link lasts minutes and is fetched again if it breaks, see lib/youtubeAudio)
@@ -310,11 +311,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           if (!audio.paused) meterFor(current.id).update(audio.currentTime);
           savePosition();
           emit({ type: 'time', trackId: current.id, seconds: audio.currentTime, duration: finite(audio.duration) });
-          if ('mediaSession' in navigator && finite(audio.duration) && navigator.mediaSession.setPositionState) {
-            try {
-              navigator.mediaSession.setPositionState({ duration: audio.duration, position: audio.currentTime, playbackRate: audio.playbackRate });
-            } catch {}
-          }
+          updateMediaPosition(audio);
         }}
         onPlay={(e) => {
           if (isSilence(e.currentTarget)) return;

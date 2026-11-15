@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseLiveNow } from './_youtubeLive';
+import { looksLikeYoutubePage, parseLiveNow } from './_youtubeLive';
 
 const SHEIKH = 'UCisGvsFtKyDU6NTFywaITzQ';
 const OTHER = 'UCabcdefghijklmnopqrstuv';
@@ -42,5 +42,14 @@ describe('parseLiveNow', () => {
   it('refuses a malformed video id or channel id', () => {
     expect(parseLiveNow(page({ videoId: 'x' }), SHEIKH)).toBeNull();
     expect(parseLiveNow(page(), 'not-a-channel')).toBeNull();
+  });
+});
+
+describe('looksLikeYoutubePage', () => {
+  it('is true for a page with player or page data and false for a consent or error page', () => {
+    expect(looksLikeYoutubePage('var ytInitialPlayerResponse = {};')).toBe(true);
+    expect(looksLikeYoutubePage('var ytInitialData = {};')).toBe(true);
+    expect(looksLikeYoutubePage('<html>Before you continue to YouTube</html>')).toBe(false);
+    expect(looksLikeYoutubePage('')).toBe(false);
   });
 });

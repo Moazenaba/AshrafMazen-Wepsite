@@ -18,7 +18,7 @@ try {
   data = await loadSiteData();
 } catch (err) {
   if (soft) {
-    console.warn(`sitemap skipped: ${err.message}`);
+    console.warn(`::warning::sitemap skipped: ${err.message}`);
     process.exit(0);
   }
   console.error(`Could not read the site's data: ${err.message}`);

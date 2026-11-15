@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Upload, Trash2, Check, Image as ImageIcon, AlertCircle, Eye, RefreshCw, Sun, Moon } from 'lucide-react';
 import { getSiteSettings, saveSiteSettings, uploadBrandingLogo } from '../../../services/dataService';
 import { type SiteSettings } from '../../../types';
+import { acceptOf, checkFile, describeRule } from '../../../constants/fileRules';
 
 export const BannerSettings: React.FC = () => {
   // Banner Settings State
@@ -37,12 +38,9 @@ export const BannerSettings: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      setSettingsMessage({
-        type: 'error',
-        text: 'حجم ملف الشعار يتجاوز 2 ميجابايت. يرجى اختيار ملف أصغر.',
-      });
+    const problem = checkFile('logo', file.name, file.size);
+    if (problem) {
+      setSettingsMessage({ type: 'error', text: problem });
       return;
     }
 
@@ -157,7 +155,7 @@ export const BannerSettings: React.FC = () => {
                   <span>الشعار المصور للترويسة (اختياري)</span>
                 </h4>
                 <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                  إذا قمت برفع شعار مخصص، فسيظهر بدلاً من النص الخطي في الترويسة (يدعم PNG، SVG، JPG، WEBP بحد أقصى 2MB).
+                  إذا قمت برفع شعار مخصص، فسيظهر بدلاً من النص الخطي في الترويسة ({describeRule('logo')}).
                 </p>
               </div>
             </div>
@@ -184,7 +182,7 @@ export const BannerSettings: React.FC = () => {
                     <span>تغيير</span>
                     <input
                       type="file"
-                      accept="image/png,image/jpeg,image/webp"
+                      accept={acceptOf('logo')}
                       onChange={handleLogoUpload}
                       disabled={uploadingLogo}
                       className="hidden"
@@ -205,7 +203,7 @@ export const BannerSettings: React.FC = () => {
                 <input
                   type="file"
                   id="logo-upload"
-                  accept="image/png,image/jpeg,image/webp"
+                  accept={acceptOf('logo')}
                   onChange={handleLogoUpload}
                   disabled={uploadingLogo}
                   className="hidden"
@@ -225,7 +223,7 @@ export const BannerSettings: React.FC = () => {
                     {uploadingLogo ? 'جاري رفع الشعار...' : 'انقر لاختيار ملف الشعار أو اسحبه هنا'}
                   </div>
                   <div className="text-xs text-stone-400">
-                    PNG, SVG, JPG, WEBP (الحد الأقصى 2 ميجابايت)
+                    {describeRule('logo')}
                   </div>
                 </label>
               </div>

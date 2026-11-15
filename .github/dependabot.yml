@@ -1,0 +1,13 @@
+# Weekly dependency update pull requests: minor and patch updates are grouped into one, at most 5 open at a time.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch

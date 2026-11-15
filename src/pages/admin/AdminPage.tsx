@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { checkCurrentAdmin, logout } from '../../services/dataService';
+import { checkAdminState, logout } from '../../services/dataService';
 import { AdminLogin } from './AdminLogin';
 import { AdminDashboard } from './AdminDashboard';
 import { AdminResetPassword } from './AdminResetPassword';
@@ -10,15 +10,19 @@ import type { AdminUser } from '../../types';
 export const AdminPage: React.FC = () => {
   const [admin, setAdmin] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
+  // The check could not be completed (offline, timeout): neither signed in nor signed out
+  const [unknown, setUnknown] = useState(false);
   const location = useLocation();
 
   const verifyAdmin = async () => {
     try {
       setLoading(true);
-      const current = await checkCurrentAdmin();
-      setAdmin(current);
+      setUnknown(false);
+      const result = await checkAdminState();
+      setUnknown(result.state === 'unknown');
+      setAdmin(result.state === 'admin' ? result.user : null);
     } catch {
-      setAdmin(null);
+      setUnknown(true);
     } finally {
       setLoading(false);
     }
@@ -47,12 +51,17 @@ export const AdminPage: React.FC = () => {
         setLoading(false);
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
         // Verify user against admins table
-        const { data: adminRecord } = await supabase
+        const { data: adminRecord, error: adminError } = await supabase
           .from('admins')
           .select('user_id')
           .eq('user_id', session.user.id)
           .maybeSingle();
 
+        // A failed request says nothing about who the user is: keep the screen as it is
+        if (adminError) {
+          setLoading(false);
+          return;
+        }
         if (adminRecord) {
           setAdmin({
             email: session.user.email || '',
@@ -92,6 +101,17 @@ export const AdminPage: React.FC = () => {
       <div className="min-h-[70vh] flex flex-col items-center justify-center gap-3">
         <div className="w-10 h-10 border-4 border-emerald-800 dark:border-amber-400 border-t-transparent rounded-full animate-spin" />
         <span className="text-xs text-stone-500 font-cairo">جاري التحقق من الصلاحيات...</span>
+      </div>
+    );
+  }
+
+  if (unknown) {
+    return (
+      <div role="alert" className="min-h-[70vh] flex flex-col items-center justify-center gap-4 px-4 text-center">
+        <p className="font-semibold text-stone-800 dark:text-stone-100">تعذّر التحقق من الجلسة. تحقق من الاتصال.</p>
+        <button type="button" onClick={verifyAdmin} className="h-11 px-5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-semibold">
+          إعادة المحاولة
+        </button>
       </div>
     );
   }

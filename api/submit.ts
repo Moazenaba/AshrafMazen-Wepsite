@@ -7,6 +7,10 @@
 // Checks: size limits, links must be http(s), a hidden field bots fill in, a minimum time spent on the form,
 // and a few requests per hour per address. The database enforces its own limits again (see the migration).
 
+import { addressOf, createLimiter } from './_rateLimit.js'; // Node on Vercel needs the extension
+import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
+import { logEvent } from './_log.js'; // Node on Vercel needs the extension
+
 const KINDS = ['book', 'audio', 'video', 'correction', 'removal'] as const;
 type Kind = (typeof KINDS)[number];
 
@@ -14,8 +18,7 @@ const LIMITS = { title: 200, url: 600, author: 200, details: 2000, target: 300, 
 const PER_HOUR = 5;
 const MIN_FORM_SECONDS = 4;
 
-// Best effort: each server instance remembers its own recent senders
-const recent = new Map<string, number[]>();
+const allowed = createLimiter(PER_HOUR, 3_600_000);
 
 const send = (res: any, status: number, body: unknown) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -37,19 +40,6 @@ const isHttpUrl = (value: string) => {
     return false;
   }
 };
-
-function tooMany(ip: string): boolean {
-  const now = Date.now();
-  const hits = (recent.get(ip) || []).filter((t) => now - t < 60 * 60 * 1000);
-  if (hits.length >= PER_HOUR) {
-    recent.set(ip, hits);
-    return true;
-  }
-  hits.push(now);
-  recent.set(ip, hits);
-  if (recent.size > 5000) for (const key of recent.keys()) recent.delete(key);
-  return false;
-}
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return send(res, 405, { error: 'method-not-allowed' });
@@ -83,7 +73,7 @@ export default async function handler(req: any, res: any) {
       let human = false;
       if (token) {
         try {
-          const check = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+          const check = await fetchWithTimeout('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({ secret: turnstileSecret, response: token }),
@@ -96,8 +86,7 @@ export default async function handler(req: any, res: any) {
       if (!human) return send(res, 400, { error: 'تعذّر التحقق من أنك لست روبوتاً. أعد تحميل الصفحة وحاول مرة أخرى.' });
     }
 
-    const forwarded = String(req.headers?.['x-forwarded-for'] || '').split(',')[0].trim();
-    if (tooMany(forwarded || req.socket?.remoteAddress || 'unknown')) {
+    if (!allowed(addressOf(req))) {
       return send(res, 429, { error: 'وصلتَ للحد المسموح به من الطلبات هذه الساعة. حاول لاحقاً.' });
     }
 
@@ -118,7 +107,7 @@ export default async function handler(req: any, res: any) {
       return send(res, 400, { error: 'اشرح المطلوب في جملة على الأقل.' });
     }
 
-    const response = await fetch(`${supabaseUrl}/rest/v1/submissions`, {
+    const response = await fetchWithTimeout(`${supabaseUrl}/rest/v1/submissions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -130,9 +119,9 @@ export default async function handler(req: any, res: any) {
     });
     if (!response.ok) {
       const text = await response.text();
-      console.error('submission rejected by the database:', response.status, text.slice(0, 300));
+      await logEvent('error', 'submit', 'submission rejected by the database', { status: response.status, body: text.slice(0, 300) });
       if (!process.env.SUPABASE_SERVICE_ROLE_KEY && [401, 403].includes(response.status)) {
-        console.error('SUPABASE_SERVICE_ROLE_KEY is not set in the environment: visitors can no longer write directly, set the key in Vercel.');
+        await logEvent('error', 'submit', 'the server key is not set in the environment: visitors can no longer write, set it in Vercel');
       }
       return send(res, 502, {
         error: /too many pending/i.test(text)
@@ -142,7 +131,7 @@ export default async function handler(req: any, res: any) {
     }
     return send(res, 201, { ok: true });
   } catch (err) {
-    console.error('submit function error:', err);
+    await logEvent('error', 'submit', 'function error', { reason: err instanceof Error ? err.message : String(err) });
     return send(res, 500, { error: 'حدث خطأ غير متوقع. حاول مرة أخرى.' });
   }
 }

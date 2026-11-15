@@ -10,6 +10,7 @@ import { PlaylistCard } from './youtube/PlaylistCard';
 import { getCategories } from '../../services/dataService';
 import { inputClass } from './youtube/styles';
 import { movePlaylist, newUploadId, titleFromFile } from './youtube/overridesDraft';
+import { timedFetch } from '../../lib/timedFetch';
 
 const empty: YoutubeOverrides = EMPTY_OVERRIDES;
 
@@ -21,7 +22,7 @@ const playlistIdFrom = (text: string) =>
 async function youtubeTitle(videoId: string): Promise<string | null> {
   try {
     const url = `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}`;
-    const response = await fetch(url);
+    const response = await timedFetch(url);
     if (!response.ok) return null;
     const data = await response.json();
     return typeof data?.title === 'string' && data.title.trim() ? data.title.trim() : null;

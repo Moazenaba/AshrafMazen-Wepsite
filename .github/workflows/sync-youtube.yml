@@ -1,9 +1,12 @@
-name: Sync YouTube
+name: Sync YouTube and check the site
 
 # A new video on the channel reaches the saved library (src/data/youtube-library.ts), and so the sitemap and the
 # prerendered pages, without anyone touching the repo. When the file changes the job commits it to main and Vercel
 # deploys. (The site itself already shows new videos within the hour through api/youtube-library; this job is what
 # lets Google find them.)
+#
+# Daily at 03:15 UTC the job also runs scripts/check-content-changed.mjs: when the live site lists lessons the deployed pages were
+# not built from, it pushes an empty commit "Rebuild: published content changed", so Vercel rebuilds the sitemap and the pages.
 #
 # Triggers:
 #   schedule            every 30 minutes (GitHub may start it a few minutes late). The repository is private, where the free plan
@@ -13,11 +16,16 @@ name: Sync YouTube
 #   repository_dispatch event type "youtube-upload": for anything that can call the GitHub API the moment a video goes up
 #                       (a Make/Zapier/IFTTT "new YouTube video" step, for example)
 #
+# The same job then checks the live site (scripts/smoke-test.mjs) as extra steps, which costs no extra Actions minutes. A failed
+# check is also written to the site's own error log (scripts/report-monitor.mjs) and turns the run red, so GitHub emails the owner.
+#
 # If YouTube answers no playlist (blocked, or its page changed) the script exits with an error and this run turns red;
 # GitHub then emails the repository owner.
 on:
   schedule:
     - cron: '*/30 * * * *'
+    # Once a day this job also checks whether lessons were published since the deployed pages were built (see below)
+    - cron: '15 3 * * *'
   workflow_dispatch:
   repository_dispatch:
     types: [youtube-upload]
@@ -57,3 +65,27 @@ jobs:
           git commit -m "YouTube: new videos added to the library automatically"
           git pull --rebase origin main
           git push origin main
+      - name: Rebuild when published content changed
+        if: github.event.schedule == '15 3 * * *'
+        run: |
+          result=$(node scripts/check-content-changed.mjs)
+          echo "Content check: $result"
+          if [ "$result" = "changed" ]; then
+            git config user.name "Moazenaba"
+            git config user.email "335531902+Moazenaba@users.noreply.github.com"
+            git commit --allow-empty -m "Rebuild: published content changed"
+            git pull --rebase origin main
+            git push origin main
+          fi
+      - name: Check the live site
+        id: smoke
+        continue-on-error: true
+        run: node scripts/smoke-test.mjs https://ashraf-mazen.vercel.app --json > smoke.json
+      - name: Record a failed check
+        if: steps.smoke.outcome == 'failure'
+        run: node scripts/report-monitor.mjs smoke.json
+        env:
+          SITE_URL: https://ashraf-mazen.vercel.app
+      - name: Fail the run when the site is down
+        if: steps.smoke.outcome == 'failure'
+        run: exit 1

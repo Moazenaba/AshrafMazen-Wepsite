@@ -19,15 +19,23 @@ export const SETTING_KEYS = [
   'lesson_extras',
 ];
 
+const LESSON_COLUMNS = 'id,series_id,title,lesson_number,youtube_url,audio_url,status,published_at,created_at,views';
+
 const QUERIES = {
   settings: `site_settings?select=key,value&key=in.(${SETTING_KEYS.join(',')})`,
   categories: 'categories?select=*&order=sort_order.asc',
   series: 'series?select=*&order=sort_order.asc',
-  lessons: 'lessons?select=*&status=eq.published&order=published_at.desc',
+  // Never the transcript text: only what the home page shows. The ids of lessons that have a text come from `transcripts`.
+  lessons: `lessons?select=${LESSON_COLUMNS}&status=eq.published&order=published_at.desc&limit=300`,
+  transcripts: 'lessons?select=id&status=eq.published&transcript=neq.',
   social: 'social_links?select=*&is_active=eq.true&order=sort_order.asc',
 } as const;
 
-export async function readSiteData(url: string, key: string, fetcher: typeof fetch = fetch) {
+// Gives up after 8 s. Written here instead of importing api/_fetch.ts because scripts/prerender.mjs loads this file
+// directly with Node, which cannot resolve the ".js" import that Vercel needs.
+const timedGet: typeof fetch = (input, init) => fetch(input, { ...init, signal: AbortSignal.timeout(8000) });
+
+export async function readSiteData(url: string, key: string, fetcher: typeof fetch = timedGet) {
   const entries = await Promise.all(
     Object.entries(QUERIES).map(async ([name, query]) => {
       const response = await fetcher(`${url}/rest/v1/${query}`, { headers: { apikey: key, Authorization: `Bearer ${key}` } });
@@ -35,7 +43,9 @@ export async function readSiteData(url: string, key: string, fetcher: typeof fet
       return [name, await response.json()] as const;
     })
   );
-  return { updatedAt: new Date().toISOString(), ...Object.fromEntries(entries) };
+  const answer: Record<string, any> = Object.fromEntries(entries);
+  answer.transcripts = (answer.transcripts as { id: string }[]).map((row) => row.id);
+  return { updatedAt: new Date().toISOString(), ...answer };
 }
 
 export default async function handler(_req: any, res: any) {
@@ -57,7 +67,7 @@ export default async function handler(_req: any, res: any) {
     res.setHeader('Cache-Control', 'public, max-age=15, s-maxage=30, stale-while-revalidate=120');
     return res.status(200).send(body);
   } catch (err) {
-    console.error('api/site:', err);
+    await (await import('./_log.js')).logEvent('error', 'site', 'upstream failed', { reason: err instanceof Error ? err.message : String(err) });
     // The site falls back to asking Supabase directly
     res.setHeader('Cache-Control', 'no-store');
     return res.status(502).send(JSON.stringify({ error: 'upstream' }));

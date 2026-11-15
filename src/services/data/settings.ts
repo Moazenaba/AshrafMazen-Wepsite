@@ -1,7 +1,9 @@
 // Site settings and branding (name, logo, about text).
 import { supabase } from '../../lib/supabase';
 import { translateSupabaseError } from '../../utils/supabaseErrors';
-import { deleteFromR2, isR2Url, uploadToR2 } from '../r2';
+import { uploadToR2 } from '../r2';
+import { checkFile } from '../../constants/fileRules';
+import { deleteIfUnused } from './fileUsage';
 import type { SiteSettings } from '../../types';
 import { DEFAULT_NAME_FONT } from '../../constants/nameFonts';
 import { loadSiteBundle } from './siteBundle';
@@ -72,25 +74,16 @@ export async function saveSiteSettings(settings: Partial<SiteSettings>): Promise
   cachedSiteSettings = null;
   await getSiteSettings(true);
   // The logo was replaced or removed: the old file on R2 is no longer used
-  if (settings.banner_logo_url !== undefined && previousLogo && previousLogo !== settings.banner_logo_url && isR2Url(previousLogo)) {
-    await deleteFromR2(previousLogo);
+  if (settings.banner_logo_url !== undefined && previousLogo && previousLogo !== settings.banner_logo_url) {
+    await deleteIfUnused(previousLogo);
   }
 }
 
 export async function uploadBrandingLogo(file: File): Promise<string> {
   if (!file) throw new Error('لم يتم تحديد أي ملف شعار.');
 
-  // Validate format
-  const extension = file.name.split('.').pop()?.toLowerCase() || '';
-  const allowed = ['png', 'jpg', 'jpeg', 'svg', 'webp'];
-  if (!allowed.includes(extension)) {
-    throw new Error('صيغة الملف غير مدعومة. يرجى اختيار ملف صورة بصيغة (PNG, JPG, SVG, WebP).');
-  }
-
-  // Validate size (max 2MB)
-  if (file.size > 2 * 1024 * 1024) {
-    throw new Error('حجم الصورة كبير جداً. الحد الأقصى المسموح به هو 2 ميجابايت.');
-  }
+  const problem = checkFile('logo', file.name, file.size);
+  if (problem) throw new Error(problem);
 
   return uploadToR2(file, 'logo');
 }

@@ -101,6 +101,7 @@ export const CategoriesTab: React.FC<CategoriesTabProps> = ({ categories, series
                           <Link
                             to={`/category/${cat.slug}`}
                             target="_blank"
+                            rel="noopener noreferrer"
                             title="معاينة في الموقع"
                             className="p-1.5 rounded-lg text-stone-500 hover:text-emerald-800 dark:hover:text-amber-400"
                           >
