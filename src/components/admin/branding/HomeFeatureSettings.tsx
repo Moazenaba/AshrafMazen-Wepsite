@@ -63,6 +63,18 @@ export const HomeFeatureSettings: React.FC = () => {
                   setMessage({ type: 'ok', text: 'تم رفع الصورة وتفعيل البطاقة. اضغط «حفظ» لتظهر في الموقع.' });
                 }} onError={(text) => setMessage({ type: 'error', text })} />
               <input aria-label="أو رابط صورة" dir="ltr" value={draft.imageUrl} onChange={(e) => set('imageUrl', e.target.value)} placeholder="https://..." className={`${input} flex-1 min-w-48`} />
+              {draft.imageUrl && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDraft((d) => ({ ...d, imageUrl: '', enabled: false }));
+                    setMessage({ type: 'ok', text: 'أُزيلت الصورة وأُطفئت البطاقة. اضغط «حفظ» لتثبيت ذلك.' });
+                  }}
+                  className="inline-flex items-center h-11 px-3 rounded-xl text-sm font-semibold text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40"
+                >
+                  إزالة الصورة
+                </button>
+              )}
             </div>
             <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">الأنسب صورة عرضية بنسبة ١٦:٩ (مثلاً ١٢٨٠×٧٢٠)، حتى ٨ ميجابايت.</p>
           </div>

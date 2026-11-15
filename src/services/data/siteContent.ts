@@ -17,6 +17,8 @@ import {
 import type { TickerQuote } from '../../constants/tickerQuotes';
 import { cleanSideMenu, parseSideMenu, type SideMenuConfig } from './sideMenuRules';
 import { loadSiteBundle } from './siteBundle';
+import { deleteFromR2, isR2Url } from '../r2';
+import { fileKey } from '../../lib/fileLinks';
 import { bundleContent } from './siteBundleRules';
 import { cleanHomeFeature, parseHomeFeature, validateHomeFeature, type HomeFeature } from './homeFeatureRules';
 import { cleanLiveStream, parseLiveStream, validateLiveStream, type LiveStream } from './liveStreamRules';
@@ -111,4 +113,18 @@ export async function readLiveStream(): Promise<LiveStream> {
   const { data, error } = await supabase.from('site_settings').select('value').eq('key', SITE_CONTENT_KEYS.live).maybeSingle();
   if (error) throw new Error(translateSupabaseError(error));
   return parseLiveStream(data?.value ?? null);
+}
+
+// Removes the welcome sound altogether: the setting is cleared (so nothing plays), and the file is deleted from storage
+// when it was uploaded to the site and no lesson uses the same file (a lesson's recording saved here by mistake stays).
+export async function removeWelcomeSound(current: WelcomeSound): Promise<WelcomeSound> {
+  const cleared = cleanWelcomeSound({ enabled: false, url: '', volume: current.volume });
+  await write(SITE_CONTENT_KEYS.welcome, cleared);
+  const key = fileKey(current.url);
+  if (key && isR2Url(current.url)) {
+    const { data } = await supabase.from('lessons').select('audio_url').not('audio_url', 'is', null);
+    const usedByLesson = (data ?? []).some((row) => fileKey(row.audio_url as string) === key);
+    if (!usedByLesson) await deleteFromR2(current.url);
+  }
+  return cleared;
 }
