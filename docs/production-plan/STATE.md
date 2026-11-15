@@ -14,9 +14,9 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 | 7 | WP-03 site bundle size | DONE | prod/wp-03-bundle-size | 2026-11-15 | 341 | lines 23%, functions 20% |
 | 8 | WP-05 error visibility | DONE | prod/wp-05-error-visibility | 2026-11-15 | 359 | lines 23%, functions 20% |
 | 9 | WP-06 monitoring | DONE | prod/wp-06-monitoring | 2026-11-15 | 364 | lines 23%, functions 20% |
-| 10 | WP-08 YouTube robustness | DONE (code); step 1 data pending | prod/wp-08-youtube-robustness | 2026-11-15 | 370 | lines 23%, functions 20% |
+| 10 | WP-08 YouTube robustness | BLOCKED (partial): code merged; publish dates need YouTube to answer again (run --redate later) | prod/wp-08-youtube-robustness | 2026-11-15 | 370 | lines 23%, functions 20% |
 | 11 | WP-11 admin forms | DONE | prod/wp-11-admin-forms | 2026-11-15 | 430 | lines 23%, functions 20% |
-| 12 | WP-12 build, CI, documents | DONE (lint blocked) | prod/wp-12-build-ci-docs | 2026-11-15 | see below | lines 23%, functions 20% |
+| 12 | WP-12 build, CI, documents | BLOCKED (partial): everything merged except lint, typescript-eslint does not support TypeScript 7 | prod/wp-12-build-ci-docs | 2026-11-15 | see below | lines 23%, functions 20% |
 | 13 | WP-10 browser tests | DONE | prod/wp-10-browser-tests | 2026-11-15 | 437 unit + 32 browser (3 runs in a row) | lines 23%, functions 20% |
 | 14 | WP-14b Quran page | BLOCKED: another session is already building the Quran page on branch feat/quran-wire | | 2026-11-15 | | |
 | 15 | WP-13 performance | DONE (Part A not applied) | prod/wp-13-performance | 2026-11-15 | 446 unit + 32 browser | lines 23%, functions 20% |
