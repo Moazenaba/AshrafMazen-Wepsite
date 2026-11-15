@@ -8,6 +8,11 @@
 import { randomUUID } from 'node:crypto';
 import { fileLink, isAdminToken, keyFromLink, presign, r2Config, type R2Config } from './_r2.js'; // Node on Vercel needs the extension (the .ts file is compiled to .js)
 
+// The folders of the site's own files. Admin deletes may touch these (and the status check's folder), visitors may read PUBLIC_FOLDERS
+export const SITE_FOLDERS = /^(library\/(files|covers)|audio|branding|media\/video|setup-check)\//;
+const PUBLIC_FOLDERS = /^(library\/(files|covers)|audio|branding|media\/video)\//;
+const isSiteKey = (key: string) => SITE_FOLDERS.test(key) && !key.includes('..');
+
 const KINDS = {
   pdf: { folder: 'library/files', extensions: ['pdf'], maxMb: 200, type: 'application/pdf' },
   cover: { folder: 'library/covers', extensions: ['jpg', 'jpeg', 'png', 'webp'], maxMb: 5, type: '' },
@@ -53,18 +58,20 @@ async function sign(cfg: R2Config, body: any, res: any) {
   if (Number(body?.size) > rules.maxMb * 1024 * 1024) {
     return send(res, 400, { error: `حجم الملف أكبر من ${rules.maxMb} ميجابايت.` });
   }
+  const size = Number(body?.size) > 0 ? Number(body.size) : undefined;
   const key = `${rules.folder}/${randomUUID()}.${extension}`;
   const contentType = rules.type || IMAGE_TYPES[extension] || AUDIO_TYPES[extension] || VIDEO_TYPES[extension] || 'application/octet-stream';
   return send(res, 200, {
-    uploadUrl: presign(cfg, 'PUT', key, 15 * 60),
+    uploadUrl: presign(cfg, 'PUT', key, 15 * 60, {}, size),
     publicUrl: fileLink(cfg, key),
     contentType,
+    contentLength: size,
   });
 }
 
 async function remove(cfg: R2Config, body: any, res: any) {
   const key = keyFromLink(cfg, String(body?.url || ''));
-  if (!key) return send(res, 400, { error: 'هذا الرابط ليس ملفاً مرفوعاً على الموقع.' });
+  if (!key || !isSiteKey(key)) return send(res, 400, { error: 'هذا الرابط ليس ملفاً مرفوعاً على الموقع.' });
   const response = await fetch(presign(cfg, 'DELETE', key, 60), { method: 'DELETE' });
   if (!response.ok && response.status !== 404) return send(res, 502, { error: 'تعذّر حذف الملف من التخزين.' });
   return send(res, 200, { deleted: key });
@@ -90,7 +97,7 @@ const LINK_SECONDS = 24 * 60 * 60;
 function serveFile(cfg: R2Config, req: any, res: any) {
   const key = String(req.query?.file || '');
   // Only the site's own uploads, so this cannot be used to read anything else in the bucket
-  if (!/^(library\/(files|covers)|audio|branding|media\/video)\//.test(key) || key.includes('..')) return send(res, 400, { error: 'رابط ملف غير صالح.' });
+  if (!PUBLIC_FOLDERS.test(key) || key.includes('..')) return send(res, 400, { error: 'رابط ملف غير صالح.' });
   // With a public address (R2_PUBLIC_URL) every file but a library PDF is sent there for good: the browser remembers
   // this permanent redirect for a year (each upload has its own unique name) and never asks the site again for it.
   // PDFs stay here: the book viewer and the download under the book's title need this function.

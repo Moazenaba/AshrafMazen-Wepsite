@@ -7,6 +7,8 @@
 // Checks: size limits, links must be http(s), a hidden field bots fill in, a minimum time spent on the form,
 // and a few requests per hour per address. The database enforces its own limits again (see the migration).
 
+import { addressOf, createLimiter } from './_rateLimit.js'; // Node on Vercel needs the extension
+
 const KINDS = ['book', 'audio', 'video', 'correction', 'removal'] as const;
 type Kind = (typeof KINDS)[number];
 
@@ -14,8 +16,7 @@ const LIMITS = { title: 200, url: 600, author: 200, details: 2000, target: 300, 
 const PER_HOUR = 5;
 const MIN_FORM_SECONDS = 4;
 
-// Best effort: each server instance remembers its own recent senders
-const recent = new Map<string, number[]>();
+const allowed = createLimiter(PER_HOUR, 3_600_000);
 
 const send = (res: any, status: number, body: unknown) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -37,19 +38,6 @@ const isHttpUrl = (value: string) => {
     return false;
   }
 };
-
-function tooMany(ip: string): boolean {
-  const now = Date.now();
-  const hits = (recent.get(ip) || []).filter((t) => now - t < 60 * 60 * 1000);
-  if (hits.length >= PER_HOUR) {
-    recent.set(ip, hits);
-    return true;
-  }
-  hits.push(now);
-  recent.set(ip, hits);
-  if (recent.size > 5000) for (const key of recent.keys()) recent.delete(key);
-  return false;
-}
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return send(res, 405, { error: 'method-not-allowed' });
@@ -96,8 +84,7 @@ export default async function handler(req: any, res: any) {
       if (!human) return send(res, 400, { error: 'تعذّر التحقق من أنك لست روبوتاً. أعد تحميل الصفحة وحاول مرة أخرى.' });
     }
 
-    const forwarded = String(req.headers?.['x-forwarded-for'] || '').split(',')[0].trim();
-    if (tooMany(forwarded || req.socket?.remoteAddress || 'unknown')) {
+    if (!allowed(addressOf(req))) {
       return send(res, 429, { error: 'وصلتَ للحد المسموح به من الطلبات هذه الساعة. حاول لاحقاً.' });
     }
 
