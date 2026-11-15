@@ -19,7 +19,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 | 12 | WP-12 build, CI, documents | DONE (lint blocked) | prod/wp-12-build-ci-docs | 2026-11-15 | see below | lines 23%, functions 20% |
 | 13 | WP-10 browser tests | DONE | prod/wp-10-browser-tests | 2026-11-15 | 437 unit + 32 browser (3 runs in a row) | lines 23%, functions 20% |
 | 14 | WP-14b Quran page | BLOCKED: another session is already building the Quran page on branch feat/quran-wire | | 2026-11-15 | | |
-| 15 | WP-13 performance | TODO | | | | |
+| 15 | WP-13 performance | DONE (Part A not applied) | prod/wp-13-performance | 2026-11-15 | 446 unit + 32 browser | lines 23%, functions 20% |
 | 16 | WP-15 database shape | TODO | | | | |
 
 ## SQL the owner must run
@@ -58,7 +58,11 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 
 ## Measurements
 
-(Lighthouse before/after, bundle size, browser test count)
+- WP-13 Lighthouse mobile, local preview, 3 runs before any change: 69, 69, 69 (median 69); LCP 1.6-1.7 s; TBT 2.8-3.3 s; CLS 0.009. After: not re-measured, Part A was not applied.
+- Part A not applied: the home hero is text only (no picture to preload; LCP is already 1.7 s), the score is limited by TBT (script execution), the entry script is 44 kB gzip and nothing over 60 kB is unused on the first screen (admin is already lazy). Steps 1-3 cannot reach 85; full hydration is the next option (owner decision).
+- Part B done: the welcome sound's length is saved with it (`seconds`); visitors' browsers skip a recording over 30 s, and skip the header probe when the short length is known. The admin message for a too-long recording is the existing, more detailed one.
+- Part C done: `scripts/check-bundle-size.mjs`, budget 48813 bytes gzip (44375 measured + 10%), in `npm run check` and CI.
+- Browser tests: 32 local + 3 live (read-only, need E2E_BASE_URL).
 
 ## Final review
 

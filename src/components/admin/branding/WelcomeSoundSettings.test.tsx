@@ -11,9 +11,29 @@ vi.mock('../FileUploadButton', () => ({ FileUploadButton: () => <button type="bu
 
 import { WelcomeSoundSettings } from './WelcomeSoundSettings';
 
+// jsdom cannot read audio headers: a fake Audio answers with the length the test sets
+let length = 10;
+class FakeAudio {
+  duration = 0;
+  preload = '';
+  volume = 1;
+  onloadedmetadata: (() => void) | null = null;
+  onerror: (() => void) | null = null;
+  removeAttribute() {}
+  pause() {}
+  set src(_: string) {
+    queueMicrotask(() => {
+      this.duration = length;
+      this.onloadedmetadata?.();
+    });
+  }
+}
+
 const content = (welcome: object) => ({ welcome: { ...EMPTY_WELCOME, ...welcome } });
 
 beforeEach(() => {
+  length = 10;
+  vi.stubGlobal('Audio', FakeAudio);
   h.get.mockReset().mockResolvedValue(content({ url: '/api/r2?file=audio%2Fw.mp3', enabled: false }));
   h.save.mockReset().mockImplementation(async (s) => s);
   h.remove.mockReset().mockResolvedValue(EMPTY_WELCOME);
@@ -39,5 +59,21 @@ describe('WelcomeSoundSettings', () => {
     render(<WelcomeSoundSettings />);
     await userEvent.click(await screen.findByRole('button', { name: /حذف/ }));
     await waitFor(() => expect(h.remove).toHaveBeenCalledTimes(1));
+  });
+
+  it('saves the length of the recording with it', async () => {
+    length = 12;
+    render(<WelcomeSoundSettings />);
+    await userEvent.click(await screen.findByRole('button', { name: /^حفظ$/ }));
+    await waitFor(() => expect(h.save).toHaveBeenCalledWith(expect.objectContaining({ seconds: 12 })));
+  });
+
+  it('refuses to save an enabled recording longer than the limit', async () => {
+    length = 60;
+    h.get.mockResolvedValue({ welcome: { ...EMPTY_WELCOME, url: '/api/r2?file=audio%2Fw.mp3', enabled: true } });
+    render(<WelcomeSoundSettings />);
+    await userEvent.click(await screen.findByRole('button', { name: /^حفظ$/ }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('30 ثانية');
+    expect(h.save).not.toHaveBeenCalled();
   });
 });

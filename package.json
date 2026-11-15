@@ -16,7 +16,7 @@
     "e2e": "playwright test --project=local",
     "e2e:live": "playwright test --project=live",
     "lint": "tsc --noEmit",
-    "check": "npm run typecheck && npm run test && npm run build",
+    "check": "npm run typecheck && npm run test && npm run build && node scripts/check-bundle-size.mjs",
     "health": "tsx scripts/health-check.ts",
     "smoke": "node scripts/smoke-test.mjs",
     "r2:setup": "tsx scripts/r2-setup.ts",

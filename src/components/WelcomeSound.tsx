@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Volume2, X } from 'lucide-react';
 import { getSiteContent } from '../services/data/siteContent';
-import { isQuietPage, isShortWelcome, MAX_WELCOME_SECONDS, shouldWelcome, type WelcomeSound as Sound } from '../services/data/welcomeSoundRules';
+import { isQuietPage, isShortWelcome, MAX_WELCOME_SECONDS, shouldLoadWelcome, shouldWelcome, type WelcomeSound as Sound } from '../services/data/welcomeSoundRules';
 import { useAudio } from '../context/AudioContext';
 import { fileSrc } from '../lib/fileLinks';
 
@@ -49,6 +49,13 @@ export const WelcomeSound: React.FC = () => {
     let alive = true;
     getSiteContent().then((c) => {
       if (!alive || !c.welcome.enabled || !c.welcome.url) return;
+      // Its saved length already says it is too long: no Audio element, no request
+      if (!shouldLoadWelcome(c.welcome.seconds)) return;
+      // Its saved length says it is short: no need to download its header to find out
+      if (c.welcome.seconds !== undefined) {
+        setSound(c.welcome);
+        return;
+      }
       const probe = new Audio();
       probe.preload = 'metadata';
       probe.onloadedmetadata = () => {
