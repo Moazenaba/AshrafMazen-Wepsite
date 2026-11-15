@@ -5,7 +5,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 
 | # | Step | Status | Branch | Date | Tests | Coverage |
 |---|---|---|---|---|---|---|
-| 1 | WP-09 test foundation | TODO | | | | |
+| 1 | WP-09 test foundation | DONE | prod/wp-09-test-foundation | 2026-11-15 | 285 | lines 23%, functions 20% (gate N=20) |
 | 2 | WP-14a finished branches | TODO | | | | |
 | 3 | WP-01 security | TODO | | | | |
 | 4 | WP-02 admin session | TODO | | | | |
@@ -32,7 +32,9 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 
 ## Found on the way
 
-(none yet)
+- `withSiteSeed` in prerender wrote `'<'` (a plain `<`), so a `</script` in the data could end the seed script early; fixed in `scripts/prerenderParts.mjs` because WP-09's test requires it.
+- The fake database (and so `/dev/admin`) lacked the `save_setting_if_unchanged` rpc, so saving lesson extras failed there; added to `src/test/fakeDatabase.ts`.
+- `/dev/admin` was not opened in a browser after the fake-database extraction (typecheck and tests pass).
 
 ## Measurements
 
