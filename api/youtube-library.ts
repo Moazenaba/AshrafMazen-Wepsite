@@ -16,7 +16,7 @@ const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || 'UCisGvsFtKyDU6NTFywaITzQ';
 // The list of the channel's uploads that are in no playlist
 const LATEST_ID = 'channel-latest';
 // One stored library per set of admin-added playlists: adding or removing one builds a new library at once
-// instead of waiting for the 6 hours to pass. The site asks with ?p=<those playlist ids>, so the CDN copy changes too.
+// instead of waiting for the hour (TTL_MS) to pass. The site asks with ?p=<those playlist ids>, so the CDN copy changes too.
 const cache = new Map<string, { at: number; body: string }>();
 
 async function fetchPage(url: string): Promise<string> {
