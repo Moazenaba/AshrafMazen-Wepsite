@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { supabase } from '../../lib/supabase';
 import { db, installFakeDatabase, resetFakeDatabase } from '../../test/fakeDatabase';
 
 const deleted: string[] = [];
@@ -52,5 +53,12 @@ describe('lessonsAdmin against the fake database', () => {
     expect(extras().featured).not.toContain('lesson-1');
     expect(extras().images['lesson-1']).toBeUndefined();
     expect(deleted).toEqual(['/api/r2?file=audio%2Flesson-1.mp3']);
+  });
+
+  it('says the lesson was saved when only its extras failed', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    (supabase as any).rpc = async () => ({ data: null, error: { message: 'down', code: '500' } });
+    await expect(updateLesson('lesson-1', { title: 'x', featured: true })).rejects.toThrow('حُفظ الدرس لكن تعذّر حفظ');
+    expect(db.lessons.find((l) => l.id === 'lesson-1')!.title).toBe('x');
   });
 });

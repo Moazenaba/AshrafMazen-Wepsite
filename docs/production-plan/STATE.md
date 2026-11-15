@@ -10,7 +10,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 | 3 | WP-01 security | DONE | prod/wp-01-security | 2026-11-15 | 302 | lines 23%, functions 20% |
 | 4 | WP-02 admin session | DONE | prod/wp-02-admin-session | 2026-11-15 | 310 | lines 23%, functions 20% |
 | 5 | WP-07 timeouts and degraded states | DONE | prod/wp-07-timeouts | 2026-11-15 | 321 | lines 23%, functions 20% |
-| 6 | WP-04 file lifecycle | TODO | | | | |
+| 6 | WP-04 file lifecycle | DONE | prod/wp-04-file-lifecycle | 2026-11-15 | 333 | lines 23%, functions 20% |
 | 7 | WP-03 site bundle size | TODO | | | | |
 | 8 | WP-05 error visibility | TODO | | | | |
 | 9 | WP-06 monitoring | TODO | | | | |
@@ -27,6 +27,8 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 (none yet)
 
 ## Needs the owner
+
+- Files are deleted by key now; orphans created before WP-04 remain (clean-up is the owner's decision).
 
 - WP-01 step 4 (signed upload length): after the merge, upload one small picture from the admin; if storage answers 403 SignatureDoesNotMatch, revert `contentLength` in `api/r2.ts` `sign` (kept, not yet checked live).
 - WP-01 CSP: mp3quran hosts and `report-uri /api/csp-report` not added yet (Quran branch and WP-05 are not merged); add them in WP-14b / WP-05.

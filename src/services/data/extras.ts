@@ -3,6 +3,7 @@
 import { supabase } from '../../lib/supabase';
 import type { Lesson, LessonChapter } from '../../types';
 import { updateSiteRecord } from './jsonRecord';
+import { deleteIfUnused } from './fileUsage';
 
 interface LessonExtras {
   featured: string[];
@@ -40,6 +41,7 @@ export async function readLessonExtras(): Promise<LessonExtras> {
 export async function saveLessonExtras(lessonId: string, data: Partial<Lesson>): Promise<void> {
   if (data.featured === undefined && data.chapters === undefined && data.image === undefined) return;
   // Applied to the latest saved copy, so another admin's pinned lessons and chapters are kept
+  let previousPicture = '';
   await updateSiteRecord(LESSON_EXTRAS_KEY, parseLessonExtras, (extras) => {
     if (data.featured !== undefined) {
       extras.featured = extras.featured.filter((id) => id !== lessonId);
@@ -51,11 +53,14 @@ export async function saveLessonExtras(lessonId: string, data: Partial<Lesson>):
     }
     if (data.image !== undefined) {
       const url = String(data.image || '').trim();
+      previousPicture = extras.images[lessonId] || '';
       if (url) extras.images[lessonId] = url;
       else delete extras.images[lessonId];
     }
     return extras;
   });
+  // The picture was replaced or removed: its file goes unless something else still uses it
+  if (previousPicture && previousPicture !== String(data.image || '').trim()) await deleteIfUnused(previousPicture);
 }
 
 export function withExtras<T extends Lesson>(lesson: T, extras: LessonExtras): T {
