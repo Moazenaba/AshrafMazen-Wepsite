@@ -6,6 +6,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.{ts,tsx}', 'api/**/*.test.ts', 'scripts/**/*.test.mjs'],
+    exclude: ['e2e/**', 'node_modules/**'],
     setupFiles: ['src/test/setup.ts'],
     coverage: {
       provider: 'v8',
