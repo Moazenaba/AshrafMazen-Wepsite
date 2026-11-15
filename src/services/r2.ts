@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { timedFetch } from '../lib/timedFetch';
+import { reportError } from '../lib/reportError';
 
 // The site's files (recordings, books, covers, the logo) live on Cloudflare R2 and nowhere else.
 // The keys stay on the server (api/r2.ts); the browser only ever gets a short-lived signed link.
@@ -46,10 +47,18 @@ export async function uploadToR2(file: File, kind: R2Kind, onProgress?: (fractio
     xhr.open('PUT', signed.uploadUrl);
     xhr.setRequestHeader('Content-Type', signed.contentType || file.type || 'application/octet-stream');
     xhr.upload.onprogress = (e) => e.lengthComputable && onProgress?.(e.loaded / e.total);
-    xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`رفض التخزين الملف (${xhr.status}).`)));
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) return resolve();
+      const err = new Error(`رفض التخزين الملف (${xhr.status}).`);
+      reportError('upload-failed', err, { kind, status: xhr.status });
+      reject(err);
+    };
     // What a browser reports when the bucket has no CORS rule for this site
-    xhr.onerror = () =>
-      reject(new Error('منع المتصفح الرفع إلى Cloudflare R2. أضف عنوان الموقع إلى قواعد CORS للحاوية (R2 ← الحاوية ← Settings ← CORS Policy).'));
+    xhr.onerror = () => {
+      const err = new Error('منع المتصفح الرفع إلى Cloudflare R2. أضف عنوان الموقع إلى قواعد CORS للحاوية (R2 ← الحاوية ← Settings ← CORS Policy).');
+      reportError('upload-failed', err, { kind, blocked: true });
+      reject(err);
+    };
     xhr.send(file);
   });
   return signed.publicUrl as string;

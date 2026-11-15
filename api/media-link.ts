@@ -19,6 +19,7 @@ import {
 } from './_providers.js'; // Node on Vercel needs the extension
 import { addressOf, createLimiter } from './_rateLimit.js';
 import { YOUTUBE_LIBRARY } from '../src/data/youtube-library.js';
+import { logEvent } from './_log.js'; // Node on Vercel needs the extension
 
 const CHANNEL_HANDLE = process.env.YOUTUBE_CHANNEL_HANDLE || 'Ashrafmazen';
 const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || 'UCisGvsFtKyDU6NTFywaITzQ';
@@ -169,11 +170,11 @@ export default async function handler(req: any, res: any) {
     const link = await Promise.any(providersFrom(process.env).map(attempt));
     if (memo.size >= 200) memo.delete(memo.keys().next().value as string);
     memo.set(memoKey, { at: Date.now(), link });
-    console.log(`media-link ok ${id} ${kind} via ${link.provider} ${new URL(link.url).host} in ${Date.now() - started} ms`);
+    await logEvent('info', 'media-link', `ok ${id} ${kind} via ${link.provider} ${new URL(link.url).host} in ${Date.now() - started} ms`);
     return res.status(200).send(JSON.stringify(link));
   } catch {
     // Written to the Vercel logs, so a failure can be read there (which service, and why)
-    console.warn(`media-link failed ${id} ${kind} after ${Date.now() - started} ms: ${JSON.stringify(tried)}`);
+    await logEvent('warn', 'media-link', `failed ${id} ${kind} after ${Date.now() - started} ms`, { tried });
     return res.status(502).send(JSON.stringify({ error: 'خدمات التحميل لا تستجيب الآن. حاول بعد قليل.', tried }));
   }
 }

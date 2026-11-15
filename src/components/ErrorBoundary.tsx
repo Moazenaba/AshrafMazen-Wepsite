@@ -1,4 +1,5 @@
 import React from 'react';
+import { reportError } from '../lib/reportError';
 
 interface Props {
   children: React.ReactNode;
@@ -22,7 +23,7 @@ export function reloadOnceForNewVersion(): boolean {
   return true;
 }
 
-const isChunkError = (error: Error) => /dynamically imported module|Importing a module script failed|Loading chunk|error loading dynamically/i.test(error.message);
+export const isChunkError = (error: Error) => /dynamically imported module|Importing a module script failed|Loading chunk|error loading dynamically/i.test(error.message);
 
 // Catches a crash in one page so the rest of the site (the header, the audio player, the footer) keeps working
 export class ErrorBoundary extends React.Component<Props, State> {
@@ -34,6 +35,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error('Page crashed:', error, info.componentStack);
+    if (!isChunkError(error)) reportError('page-crash', error, { stack: info.componentStack });
     if (isChunkError(error)) reloadOnceForNewVersion();
   }
 

@@ -8,6 +8,7 @@
 import { randomUUID } from 'node:crypto';
 import { fileLink, isAdminToken, keyFromLink, presign, r2Config, type R2Config } from './_r2.js'; // Node on Vercel needs the extension (the .ts file is compiled to .js)
 import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
+import { logEvent } from './_log.js'; // Node on Vercel needs the extension
 
 // The folders of the site's own files. Admin deletes may touch these (and the status check's folder), visitors may read PUBLIC_FOLDERS
 export const SITE_FOLDERS = /^(library\/(files|covers)|audio|branding|media\/video|setup-check)\//;
@@ -141,7 +142,7 @@ export default async function handler(req: any, res: any) {
     if (body.action === 'delete') return remove(cfg, body, res);
     return send(res, 400, { error: 'unknown-action' });
   } catch (err) {
-    console.error('r2 function error:', err);
+    await logEvent('error', 'r2', 'function error', { reason: err instanceof Error ? err.message : String(err) });
     return send(res, 500, { error: 'حدث خطأ في الخادم أثناء معالجة الملف.' });
   }
 }

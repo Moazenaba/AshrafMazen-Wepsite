@@ -51,7 +51,7 @@ describe('api/media-link', () => {
     it('answers a second ask for the same video within 2 minutes without calling fetch', async () => {
       const f = happyFetch();
       vi.stubGlobal('fetch', f);
-      vi.spyOn(console, 'log').mockImplementation(() => {});
+      vi.spyOn(console, 'info').mockImplementation(() => {});
       expect((await call('7.7.7.1', 'memoVideo01')).statusCode).toBe(200);
       const before = f.mock.calls.length;
       expect((await call('7.7.7.1', 'memoVideo01')).statusCode).toBe(200);
@@ -60,7 +60,7 @@ describe('api/media-link', () => {
 
     it('answers 429 on the 7th call from one address', async () => {
       vi.stubGlobal('fetch', happyFetch());
-      vi.spyOn(console, 'log').mockImplementation(() => {});
+      vi.spyOn(console, 'info').mockImplementation(() => {});
       const codes: number[] = [];
       for (let i = 0; i < 7; i++) codes.push((await call('7.7.7.2', `limitVid${String(i).padStart(3, '0')}`)).statusCode);
       expect(codes.slice(0, 6).every((c) => c === 200)).toBe(true);

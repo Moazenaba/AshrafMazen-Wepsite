@@ -9,6 +9,7 @@
 import { YOUTUBE_LIBRARY, type LibraryPlaylist, type LibraryVideo } from '../src/data/youtube-library.js'; // Node on Vercel needs the extension
 import { parsePlaylists, parseVideos, withArabic, YOUTUBE_HEADERS } from './_youtubePage.js';
 import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
+import { logEvent } from './_log.js'; // Node on Vercel needs the extension
 
 const TTL_MS = 60 * 60 * 1000;
 const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || 'UCisGvsFtKyDU6NTFywaITzQ';
@@ -105,7 +106,7 @@ async function build(admins: { id: string; title: string }[]): Promise<string> {
   // The saved playlists are taken as they are: the GitHub job keeps them current
   const playlists = [...YOUTUBE_LIBRARY, ...addedPlaylists];
   const latest = await channelLatest(new Set(playlists.flatMap((p) => p.videos.map((v) => v.id))));
-  console.log(`youtube-library built: ${playlists.length} playlists (${discovered.length} found on the channel by themselves, ${admins.length} added by the admin); extra playlist pages read ${via.page}, empty ${via.none}; uploads in no playlist ${latest?.videos.length ?? 0}`);
+  void logEvent('info', 'youtube-library', `built: ${playlists.length} playlists (${discovered.length} found on the channel by themselves, ${admins.length} added by the admin); extra playlist pages read ${via.page}, empty ${via.none}; uploads in no playlist ${latest?.videos.length ?? 0}`);
   return JSON.stringify({ updatedAt: new Date().toISOString(), playlists: latest ? [latest, ...playlists] : playlists });
 }
 
@@ -120,8 +121,9 @@ export async function loadLibrary(): Promise<string> {
       entry = { at: Date.now(), body: await build(extras) };
       if (cache.size > 20) cache.clear();
       cache.set(signature, entry);
-    } catch {
+    } catch (err) {
       // Keep the copy we already have; if there is none, the site shows its saved library
+      await logEvent('error', 'youtube-library', 'library build failed', { reason: err instanceof Error ? err.message : String(err) });
     }
   }
   return entry?.body ?? JSON.stringify({ updatedAt: null, playlists: YOUTUBE_LIBRARY });

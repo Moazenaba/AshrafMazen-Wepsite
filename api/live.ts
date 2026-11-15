@@ -5,6 +5,7 @@
 import { parseLiveNow } from './_youtubeLive.js'; // Node on Vercel needs the extension
 import { withArabic, YOUTUBE_HEADERS } from './_youtubePage.js';
 import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
+import { logEvent } from './_log.js'; // Node on Vercel needs the extension
 
 const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || 'UCisGvsFtKyDU6NTFywaITzQ';
 
@@ -19,7 +20,7 @@ export default async function handler(_req: any, res: any) {
     res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=60');
     return res.status(200).send(JSON.stringify(live ? { live: true, ...live } : { live: false }));
   } catch (err) {
-    console.error('api/live:', err);
+    await logEvent('error', 'live', 'youtube unreachable', { reason: err instanceof Error ? err.message : String(err) });
     // When YouTube cannot be reached the site simply shows no broadcast; asked again in half a minute
     res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=30');
     return res.status(200).send(JSON.stringify({ live: false }));

@@ -67,7 +67,7 @@ export default async function handler(_req: any, res: any) {
     res.setHeader('Cache-Control', 'public, max-age=15, s-maxage=30, stale-while-revalidate=120');
     return res.status(200).send(body);
   } catch (err) {
-    console.error('api/site:', err);
+    await (await import('./_log.js')).logEvent('error', 'site', 'upstream failed', { reason: err instanceof Error ? err.message : String(err) });
     // The site falls back to asking Supabase directly
     res.setHeader('Cache-Control', 'no-store');
     return res.status(502).send(JSON.stringify({ error: 'upstream' }));

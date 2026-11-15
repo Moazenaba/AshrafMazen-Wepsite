@@ -4,6 +4,7 @@
 // (src/lib/reels.ts), so a saved change shows at once without waiting for this list.
 import { mergeShorts, parseShortsFeed, parseShortsPage, type ShortItem } from './_shorts.js'; // Node on Vercel needs the extension
 import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
+import { logEvent } from './_log.js'; // Node on Vercel needs the extension
 
 const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || 'UCisGvsFtKyDU6NTFywaITzQ';
 const TTL_MS = 6 * 60 * 60 * 1000;
@@ -50,8 +51,9 @@ export default async function handler(_req: any, res: any) {
       // An empty answer (YouTube unreachable for a moment) never replaces a list we have, and is retried soon
       if (!cache || cache.empty || !empty) cache = { at: Date.now(), body, empty };
       else cache = { ...cache, at: Date.now() - TTL_MS + EMPTY_TTL_MS };
-    } catch {
+    } catch (err) {
       // keep what we have
+      await logEvent('error', 'youtube-shorts', 'shorts build failed', { reason: err instanceof Error ? err.message : String(err) });
     }
   }
   res.setHeader('Content-Type', 'application/json');
