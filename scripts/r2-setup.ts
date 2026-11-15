@@ -20,13 +20,14 @@ if (!cfg) {
   process.exit(1);
 }
 
+// The live domain first: uploads fail when the bucket's CORS list does not name it
 const origins = [
+  'https://ashraf-mazen.vercel.app',
+  'https://ashraf-mazen-wepsite.vercel.app',
+  'https://ashrafmazenwepsite.vercel.app',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:4173',
-  'https://ashraf-mazen-wepsite.vercel.app',
-  'https://ashrafmazenwepsite.vercel.app',
-  'https://ashraf-mazen.vercel.app',
   ...(process.env.R2_CORS_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean),
 ];
 

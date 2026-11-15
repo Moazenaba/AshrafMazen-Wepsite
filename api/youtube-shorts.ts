@@ -1,5 +1,5 @@
 // Vercel serverless function: the channel's newest YouTube Shorts, for the site's reels page.
-// Every 6 hours it reads the channel's Shorts page (YouTube's RSS feeds answer 404 from servers) and keeps the result; visitors get
+// Every 6 hours (TTL_MS; every 10 minutes while the list is empty) it reads the channel's Shorts page (YouTube's RSS feeds answer 404 from servers) and keeps the result; visitors get
 // the stored copy with CDN caching. What the admin hid, ordered or added is applied in the browser
 // (src/lib/reels.ts), so a saved change shows at once without waiting for this list.
 import { parseShortsPage, type ShortItem } from './_shorts.js'; // Node on Vercel needs the extension

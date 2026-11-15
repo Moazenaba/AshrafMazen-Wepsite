@@ -16,7 +16,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 | 9 | WP-06 monitoring | DONE | prod/wp-06-monitoring | 2026-11-15 | 364 | lines 23%, functions 20% |
 | 10 | WP-08 YouTube robustness | DONE (code); step 1 data pending | prod/wp-08-youtube-robustness | 2026-11-15 | 370 | lines 23%, functions 20% |
 | 11 | WP-11 admin forms | DONE | prod/wp-11-admin-forms | 2026-11-15 | 430 | lines 23%, functions 20% |
-| 12 | WP-12 build, CI, documents | TODO | | | | |
+| 12 | WP-12 build, CI, documents | DONE (lint blocked) | prod/wp-12-build-ci-docs | 2026-11-15 | see below | lines 23%, functions 20% |
 | 13 | WP-10 browser tests | TODO | | | | |
 | 14 | WP-14b Quran page | TODO | | | | |
 | 15 | WP-13 performance | TODO | | | | |
@@ -27,6 +27,10 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 - `docs/migrations/2026-11-16-error-events.sql` (OWNER-09): error log table + daily cap on `record_event` (per kind, from `daily_stats`; the data has no per-key daily total).
 
 ## Needs the owner
+
+- WP-12 lint NOT done: `typescript-eslint` refuses TypeScript 7 ("does not support TS 7.0", peer range `<6.1`); installing needs `--legacy-peer-deps` and still crashes at start. Unblock: the owner decides to pin `typescript` to 6.x (a dependency change this plan forbids), or waits for a typescript-eslint release that supports 7. `npm run lint` stays `tsc --noEmit`.
+- WP-12 OPS-01: `api/tsconfig.json` already existed (types: node); no change was made and it cannot be checked without a push (the executor never pushes). After the owner pushes `prod/integration` to a branch, read the Vercel preview log for `error TS2688`.
+- WP-12: after one clean deploy, set `PRERENDER_STRICT=1` in Vercel; to make the daily rebuild work nothing else is needed (it uses `dist/content-hash.txt`).
 
 - WP-08 step 1 (publish dates) NOT finished: on 2026-11-15 YouTube stopped answering for watch pages after the first request (`--dry` showed 4 waiting, the real run dated 0; 228 videos undated, 3 playlists not sorted: الوابل الصيب, كتاب التوبة, ٢٠٠ سؤال وجواب). The data file was left unchanged. Someone must run `node scripts/refresh-youtube-library.mjs --redate` from a home connection later (not more than 3 times an hour), then commit `src/data/youtube-library.ts`.
 - WP-08 step 5 skipped: OWNER-06 (keep or remove the download feature) is still undecided.

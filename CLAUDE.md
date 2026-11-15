@@ -93,5 +93,6 @@ a component receives only the props it uses; the same query/attach logic is writ
 
 ## Deploy
 
-GitHub repo `Moazenaba/AshrafMazen-Wepsite` → Vercel project `ashraf-mazen-wepsite` (production = `main`).
+GitHub repo `Moazenaba/AshrafMazen-Wepsite` → Vercel project **`ashraf-mazen`** (dashboard `https://vercel.com/moaz-6856/ashraf-mazen`; production = `main`).
+Vercel deploys only commits authored by the owner's GitHub account (`Moazenaba`); any other author shows "Blocked".
 Work on a branch, push, the owner merges the pull request. Database changes are SQL files the owner runs in the Supabase SQL editor.

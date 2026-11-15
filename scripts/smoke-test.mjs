@@ -35,6 +35,11 @@ export async function runChecks(base, fetcher = fetch) {
   const sitemapText = sitemap.ok ? await sitemap.text() : '';
   const urls = (sitemapText.match(/<loc>/g) || []).length;
   check(sitemap.ok && sitemapText.includes('<urlset') && urls >= 100, 'sitemap.xml', sitemap.ok ? `${urls} URLs` : `HTTP ${sitemap.status}`);
+  // A build that could not read the database writes this file (scripts/prerender.mjs --soft)
+  const warnings = await get('/build-warnings.json');
+  const warned = warnings.ok ? await warnings.json().catch(() => null) : null;
+  check(!(warned && warned.prerender === false), 'prerendered pages', warned?.reason ? String(warned.reason) : '');
+
   const robots = await get('/robots.txt');
   check(robots.ok && (await robots.text()).includes('Sitemap:'), 'robots.txt');
 

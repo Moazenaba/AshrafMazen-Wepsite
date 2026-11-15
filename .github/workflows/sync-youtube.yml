@@ -5,6 +5,9 @@ name: Sync YouTube and check the site
 # deploys. (The site itself already shows new videos within the hour through api/youtube-library; this job is what
 # lets Google find them.)
 #
+# Daily at 03:15 UTC the job also runs scripts/check-content-changed.mjs: when the live site lists lessons the deployed pages were
+# not built from, it pushes an empty commit "Rebuild: published content changed", so Vercel rebuilds the sitemap and the pages.
+#
 # Triggers:
 #   schedule            every 30 minutes (GitHub may start it a few minutes late). The repository is private, where the free plan
 #                       gives 2000 Actions minutes a month and every run counts as at least one: 48 runs a day is about 1440 a month.
@@ -21,6 +24,8 @@ name: Sync YouTube and check the site
 on:
   schedule:
     - cron: '*/30 * * * *'
+    # Once a day this job also checks whether lessons were published since the deployed pages were built (see below)
+    - cron: '15 3 * * *'
   workflow_dispatch:
   repository_dispatch:
     types: [youtube-upload]
@@ -60,6 +65,18 @@ jobs:
           git commit -m "YouTube: new videos added to the library automatically"
           git pull --rebase origin main
           git push origin main
+      - name: Rebuild when published content changed
+        if: github.event.schedule == '15 3 * * *'
+        run: |
+          result=$(node scripts/check-content-changed.mjs)
+          echo "Content check: $result"
+          if [ "$result" = "changed" ]; then
+            git config user.name "Moazenaba"
+            git config user.email "335531902+Moazenaba@users.noreply.github.com"
+            git commit --allow-empty -m "Rebuild: published content changed"
+            git pull --rebase origin main
+            git push origin main
+          fi
       - name: Check the live site
         id: smoke
         continue-on-error: true

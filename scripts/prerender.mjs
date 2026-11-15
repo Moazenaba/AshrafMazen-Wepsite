@@ -13,6 +13,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { excerpt, loadSiteData, root, siteUrl, youtubeId } from './site-data.mjs';
 import { esc, render as renderPage, withNameFont, withSiteSeed } from './prerenderParts.mjs';
+import { contentHash } from './contentHash.mjs';
 
 const soft = process.argv.includes('--soft');
 const dist = resolve(root, 'dist');
@@ -67,14 +68,21 @@ try {
   // The fallback shell again, now with the chosen font
   writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true, seeded: true }), 'utf8');
 } catch (err) {
-  if (soft) {
-    console.warn(`prerender skipped (pages will render in the browser only): ${err.message}`);
+  // PRERENDER_STRICT=1 (set in Vercel after one clean deploy) makes a production build fail instead of shipping unprerendered pages
+  if (soft && process.env.PRERENDER_STRICT !== '1') {
+    console.warn(`::warning::prerender skipped (pages will render in the browser only): ${err.message}`);
+    try {
+      writeFileSync(resolve(dist, 'build-warnings.json'), JSON.stringify({ prerender: false, reason: String(err.message).slice(0, 300) }));
+    } catch {
+      // dist is missing: the build itself failed earlier
+    }
     process.exit(0);
   }
   console.error(err.message);
   process.exit(1);
 }
 const { categories, series, lessons, books, socials, library } = data;
+writeFileSync(resolve(dist, 'content-hash.txt'), contentHash(lessons), 'utf8');
 
 // Only addresses that are safe as folder names (every id and slug the site makes today)
 const SAFE = /^[\p{L}\p{N}_-]{1,80}$/u;
