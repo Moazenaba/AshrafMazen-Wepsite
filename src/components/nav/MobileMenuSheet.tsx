@@ -41,6 +41,7 @@ export const MobileMenuSheet: React.FC<{ open: boolean; onClose: () => void; isA
     { label: JUMUAH_LABEL, to: `/playlist/${JUMUAH_PLAYLIST_ID}`, icon: Mic },
     { label: 'كل الدروس', to: '/search', icon: ListVideo },
     { label: 'الريلز', to: '/reels', icon: Clapperboard },
+    { label: 'القرآن الكريم', to: '/quran', icon: BookOpen },
     { label: 'المكتبة', to: '/books', icon: BookOpen },
     { label: bookmarkCount > 0 ? `المحفوظات (${bookmarkCount})` : 'المحفوظات', to: '/bookmarks', icon: Bookmark },
     { label: 'اقترح مادة', to: '/contribute', icon: Send },

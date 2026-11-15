@@ -40,6 +40,9 @@ export const Footer: React.FC = () => {
           <Link to="/audio" className={linkClass}>
             الصوتيات
           </Link>
+          <Link to="/quran" className={linkClass}>
+            القرآن
+          </Link>
           <Link to="/books" className={linkClass}>
             المكتبة
           </Link>

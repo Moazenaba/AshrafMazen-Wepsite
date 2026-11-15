@@ -18,9 +18,14 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
   {
     "id": "PLHcd1VuAeT_NcmgwOimYSUQVJVK9WwM3_",
     "title": "خطب الجمعة",
-    "count": "139 فيديو",
-    "latestVideoId": "XU7SftMHnR0",
+    "count": "140 فيديو",
+    "latestVideoId": "DILQkTLFZg0",
     "videos": [
+      {
+        "id": "DILQkTLFZg0",
+        "title": "خطبة الجمعة | فقه صنائع المعروف | # الشيخ _ أشرف _ مازن",
+        "published": "2026-11-15T16:31:37.266Z"
+      },
       {
         "id": "XU7SftMHnR0",
         "title": "حَذَارِي أَنْ تَيْأَسَ مِنْ رَحْمَةِ اللَّهِ رَبِّ الْعَالَمِينَ| # الشيخ _ أشرف _ مازن",
