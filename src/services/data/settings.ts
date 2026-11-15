@@ -1,7 +1,8 @@
 // Site settings and branding (name, logo, about text).
 import { supabase } from '../../lib/supabase';
 import { translateSupabaseError } from '../../utils/supabaseErrors';
-import { deleteFromR2, isR2Url, uploadToR2 } from '../r2';
+import { uploadToR2 } from '../r2';
+import { deleteIfUnused } from './fileUsage';
 import type { SiteSettings } from '../../types';
 import { DEFAULT_NAME_FONT } from '../../constants/nameFonts';
 import { loadSiteBundle } from './siteBundle';
@@ -72,8 +73,8 @@ export async function saveSiteSettings(settings: Partial<SiteSettings>): Promise
   cachedSiteSettings = null;
   await getSiteSettings(true);
   // The logo was replaced or removed: the old file on R2 is no longer used
-  if (settings.banner_logo_url !== undefined && previousLogo && previousLogo !== settings.banner_logo_url && isR2Url(previousLogo)) {
-    await deleteFromR2(previousLogo);
+  if (settings.banner_logo_url !== undefined && previousLogo && previousLogo !== settings.banner_logo_url) {
+    await deleteIfUnused(previousLogo);
   }
 }
 

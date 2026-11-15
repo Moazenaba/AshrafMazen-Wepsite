@@ -4,9 +4,22 @@ import { attachRelations } from './relations';
 import { rowsOrThrow } from './db';
 import { supabase } from '../../lib/supabase';
 import { translateSupabaseError } from '../../utils/supabaseErrors';
-import { deleteFromR2, isR2Url } from '../r2';
+import { deleteIfUnused } from './fileUsage';
 import type { Lesson } from '../../types';
 import { lessonRow, readLessonExtras, saveLessonExtras, withExtras } from './extras';
+
+const EXTRAS_FAILED = 'حُفظ الدرس لكن تعذّر حفظ (المميز / الفصول / الصورة). أعد الحفظ.';
+
+// The order of a save: 1. the lesson row, 2. its extras (featured, chapters, picture), 3. only then the old files are deleted.
+// A failure in step 2 says so, because the lesson itself is already saved.
+async function saveExtrasAfterRow(id: string, data: Partial<Lesson>): Promise<void> {
+  try {
+    await saveLessonExtras(id, data);
+  } catch (err) {
+    console.error('Lesson extras were not saved:', err instanceof Error ? err.message : err);
+    throw new Error(EXTRAS_FAILED);
+  }
+}
 
 // Lessons CRUD
 export async function createLesson(lessonData: Partial<Lesson>): Promise<Lesson> {
@@ -38,7 +51,7 @@ export async function createLesson(lessonData: Partial<Lesson>): Promise<Lesson>
     .single();
 
   if (error) throw new Error(translateSupabaseError(error));
-  await saveLessonExtras(data.id, { featured: Boolean(lessonData.featured), chapters: lessonData.chapters || [], image: lessonData.image || '' });
+  await saveExtrasAfterRow(data.id, { featured: Boolean(lessonData.featured), chapters: lessonData.chapters || [], image: lessonData.image || '' });
   return data;
 }
 
@@ -63,19 +76,11 @@ export async function updateLesson(
     .single();
 
   if (error) throw new Error(translateSupabaseError(error));
-  await saveLessonExtras(id, lessonData);
-  // The recording was replaced or removed: the old file on R2 is no longer used by anything
+  await saveExtrasAfterRow(id, lessonData);
+  // The recording was replaced or removed: the old file is deleted unless something else still uses it
   const oldAudio = before?.audio_url as string | undefined;
-  if (lessonData.audio_url !== undefined && oldAudio !== lessonData.audio_url) await dropLessonAudio(oldAudio);
+  if (lessonData.audio_url !== undefined && oldAudio !== lessonData.audio_url) await deleteIfUnused(oldAudio);
   return data;
-}
-
-// Removes a lesson's recording from R2 unless another lesson still plays the same file
-async function dropLessonAudio(url: string | null | undefined): Promise<void> {
-  if (!url || !isR2Url(url)) return;
-  const { data, error } = await supabase.from('lessons').select('id').eq('audio_url', url).limit(1);
-  if (error || (data && data.length > 0)) return;
-  await deleteFromR2(url);
 }
 
 export async function deleteLesson(id: string): Promise<boolean> {
@@ -83,12 +88,12 @@ export async function deleteLesson(id: string): Promise<boolean> {
   const { error } = await supabase.from('lessons').delete().eq('id', id);
   if (error) throw new Error(translateSupabaseError(error));
   // Its recording goes with it (a failure here is logged, never blocks the delete)
-  await dropLessonAudio(before?.audio_url as string | undefined);
   try {
     await saveLessonExtras(id, { featured: false, chapters: [], image: '' });
   } catch (err) {
     console.error('Lesson extras were not cleared:', err);
   }
+  await deleteIfUnused(before?.audio_url as string | undefined);
   return true;
 }
 

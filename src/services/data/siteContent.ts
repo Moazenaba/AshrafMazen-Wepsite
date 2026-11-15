@@ -17,8 +17,7 @@ import {
 import type { TickerQuote } from '../../constants/tickerQuotes';
 import { cleanSideMenu, parseSideMenu, type SideMenuConfig } from './sideMenuRules';
 import { loadSiteBundle } from './siteBundle';
-import { deleteFromR2, isR2Url } from '../r2';
-import { fileKey } from '../../lib/fileLinks';
+import { deleteIfUnused } from './fileUsage';
 import { bundleContent } from './siteBundleRules';
 import { cleanHomeFeature, parseHomeFeature, validateHomeFeature, type HomeFeature } from './homeFeatureRules';
 import { cleanLiveStream, parseLiveStream, validateLiveStream, type LiveStream } from './liveStreamRules';
@@ -81,7 +80,9 @@ export async function saveHomeFeature(feature: HomeFeature): Promise<HomeFeature
   const clean = cleanHomeFeature(feature);
   const problem = validateHomeFeature(clean);
   if (problem) throw new Error(problem);
+  const before = (await getSiteContent(true)).feature;
   await write(SITE_CONTENT_KEYS.feature, clean);
+  if (before.imageUrl && before.imageUrl !== clean.imageUrl) await deleteIfUnused(before.imageUrl);
   return clean;
 }
 
@@ -95,7 +96,9 @@ export async function saveWelcomeSound(sound: WelcomeSound): Promise<WelcomeSoun
   const clean = cleanWelcomeSound(sound);
   const problem = validateWelcomeSound(clean);
   if (problem) throw new Error(problem);
+  const before = (await getSiteContent(true)).welcome;
   await write(SITE_CONTENT_KEYS.welcome, clean);
+  if (before.url && before.url !== clean.url) await deleteIfUnused(before.url);
   return clean;
 }
 
@@ -120,11 +123,6 @@ export async function readLiveStream(): Promise<LiveStream> {
 export async function removeWelcomeSound(current: WelcomeSound): Promise<WelcomeSound> {
   const cleared = cleanWelcomeSound({ enabled: false, url: '', volume: current.volume });
   await write(SITE_CONTENT_KEYS.welcome, cleared);
-  const key = fileKey(current.url);
-  if (key && isR2Url(current.url)) {
-    const { data } = await supabase.from('lessons').select('audio_url').not('audio_url', 'is', null);
-    const usedByLesson = (data ?? []).some((row) => fileKey(row.audio_url as string) === key);
-    if (!usedByLesson) await deleteFromR2(current.url);
-  }
+  await deleteIfUnused(current.url);
   return cleared;
 }
