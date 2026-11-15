@@ -17,7 +17,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 | 10 | WP-08 YouTube robustness | DONE (code); step 1 data pending | prod/wp-08-youtube-robustness | 2026-11-15 | 370 | lines 23%, functions 20% |
 | 11 | WP-11 admin forms | DONE | prod/wp-11-admin-forms | 2026-11-15 | 430 | lines 23%, functions 20% |
 | 12 | WP-12 build, CI, documents | DONE (lint blocked) | prod/wp-12-build-ci-docs | 2026-11-15 | see below | lines 23%, functions 20% |
-| 13 | WP-10 browser tests | TODO | | | | |
+| 13 | WP-10 browser tests | DONE | prod/wp-10-browser-tests | 2026-11-15 | 437 unit + 32 browser (3 runs in a row) | lines 23%, functions 20% |
 | 14 | WP-14b Quran page | TODO | | | | |
 | 15 | WP-13 performance | TODO | | | | |
 | 16 | WP-15 database shape | TODO | | | | |
@@ -51,6 +51,8 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 - AdminPage's auth listener also signed the admin out when the admins query failed; fixed in WP-02.
 - WP-03: PostgREST form `transcript=neq.` is accepted by the live database (HTTP 200); a positive match could not be checked because no live lesson has a transcript yet. Transcript marker is `…` (MediaIcons trims, so a space would not do).
 - WP-11 fixes found by the form tests: the lesson YouTube field was `type="url"` (now text); the logo screen promised SVG that the server refuses (now one shared rule); `index.css` split into `src/styles/motion.css` (was 387 lines). `/dev/admin` was not opened in a browser.
+- WP-10: found by browser tests: the lesson text-size buttons had an accessible name that did not match their text (fixed); the contribute form is `noValidate`, so an empty form is sent and only the server refuses it. The local dev server must not be started with file watching off while editing (stale code); Playwright starts its own.
+- Another Claude session used this same folder on 2026-11-15 and switched branches under the executor; keep one session per folder.
 
 ## Measurements
 

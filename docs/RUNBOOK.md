@@ -18,3 +18,13 @@
 | `API /api/submit …` | دالة طلبات الزوار لا تردّ كما يجب | راجع سجل الدالة و`SUPABASE_SERVICE_ROLE_KEY` في Vercel |
 
 بعد الإصلاح شغّل يدوياً: `node scripts/smoke-test.mjs https://ashraf-mazen.vercel.app` وانتظر `ALL PASSED`.
+
+## قبل الدمج (Before merging)
+
+شغّل فحوص المتصفح القراءة-فقط على عنوان المعاينة (Vercel preview) قبل دمج أي طلب سحب:
+
+```
+E2E_BASE_URL=<عنوان المعاينة> npm run e2e:live
+```
+
+وفحوص المتصفح المحلية (بيانات وهمية، بلا شبكة): `npm run e2e`.

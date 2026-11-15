@@ -13,6 +13,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test:coverage": "vitest run --coverage",
+    "e2e": "playwright test --project=local",
+    "e2e:live": "playwright test --project=live",
     "lint": "tsc --noEmit",
     "check": "npm run typecheck && npm run test && npm run build",
     "health": "tsx scripts/health-check.ts",
@@ -39,6 +41,8 @@
     "vite": "^8.3.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.65.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.10",

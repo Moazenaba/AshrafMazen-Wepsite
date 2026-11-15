@@ -16,19 +16,19 @@ export const TranscriptPanel: React.FC<{ reading: TranscriptReading; font: Trans
               type="button"
               onClick={() => font.change(font.size - 2)}
               disabled={font.size <= MIN_FONT_SIZE}
-              aria-label="تصغير الخط"
               className="press w-11 h-11 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-bold disabled:opacity-40"
             >
-              أ−
+              <span aria-hidden="true">أ−</span>
+              <span className="sr-only">تصغير الخط</span>
             </button>
             <button
               type="button"
               onClick={() => font.change(font.size + 2)}
               disabled={font.size >= MAX_FONT_SIZE}
-              aria-label="تكبير الخط"
               className="press w-11 h-11 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-bold text-lg disabled:opacity-40"
             >
-              أ+
+              <span aria-hidden="true">أ+</span>
+              <span className="sr-only">تكبير الخط</span>
             </button>
           </div>
           <button type="button" onClick={share.copyTranscript} className={actionButton}>
