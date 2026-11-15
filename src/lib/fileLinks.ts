@@ -20,7 +20,23 @@ export function toPublicFileUrl<T extends string | null | undefined>(url: T, bas
   return `${base.replace(/\/+$/, '')}/${key.split('/').map(encodeURIComponent).join('/')}`;
 }
 
+// The file's key in the bucket from either form of its link (the site link, or the public address); null for any other link
+export function fileKeyOf(url: string | null | undefined, base: string): string | null {
+  if (!url) return null;
+  const match = url.match(FILE_LINK);
+  try {
+    if (match) return decodeURIComponent(match[1]);
+    const root = base.replace(/\/+$/, '');
+    if (root && url.startsWith(`${root}/`)) return decodeURIComponent(url.slice(root.length + 1).split('?')[0]);
+  } catch {
+    // a broken link is no file of ours
+  }
+  return null;
+}
+
 const PUBLIC_FILES = String(import.meta.env.VITE_R2_PUBLIC_URL || '').replace(/\/+$/, '');
 
 // For any picture or sound shown on the site
 export const fileSrc = <T extends string | null | undefined>(url: T): T | string => toPublicFileUrl(url, PUBLIC_FILES);
+
+export const fileKey = (url: string | null | undefined) => fileKeyOf(url, PUBLIC_FILES);

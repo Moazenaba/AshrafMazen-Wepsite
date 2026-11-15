@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { continuationIn, innertubeOf, parsePlaylists, parseVideos, videosIn, withArabic } from './_youtubePage';
+import { continuationIn, inChannelOrder, innertubeOf, newestFirst, parsePlaylists, parseVideos, publishDateOf, videosIn, withArabic } from './_youtubePage';
 
 const page = (data: unknown) => `<html><script>var ytInitialData = ${JSON.stringify(data)};</script></html>`;
 const lockup = (id: string, title: string, type = 'LOCKUP_CONTENT_TYPE_VIDEO') => ({ lockupViewModel: { contentId: id, contentType: type, metadata: { lockupMetadataViewModel: { title: { content: title } } } } });
@@ -64,5 +64,31 @@ describe('long playlists and language', () => {
   it('asks YouTube for the Arabic page', () => {
     expect(withArabic('https://www.youtube.com/playlist?list=PL1')).toBe('https://www.youtube.com/playlist?list=PL1&hl=ar&gl=EG');
     expect(withArabic('https://www.youtube.com/channel/UC1/videos')).toBe('https://www.youtube.com/channel/UC1/videos?hl=ar&gl=EG');
+  });
+});
+
+describe('order like YouTube', () => {
+  it('reads the publish date of a watch page as UTC', () => {
+    expect(publishDateOf('x"publishDate":"2026-11-10T11:14:14-08:00"y')).toBe('2026-11-10T19:14:14.000Z');
+    expect(publishDateOf('<meta itemprop="datePublished" content="2024-01-02T00:00:00+00:00">')).toBe('2024-01-02T00:00:00.000Z');
+    expect(publishDateOf('<html></html>')).toBeNull();
+    expect(publishDateOf('"publishDate":"not a date"')).toBeNull();
+  });
+
+  it('puts the newest video first and the oldest last; undated ones keep their order after them', () => {
+    const videos = [
+      { id: 'old', published: '2020-01-01T00:00:00.000Z' },
+      { id: 'u1' },
+      { id: 'new', published: '2026-01-01T00:00:00.000Z' },
+      { id: 'u2' },
+      { id: 'mid', published: '2023-01-01T00:00:00.000Z' },
+    ];
+    expect(newestFirst(videos).map((v) => v.id)).toEqual(['new', 'mid', 'old', 'u1', 'u2']);
+  });
+
+  it('orders playlists as the channel page does; others stay after, in their order', () => {
+    const lists = [{ id: 'c' }, { id: 'x' }, { id: 'a' }, { id: 'y' }, { id: 'b' }];
+    expect(inChannelOrder(lists, ['a', 'b', 'c']).map((p) => p.id)).toEqual(['a', 'b', 'c', 'x', 'y']);
+    expect(inChannelOrder(lists, []).map((p) => p.id)).toEqual(['c', 'x', 'a', 'y', 'b']);
   });
 });

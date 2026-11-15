@@ -25,3 +25,13 @@ describe('public file address', () => {
     expect(toPublicFileUrl('/api/r2?file=audio%2F..%2Fsecret', BASE)).toBe('/api/r2?file=audio%2F..%2Fsecret');
   });
 });
+
+describe('file key', () => {
+  it('is the same for both forms of a link to one file', async () => {
+    const { fileKeyOf } = await import('./fileLinks');
+    expect(fileKeyOf('/api/r2?file=audio%2Fx.mp3', BASE)).toBe('audio/x.mp3');
+    expect(fileKeyOf(`${BASE}/audio/x.mp3`, BASE)).toBe('audio/x.mp3');
+    expect(fileKeyOf('https://example.com/audio/x.mp3', BASE)).toBeNull();
+    expect(fileKeyOf('', BASE)).toBeNull();
+  });
+});
