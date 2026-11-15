@@ -63,7 +63,7 @@ describe('updateRecord (saving a shared JSON record without losing anyone\'s edi
   it('gives up with a clear message after repeated conflicts, writing nothing', async () => {
     const store = memoryStore('["a"]');
     store.writeIfUnchanged = async () => false;
-    await expect(updateRecord(store, 'k', parse, add('b'), 3)).rejects.toThrow(CONFLICT_MESSAGE);
+    await expect(updateRecord(store, 'k', parse, add('b'), {}, 3)).rejects.toThrow(CONFLICT_MESSAGE);
     expect(store.values.get('k')).toBe('["a"]');
   });
 

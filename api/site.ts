@@ -45,6 +45,8 @@ export async function readSiteData(url: string, key: string, fetcher: typeof fet
   );
   const answer: Record<string, any> = Object.fromEntries(entries);
   answer.transcripts = (answer.transcripts as { id: string }[]).map((row) => row.id);
+  // The one-step-undo copies (<key>__prev) are for the admin only
+  answer.settings = (answer.settings as { key: string }[]).filter((row) => !row.key.endsWith('__prev'));
   return { updatedAt: new Date().toISOString(), ...answer };
 }
 

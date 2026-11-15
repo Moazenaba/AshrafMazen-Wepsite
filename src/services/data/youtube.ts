@@ -1,7 +1,7 @@
 // The channel's videos: what the admin hid, renamed or added.
 import { supabase } from '../../lib/supabase';
 import { translateSupabaseError } from '../../utils/supabaseErrors';
-import { supabaseRecordStore } from './jsonRecord';
+import { assertReadable, supabaseRecordStore } from './jsonRecord';
 import type { MediaFiles, SiteVideo } from '../../lib/libraryOverrides';
 
 export interface YoutubeOverrides {
@@ -78,6 +78,7 @@ export const OVERRIDES_CONFLICT_MESSAGE =
 // The settings together with the exact text that was stored, so the next save can tell whether anyone saved in between
 export async function readYoutubeOverrides(): Promise<{ value: YoutubeOverrides; raw: string | null }> {
   const raw = await supabaseRecordStore.read(YOUTUBE_OVERRIDES_KEY);
+  assertReadable(YOUTUBE_OVERRIDES_KEY, raw, 'object');
   return { value: parseYoutubeOverrides(raw), raw };
 }
 

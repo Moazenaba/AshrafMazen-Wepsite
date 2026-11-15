@@ -20,13 +20,17 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 | 13 | WP-10 browser tests | DONE | prod/wp-10-browser-tests | 2026-11-15 | 437 unit + 32 browser (3 runs in a row) | lines 23%, functions 20% |
 | 14 | WP-14b Quran page | BLOCKED: another session is already building the Quran page on branch feat/quran-wire | | 2026-11-15 | | |
 | 15 | WP-13 performance | DONE (Part A not applied) | prod/wp-13-performance | 2026-11-15 | 446 unit + 32 browser | lines 23%, functions 20% |
-| 16 | WP-15 database shape | TODO | | | | |
+| 16 | WP-15 database shape | DONE (schema file pending owner) | prod/wp-15-database-shape | 2026-11-15 | 470 | lines 23%, functions 20% |
 
 ## SQL the owner must run
 
+- `docs/migrations/2026-11-16-hide-prev-copies.sql` (WP-15): hides the `__prev` undo copies from visitors. Run before relying on the restore button.
 - `docs/migrations/2026-11-16-error-events.sql` (OWNER-09): error log table + daily cap on `record_event` (per kind, from `daily_stats`; the data has no per-key daily total).
 
 ## Needs the owner
+
+- WP-15 Part A: `.env.local` has no `SUPABASE_SERVICE_ROLE_KEY`, so `docs/schema/tables.json` and `schema.sql` were not generated. The owner runs `npm run schema` once and commits `docs/schema/`; `src/test/schemaContract.test.ts` then starts checking the columns (it is skipped until then).
+- WP-15 Part C: `docs/schema/PLAN-json-to-tables.md` needs the owner's decision before any code.
 
 - WP-14b (Quran page) is blocked: a separate session is wiring `/quran` on `feat/quran-wire`. When that branch is finished, merge it into `prod/integration`, then add what WP-14 step 2 still requires (`timedFetch` + `sessionStorage` cache + `level: 'none'` fallback for the v4 service, the CSP hosts for mp3quran, `useHighlight` without per-frame setState, tests).
 
@@ -55,6 +59,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 - WP-11 fixes found by the form tests: the lesson YouTube field was `type="url"` (now text); the logo screen promised SVG that the server refuses (now one shared rule); `index.css` split into `src/styles/motion.css` (was 387 lines). `/dev/admin` was not opened in a browser.
 - WP-10: found by browser tests: the lesson text-size buttons had an accessible name that did not match their text (fixed); the contribute form is `noValidate`, so an empty form is sent and only the server refuses it. The local dev server must not be started with file watching off while editing (stale code); Playwright starts its own.
 - Another Claude session used this same folder on 2026-11-15 and switched branches under the executor; keep one session per folder.
+- WP-15: the three `catch` blocks left in `books.ts`, `extras.ts`, `youtube.ts` are the lenient parsers visitors' pages use; every admin read and every save goes through `assertReadable` and never treats a broken record as empty.
 
 ## Measurements
 

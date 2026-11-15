@@ -34,6 +34,7 @@ export function parseLessonExtras(raw: string | null): LessonExtras {
 
 export async function readLessonExtras(): Promise<LessonExtras> {
   const { data, error } = await supabase.from('site_settings').select('value').eq('key', LESSON_EXTRAS_KEY).maybeSingle();
+  // Visitors read this too, so a broken value only shows no pictures; saving is what refuses it (see updateSiteRecord)
   return error ? parseLessonExtras(null) : parseLessonExtras(data?.value ?? null);
 }
 
@@ -58,7 +59,7 @@ export async function saveLessonExtras(lessonId: string, data: Partial<Lesson>):
       else delete extras.images[lessonId];
     }
     return extras;
-  });
+  }, { shape: 'object' });
   // The picture was replaced or removed: its file goes unless something else still uses it
   if (previousPicture && previousPicture !== String(data.image || '').trim()) await deleteIfUnused(previousPicture);
 }
