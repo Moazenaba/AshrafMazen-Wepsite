@@ -28,3 +28,13 @@ E2E_BASE_URL=<عنوان المعاينة> npm run e2e:live
 ```
 
 وفحوص المتصفح المحلية (بيانات وهمية، بلا شبكة): `npm run e2e`.
+
+## إعادة بناء قاعدة البيانات من الصفر (Rebuilding the database from nothing)
+
+1. شغّل `docs/schema/schema.sql` في Supabase SQL Editor (يُنشأ بالأمر `npm run schema`).
+2. شغّل كل ملف في `docs/migrations/` بالترتيب المذكور في README هناك.
+3. شغّل `npm run health` وانتظر أن تكون كل البنود PASS.
+
+## استرجاع المحتوى (Restoring content)
+
+Supabase ← Database ← Backups (OWNER-07: تأكد أن النسخ الاحتياطية موجودة وجرّب استرجاع واحدة في مشروع تجريبي). وللقوائم الكبيرة (الكتب، الفصول والصور، إعدادات يوتيوب) زر «استرجاع النسخة السابقة» في تبويب «البيانات والتكامل».

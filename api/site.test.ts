@@ -59,4 +59,11 @@ describe('api/site', () => {
     await handler(fakeReq(), res);
     expect(json(res).transcripts).toEqual(['a', 'b']);
   });
+
+  it('never lists the __prev undo copies', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (u: string) => new Response(String(u).includes('site_settings') ? '[{"key":"banner_name","value":"x"},{"key":"lesson_extras__prev","value":"{}"}]' : '[]')));
+    const res = fakeRes();
+    await handler(fakeReq(), res);
+    expect(json(res).settings.map((r: { key: string }) => r.key)).toEqual(['banner_name']);
+  });
 });
