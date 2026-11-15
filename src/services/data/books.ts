@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { translateSupabaseError } from '../../utils/supabaseErrors';
 import { isR2Url, r2DownloadUrl, uploadToR2 } from '../r2';
 import { deleteIfUnused } from './fileUsage';
+import { checkFile } from '../../constants/fileRules';
 import type { Category, Book } from '../../types';
 import { getCategories } from './catalog';
 import { updateSiteRecord } from './jsonRecord';
@@ -150,16 +151,11 @@ export async function deleteBook(book: Pick<Book, 'id' | 'file_url' | 'cover_url
   return true;
 }
 
-const BOOK_FILE_RULES = {
-  pdf: { extensions: ['pdf'], maxMb: 200, message: 'يرجى اختيار ملف بصيغة PDF.' },
-  cover: { extensions: ['jpg', 'jpeg', 'png', 'webp'], maxMb: 5, message: 'يرجى اختيار صورة غلاف بصيغة jpg أو png أو webp.' },
-} as const;
+
 
 export async function uploadBookFile(file: File, kind: 'pdf' | 'cover'): Promise<string> {
-  const rules = BOOK_FILE_RULES[kind];
-  const extension = (file.name.split('.').pop() || '').toLowerCase();
-  if (!(rules.extensions as readonly string[]).includes(extension)) throw new Error(rules.message);
-  if (file.size > rules.maxMb * 1024 * 1024) throw new Error(`حجم الملف أكبر من ${rules.maxMb} ميجابايت.`);
+  const problem = checkFile(kind, file.name, file.size);
+  if (problem) throw new Error(problem);
 
   return uploadToR2(file, kind);
 }

@@ -5,6 +5,7 @@ import { createBook, updateBook, uploadBookFile, type BookWithCategory } from '.
 import { type Book, type Category } from '../../../types';
 import { BookCover } from '../../BookCover';
 import { field, label } from './styles';
+import { acceptOf } from '../../../constants/fileRules';
 
 export const BookModal: React.FC<{
   initial: BookWithCategory | null;
@@ -100,7 +101,7 @@ export const BookModal: React.FC<{
                 {uploading === 'pdf' ? 'جارٍ الرفع...' : fileUrl ? 'استبدال الملف' : 'رفع ملف PDF'}
                 <input
                   type="file"
-                  accept=".pdf,application/pdf"
+                  accept={`${acceptOf('pdf')},application/pdf`}
                   className="sr-only"
                   disabled={!!uploading}
                   onChange={(e) => upload(e.target.files?.[0], 'pdf')}
@@ -176,7 +177,7 @@ export const BookModal: React.FC<{
                 <label className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-semibold cursor-pointer">
                   {uploading === 'cover' ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <FileUp className="w-4 h-4" aria-hidden="true" />}
                   {coverUrl ? 'تغيير الصورة' : 'رفع صورة'}
-                  <input type="file" accept=".jpg,.jpeg,.png,.webp,image/*" className="sr-only" disabled={!!uploading} onChange={(e) => upload(e.target.files?.[0], 'cover')} aria-describedby="book-cover-hint" />
+                  <input type="file" accept={`${acceptOf('cover')},image/*`} className="sr-only" disabled={!!uploading} onChange={(e) => upload(e.target.files?.[0], 'cover')} aria-describedby="book-cover-hint" />
                 </label>
                 {coverUrl && (
                   <button type="button" onClick={() => setCoverUrl('')} className="h-10 px-4 rounded-xl text-red-700 dark:text-red-400 font-semibold hover:bg-red-50 dark:hover:bg-red-950/40">

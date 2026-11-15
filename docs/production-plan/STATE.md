@@ -15,7 +15,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 | 8 | WP-05 error visibility | DONE | prod/wp-05-error-visibility | 2026-11-15 | 359 | lines 23%, functions 20% |
 | 9 | WP-06 monitoring | DONE | prod/wp-06-monitoring | 2026-11-15 | 364 | lines 23%, functions 20% |
 | 10 | WP-08 YouTube robustness | DONE (code); step 1 data pending | prod/wp-08-youtube-robustness | 2026-11-15 | 370 | lines 23%, functions 20% |
-| 11 | WP-11 admin forms | TODO | | | | |
+| 11 | WP-11 admin forms | DONE | prod/wp-11-admin-forms | 2026-11-15 | 430 | lines 23%, functions 20% |
 | 12 | WP-12 build, CI, documents | TODO | | | | |
 | 13 | WP-10 browser tests | TODO | | | | |
 | 14 | WP-14b Quran page | TODO | | | | |
@@ -46,6 +46,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 - `api/site.ts` uses an inline `AbortSignal.timeout(8000)` instead of `api/_fetch.ts`, because prerender loads that file with plain Node, which cannot resolve the `.js` import.
 - AdminPage's auth listener also signed the admin out when the admins query failed; fixed in WP-02.
 - WP-03: PostgREST form `transcript=neq.` is accepted by the live database (HTTP 200); a positive match could not be checked because no live lesson has a transcript yet. Transcript marker is `…` (MediaIcons trims, so a space would not do).
+- WP-11 fixes found by the form tests: the lesson YouTube field was `type="url"` (now text); the logo screen promised SVG that the server refuses (now one shared rule); `index.css` split into `src/styles/motion.css` (was 387 lines). `/dev/admin` was not opened in a browser.
 
 ## Measurements
 
