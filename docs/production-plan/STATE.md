@@ -11,7 +11,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 | 4 | WP-02 admin session | DONE | prod/wp-02-admin-session | 2026-11-15 | 310 | lines 23%, functions 20% |
 | 5 | WP-07 timeouts and degraded states | DONE | prod/wp-07-timeouts | 2026-11-15 | 321 | lines 23%, functions 20% |
 | 6 | WP-04 file lifecycle | DONE | prod/wp-04-file-lifecycle | 2026-11-15 | 333 | lines 23%, functions 20% |
-| 7 | WP-03 site bundle size | TODO | | | | |
+| 7 | WP-03 site bundle size | DONE | prod/wp-03-bundle-size | 2026-11-15 | 341 | lines 23%, functions 20% |
 | 8 | WP-05 error visibility | TODO | | | | |
 | 9 | WP-06 monitoring | TODO | | | | |
 | 10 | WP-08 YouTube robustness | TODO | | | | |
@@ -42,6 +42,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 - `/dev/admin` was not opened in a browser after the fake-database extraction (typecheck and tests pass).
 - `api/site.ts` uses an inline `AbortSignal.timeout(8000)` instead of `api/_fetch.ts`, because prerender loads that file with plain Node, which cannot resolve the `.js` import.
 - AdminPage's auth listener also signed the admin out when the admins query failed; fixed in WP-02.
+- WP-03: PostgREST form `transcript=neq.` is accepted by the live database (HTTP 200); a positive match could not be checked because no live lesson has a transcript yet. Transcript marker is `…` (MediaIcons trims, so a space would not do).
 
 ## Measurements
 
