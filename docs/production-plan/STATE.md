@@ -18,7 +18,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 | 11 | WP-11 admin forms | DONE | prod/wp-11-admin-forms | 2026-11-15 | 430 | lines 23%, functions 20% |
 | 12 | WP-12 build, CI, documents | DONE (lint blocked) | prod/wp-12-build-ci-docs | 2026-11-15 | see below | lines 23%, functions 20% |
 | 13 | WP-10 browser tests | DONE | prod/wp-10-browser-tests | 2026-11-15 | 437 unit + 32 browser (3 runs in a row) | lines 23%, functions 20% |
-| 14 | WP-14b Quran page | TODO | | | | |
+| 14 | WP-14b Quran page | BLOCKED: another session is already building the Quran page on branch feat/quran-wire | | 2026-11-15 | | |
 | 15 | WP-13 performance | TODO | | | | |
 | 16 | WP-15 database shape | TODO | | | | |
 
@@ -27,6 +27,8 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 - `docs/migrations/2026-11-16-error-events.sql` (OWNER-09): error log table + daily cap on `record_event` (per kind, from `daily_stats`; the data has no per-key daily total).
 
 ## Needs the owner
+
+- WP-14b (Quran page) is blocked: a separate session is wiring `/quran` on `feat/quran-wire`. When that branch is finished, merge it into `prod/integration`, then add what WP-14 step 2 still requires (`timedFetch` + `sessionStorage` cache + `level: 'none'` fallback for the v4 service, the CSP hosts for mp3quran, `useHighlight` without per-frame setState, tests).
 
 - WP-12 lint NOT done: `typescript-eslint` refuses TypeScript 7 ("does not support TS 7.0", peer range `<6.1`); installing needs `--legacy-peer-deps` and still crashes at start. Unblock: the owner decides to pin `typescript` to 6.x (a dependency change this plan forbids), or waits for a typescript-eslint release that supports 7. `npm run lint` stays `tsc --noEmit`.
 - WP-12 OPS-01: `api/tsconfig.json` already existed (types: node); no change was made and it cannot be checked without a push (the executor never pushes). After the owner pushes `prod/integration` to a branch, read the Vercel preview log for `error TS2688`.
