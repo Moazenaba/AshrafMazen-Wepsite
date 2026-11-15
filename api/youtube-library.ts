@@ -8,6 +8,7 @@
 // (What the admin hid or removed is taken off on the site afterwards, so none of this brings it back.)
 import { YOUTUBE_LIBRARY, type LibraryPlaylist, type LibraryVideo } from '../src/data/youtube-library.js'; // Node on Vercel needs the extension
 import { parsePlaylists, parseVideos, withArabic, YOUTUBE_HEADERS } from './_youtubePage.js';
+import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
 
 const TTL_MS = 60 * 60 * 1000;
 const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || 'UCisGvsFtKyDU6NTFywaITzQ';
@@ -20,7 +21,7 @@ const cache = new Map<string, { at: number; body: string }>();
 async function fetchPage(url: string): Promise<string> {
   try {
     // Always the Arabic page: from a US server YouTube would otherwise send its English translation of the titles
-    const response = await fetch(withArabic(url), { headers: YOUTUBE_HEADERS });
+    const response = await fetchWithTimeout(withArabic(url), { headers: YOUTUBE_HEADERS });
     return response.ok ? await response.text() : '';
   } catch {
     return '';
@@ -58,7 +59,7 @@ export async function loadOverrides(): Promise<Record<string, any>> {
   const key = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
   if (!url || !key) return {};
   try {
-    const response = await fetch(`${url}/rest/v1/site_settings?select=value&key=eq.youtube_overrides`, {
+    const response = await fetchWithTimeout(`${url}/rest/v1/site_settings?select=value&key=eq.youtube_overrides`, {
       headers: { apikey: key, Authorization: `Bearer ${key}` },
     });
     if (!response.ok) return {};

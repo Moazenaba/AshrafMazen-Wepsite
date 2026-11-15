@@ -9,7 +9,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 | 2 | WP-14a finished branches | DONE | prod/wp-14a-finished-branches | 2026-11-15 | 289 | lines 23%, functions 20% |
 | 3 | WP-01 security | DONE | prod/wp-01-security | 2026-11-15 | 302 | lines 23%, functions 20% |
 | 4 | WP-02 admin session | DONE | prod/wp-02-admin-session | 2026-11-15 | 310 | lines 23%, functions 20% |
-| 5 | WP-07 timeouts and degraded states | TODO | | | | |
+| 5 | WP-07 timeouts and degraded states | DONE | prod/wp-07-timeouts | 2026-11-15 | 321 | lines 23%, functions 20% |
 | 6 | WP-04 file lifecycle | TODO | | | | |
 | 7 | WP-03 site bundle size | TODO | | | | |
 | 8 | WP-05 error visibility | TODO | | | | |
@@ -35,9 +35,11 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 
 ## Found on the way
 
-- `withSiteSeed` in prerender wrote `'<'` (a plain `<`), so a `</script` in the data could end the seed script early; fixed in `scripts/prerenderParts.mjs` because WP-09's test requires it.
+- `withSiteSeed` in prerender wrote a unicode escape that JavaScript turned into a plain `<`, so a `</script` in the data could end the seed script early; fixed in `scripts/prerenderParts.mjs` because WP-09's test requires it.
 - The fake database (and so `/dev/admin`) lacked the `save_setting_if_unchanged` rpc, so saving lesson extras failed there; added to `src/test/fakeDatabase.ts`.
 - `/dev/admin` was not opened in a browser after the fake-database extraction (typecheck and tests pass).
+- `api/site.ts` uses an inline `AbortSignal.timeout(8000)` instead of `api/_fetch.ts`, because prerender loads that file with plain Node, which cannot resolve the `.js` import.
+- AdminPage's auth listener also signed the admin out when the admins query failed; fixed in WP-02.
 
 ## Measurements
 

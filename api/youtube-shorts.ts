@@ -3,6 +3,7 @@
 // the stored copy with CDN caching. What the admin hid, ordered or added is applied in the browser
 // (src/lib/reels.ts), so a saved change shows at once without waiting for this list.
 import { mergeShorts, parseShortsFeed, parseShortsPage, type ShortItem } from './_shorts.js'; // Node on Vercel needs the extension
+import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
 
 const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || 'UCisGvsFtKyDU6NTFywaITzQ';
 const TTL_MS = 6 * 60 * 60 * 1000;
@@ -13,7 +14,7 @@ const HEADERS = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Ac
 
 async function text(url: string): Promise<string> {
   try {
-    const response = await fetch(url, { headers: HEADERS });
+    const response = await fetchWithTimeout(url, { headers: HEADERS });
     return response.ok ? await response.text() : '';
   } catch {
     return '';

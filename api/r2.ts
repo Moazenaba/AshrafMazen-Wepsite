@@ -7,6 +7,7 @@
 // Until the R2 settings are present it answers 501, and the admin screens say that file uploads are not set up yet.
 import { randomUUID } from 'node:crypto';
 import { fileLink, isAdminToken, keyFromLink, presign, r2Config, type R2Config } from './_r2.js'; // Node on Vercel needs the extension (the .ts file is compiled to .js)
+import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
 
 // The folders of the site's own files. Admin deletes may touch these (and the status check's folder), visitors may read PUBLIC_FOLDERS
 export const SITE_FOLDERS = /^(library\/(files|covers)|audio|branding|media\/video|setup-check)\//;
@@ -72,7 +73,7 @@ async function sign(cfg: R2Config, body: any, res: any) {
 async function remove(cfg: R2Config, body: any, res: any) {
   const key = keyFromLink(cfg, String(body?.url || ''));
   if (!key || !isSiteKey(key)) return send(res, 400, { error: 'هذا الرابط ليس ملفاً مرفوعاً على الموقع.' });
-  const response = await fetch(presign(cfg, 'DELETE', key, 60), { method: 'DELETE' });
+  const response = await fetchWithTimeout(presign(cfg, 'DELETE', key, 60), { method: 'DELETE' }, 10000);
   if (!response.ok && response.status !== 404) return send(res, 502, { error: 'تعذّر حذف الملف من التخزين.' });
   return send(res, 200, { deleted: key });
 }
@@ -83,8 +84,8 @@ async function status(cfg: R2Config, res: any) {
   let write = false;
   let remove = false;
   try {
-    write = (await fetch(presign(cfg, 'PUT', key, 60), { method: 'PUT', body: 'ok', headers: { 'Content-Type': 'text/plain' } })).ok;
-    remove = (await fetch(presign(cfg, 'DELETE', key, 60), { method: 'DELETE' })).ok;
+    write = (await fetchWithTimeout(presign(cfg, 'PUT', key, 60), { method: 'PUT', body: 'ok', headers: { 'Content-Type': 'text/plain' } }, 10000)).ok;
+    remove = (await fetchWithTimeout(presign(cfg, 'DELETE', key, 60), { method: 'DELETE' }, 10000)).ok;
   } catch {
     // reported below as false
   }

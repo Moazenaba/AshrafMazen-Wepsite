@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TurnstileWidget, turnstileEnabled } from '../components/TurnstileWidget';
 import { useSearchParams } from 'react-router-dom';
 import { Check, Loader2 } from 'lucide-react';
+import { timedFetch } from '../lib/timedFetch';
 
 type Kind = 'book' | 'audio' | 'video' | 'correction' | 'removal';
 
@@ -54,7 +55,7 @@ export const Contribute: React.FC = () => {
     setError('');
     setSending(true);
     try {
-      const response = await fetch('/api/submit', {
+      const response = await timedFetch('/api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ kind, title, url, author, details, target, contact, website, turnstile, t: openedAt.current }),

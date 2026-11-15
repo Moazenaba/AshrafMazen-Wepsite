@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { getReelsSettings } from '../services/data/reels';
 import { EMPTY_REELS, visibleReels, type ReelItem, type ReelsSettings } from './reelsRules';
+import { timedFetch } from './timedFetch';
 
 const SHORTS_URL = '/api/youtube-shorts';
 const CHANGED = 'reels_settings_changed';
@@ -10,7 +11,7 @@ let fetchedCache: Promise<ReelItem[]> | null = null;
 let settingsCache: ReelsSettings | null = null;
 
 export function fetchShorts(): Promise<ReelItem[]> {
-  return (fetchedCache ??= fetch(SHORTS_URL)
+  return (fetchedCache ??= timedFetch(SHORTS_URL)
     .then((r) => (r.ok ? r.json() : { shorts: [] }))
     .then((data: { shorts?: ReelItem[] }) => (Array.isArray(data?.shorts) ? data.shorts : []))
     .catch(() => []));

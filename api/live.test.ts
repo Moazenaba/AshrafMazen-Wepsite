@@ -10,6 +10,7 @@ const livePage = (channelId: string) =>
   })};</script>`;
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -43,5 +44,16 @@ describe('api/live', () => {
     vi.stubGlobal('fetch', f);
     await handler(fakeReq(), fakeRes());
     expect(String(f.mock.calls[0][0])).toContain('hl=ar');
+  });
+
+  it('answers live:false when YouTube does not answer in time', async () => {
+    vi.useFakeTimers();
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.stubGlobal('fetch', (_u: string, init: RequestInit) => new Promise((_res, rej) => init.signal!.addEventListener('abort', () => rej(new DOMException('x', 'AbortError')))));
+    const res = fakeRes();
+    const done = handler(fakeReq(), res);
+    await vi.advanceTimersByTimeAsync(8001);
+    await done;
+    expect(json(res)).toEqual({ live: false });
   });
 });

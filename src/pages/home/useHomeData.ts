@@ -17,13 +17,14 @@ import type { SiteSettings } from '../../types';
 
 const EMPTY: HomeLists = { categories: [], featuredList: [], latestList: [], viewedList: [], sermonList: [] };
 
-type HomeState = HomeLists & { settings: SiteSettings; loaded: boolean };
+// failed: nothing could be loaded and there is no saved copy to show
+type HomeState = HomeLists & { settings: SiteSettings; loaded: boolean; failed: boolean };
 
-const fromBundle = (bundle: SiteBundle): HomeState => ({ ...buildHomeLists(bundle), settings: bundleSettings(bundle), loaded: true });
+const fromBundle = (bundle: SiteBundle): HomeState => ({ ...buildHomeLists(bundle), settings: bundleSettings(bundle), loaded: true, failed: false });
 
 function initialState(): HomeState {
   const saved = storedSiteBundle();
-  return saved ? fromBundle(saved) : { ...EMPTY, settings: DEFAULT_SITE_SETTINGS, loaded: false };
+  return saved ? fromBundle(saved) : { ...EMPTY, settings: DEFAULT_SITE_SETTINGS, loaded: false, failed: false };
 }
 
 async function loadOneByOne(): Promise<HomeState> {
@@ -36,10 +37,10 @@ async function loadOneByOne(): Promise<HomeState> {
       getTopViewedLessons(6),
       getKhutabLessons(8),
     ]);
-    return { categories, featuredList, latestList, viewedList, sermonList, settings: await settings, loaded: true };
+    return { categories, featuredList, latestList, viewedList, sermonList, settings: await settings, loaded: true, failed: false };
   } catch (err) {
     console.error('Error loading home data:', err);
-    return { ...EMPTY, settings: await settings, loaded: true };
+    return { ...EMPTY, settings: await settings, loaded: true, failed: true };
   }
 }
 

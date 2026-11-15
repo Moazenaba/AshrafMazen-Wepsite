@@ -2,6 +2,7 @@
 // Files starting with "_" in api/ are helpers, not endpoints. Everything secret stays on the server:
 // the browser only ever receives a signed link that works for one file for a few minutes.
 import { createHash, createHmac } from 'node:crypto';
+import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
 
 export interface R2Config {
   accountId: string;
@@ -126,11 +127,11 @@ export async function isAdminToken(token: string | undefined): Promise<boolean> 
   const anon = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
   if (!token || !url || !anon) return false;
   const headers = { apikey: anon, Authorization: `Bearer ${token}` };
-  const userRes = await fetch(`${url}/auth/v1/user`, { headers });
+  const userRes = await fetchWithTimeout(`${url}/auth/v1/user`, { headers }, 6000);
   if (!userRes.ok) return false;
   const user = (await userRes.json()) as { id?: string };
   if (!user.id) return false;
-  const adminRes = await fetch(`${url}/rest/v1/admins?select=user_id&user_id=eq.${encodeURIComponent(user.id)}`, { headers });
+  const adminRes = await fetchWithTimeout(`${url}/rest/v1/admins?select=user_id&user_id=eq.${encodeURIComponent(user.id)}`, { headers }, 6000);
   if (!adminRes.ok) return false;
   const rows = (await adminRes.json()) as unknown[];
   return Array.isArray(rows) && rows.length > 0;
