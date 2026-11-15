@@ -19,11 +19,15 @@ export const SETTING_KEYS = [
   'lesson_extras',
 ];
 
+const LESSON_COLUMNS = 'id,series_id,title,lesson_number,youtube_url,audio_url,status,published_at,created_at,views';
+
 const QUERIES = {
   settings: `site_settings?select=key,value&key=in.(${SETTING_KEYS.join(',')})`,
   categories: 'categories?select=*&order=sort_order.asc',
   series: 'series?select=*&order=sort_order.asc',
-  lessons: 'lessons?select=*&status=eq.published&order=published_at.desc',
+  // Never the transcript text: only what the home page shows. The ids of lessons that have a text come from `transcripts`.
+  lessons: `lessons?select=${LESSON_COLUMNS}&status=eq.published&order=published_at.desc&limit=300`,
+  transcripts: 'lessons?select=id&status=eq.published&transcript=neq.',
   social: 'social_links?select=*&is_active=eq.true&order=sort_order.asc',
 } as const;
 
@@ -39,7 +43,9 @@ export async function readSiteData(url: string, key: string, fetcher: typeof fet
       return [name, await response.json()] as const;
     })
   );
-  return { updatedAt: new Date().toISOString(), ...Object.fromEntries(entries) };
+  const answer: Record<string, any> = Object.fromEntries(entries);
+  answer.transcripts = (answer.transcripts as { id: string }[]).map((row) => row.id);
+  return { updatedAt: new Date().toISOString(), ...answer };
 }
 
 export default async function handler(_req: any, res: any) {

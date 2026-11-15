@@ -24,7 +24,9 @@ const DEFAULT_DESCRIPTION =
 
 
 const site = { siteUrl, verification: '' };
-const render = (page) => renderPage(template, page, site);
+// The first-visit copy goes only into the home page and app.html (`seeded`), never into every page
+let seededTemplate = null;
+const render = (page) => renderPage(page.seeded && seededTemplate ? seededTemplate : template, page, site);
 const url = (path) => `${siteUrl}${encodeURI(path)}`;
 // The sheikh's name once: many channel titles already carry it
 const named = (text) => (/مازن/.test(text) ? text : `${text} - ${SITE_NAME}`);
@@ -46,24 +48,24 @@ const written = { count: 0 };
 function write(page) {
   const file = page.path === '/' ? resolve(dist, 'index.html') : resolve(dist, `.${page.path}`, 'index.html');
   mkdirSync(resolve(file, '..'), { recursive: true });
-  writeFileSync(file, render(page), 'utf8');
+  writeFileSync(file, render({ ...page, seeded: page.path === '/' }), 'utf8');
   written.count += 1;
 }
 
 // The fallback shell, written first so a failure below still leaves the site working
-writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true }), 'utf8');
+writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true, seeded: true }), 'utf8');
 
 let data;
 try {
   data = await loadSiteData();
   template = withNameFont(template, data.nameFont);
-  template = await withSiteSeed(template, async () => {
+  seededTemplate = await withSiteSeed(template, async () => {
     const seedUrl = (process.env.VITE_SUPABASE_URL || '').replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
     const { readSiteData } = await import('../api/site.ts');
     return readSiteData(seedUrl, process.env.VITE_SUPABASE_ANON_KEY || '');
   });
   // The fallback shell again, now with the chosen font
-  writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true }), 'utf8');
+  writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true, seeded: true }), 'utf8');
 } catch (err) {
   if (soft) {
     console.warn(`prerender skipped (pages will render in the browser only): ${err.message}`);

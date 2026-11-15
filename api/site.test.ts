@@ -28,7 +28,7 @@ describe('api/site', () => {
     const res = fakeRes();
     await handler(fakeReq(), res);
     expect(res.statusCode).toBe(200);
-    expect(Object.keys(json(res)).sort()).toEqual(['categories', 'lessons', 'series', 'settings', 'social', 'updatedAt']);
+    expect(Object.keys(json(res)).sort()).toEqual(['categories', 'lessons', 'series', 'settings', 'social', 'transcripts', 'updatedAt']);
     expect(res.headers['cache-control']).toContain('s-maxage=30');
   });
 
@@ -40,5 +40,23 @@ describe('api/site', () => {
     await handler(fakeReq(), res);
     expect(res.statusCode).toBe(502);
     expect(res.headers['cache-control']).toBe('no-store');
+  });
+
+  it('never asks for the transcript text and caps the lessons', async () => {
+    const f = vi.fn(async (..._a: unknown[]) => new Response('[]', { status: 200 }));
+    vi.stubGlobal('fetch', f);
+    await handler(fakeReq(), fakeRes());
+    const lessons = f.mock.calls.map((c) => String(c[0])).find((u) => u.includes('order=published_at.desc'))!;
+    expect(lessons).toContain('select=id,series_id');
+    expect(lessons).not.toContain('select=*');
+    expect(lessons).not.toMatch(/select=[^&]*transcript/);
+    expect(lessons).toContain('limit=300');
+  });
+
+  it('lists the ids of lessons that have a text', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (u: string) => new Response(String(u).includes('transcript=neq.') ? '[{"id":"a"},{"id":"b"}]' : '[]')));
+    const res = fakeRes();
+    await handler(fakeReq(), res);
+    expect(json(res).transcripts).toEqual(['a', 'b']);
   });
 });

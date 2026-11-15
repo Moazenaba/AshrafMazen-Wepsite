@@ -56,9 +56,16 @@ export function withNameFont(html, id) {
 // The same answer /api/site gives, written into the page as inert JSON: a first-time visitor's first render already has
 // the texts, lessons and featured card, and the fresh answer replaces it a moment later. `readSeed` returns the data;
 // when it fails the page is returned unchanged and fetches as before.
-export async function withSiteSeed(html, readSeed) {
+export const MAX_SEED_BYTES = 60_000;
+
+export async function withSiteSeed(html, readSeed, maxBytes = MAX_SEED_BYTES) {
   try {
     const json = JSON.stringify(await readSeed()).replace(/</g, '\\u003c');
+    const bytes = Buffer.byteLength(json);
+    if (bytes > maxBytes) {
+      console.warn(`site seed skipped: ${bytes} bytes is over the ${Math.round(maxBytes / 1000)} kB limit`);
+      return html;
+    }
     return html.replace('</body>', () => `<script type="application/json" id="site-seed">${json}</script>
   </body>`);
   } catch (err) {

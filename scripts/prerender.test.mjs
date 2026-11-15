@@ -61,4 +61,10 @@ describe('withSiteSeed', () => {
     });
     expect(html).toBe(SHELL);
   });
+
+  it('writes nothing when the seed is over the size limit', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const html = await withSiteSeed(SHELL, async () => ({ big: 'x'.repeat(100) }), 50);
+    expect(html).toBe(SHELL);
+  });
 });

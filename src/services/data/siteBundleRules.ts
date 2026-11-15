@@ -21,6 +21,8 @@ export interface SiteBundle {
   // Published lessons only, newest first
   lessons: Lesson[];
   social: SocialLink[];
+  // Ids of the published lessons that have a written text (the text itself is never sent); absent in older saved copies
+  transcripts?: string[];
 }
 
 export interface HomeLists {
@@ -30,6 +32,8 @@ export interface HomeLists {
   viewedList: LessonWithRelations[];
   sermonList: LessonWithRelations[];
 }
+
+export const TRANSCRIPT_MARKER = '…';
 
 export const isSiteBundle = (value: unknown): value is SiteBundle => {
   const b = value as SiteBundle;
@@ -65,7 +69,12 @@ export function bundleContent(bundle: SiteBundle): SiteContent {
 // getTopViewedLessons(6) and getKhutabLessons(8)
 export function buildHomeLists(bundle: SiteBundle, limits = { recent: 1, featured: 3, latest: 30, viewed: 6, sermons: 8 }): HomeLists {
   const { categories, series } = bundle;
-  const lessons = withImages(bundle.lessons, parseLessonExtras(settingsMap(bundle).get('lesson_extras') ?? null));
+  const withText = new Set(bundle.transcripts ?? []);
+  // The home page only asks whether a lesson has a text (MediaIcons trims it), so a one-character marker stands in for it
+  const lessons = withImages(bundle.lessons, parseLessonExtras(settingsMap(bundle).get('lesson_extras') ?? null)).map((l) => ({
+    ...l,
+    transcript: withText.has(l.id) ? TRANSCRIPT_MARKER : '',
+  }));
   const attach = (list: Lesson[]) => attachWith(list, series, categories);
   const latest = (n: number) => attach(lessons.slice(0, n));
 
