@@ -17,6 +17,7 @@ import {
 import type { TickerQuote } from '../../constants/tickerQuotes';
 import { cleanSideMenu, parseSideMenu, type SideMenuConfig } from './sideMenuRules';
 import { loadSiteBundle } from './siteBundle';
+import { deleteIfUnused } from './fileUsage';
 import { bundleContent } from './siteBundleRules';
 import { cleanHomeFeature, parseHomeFeature, validateHomeFeature, type HomeFeature } from './homeFeatureRules';
 import { cleanLiveStream, parseLiveStream, validateLiveStream, type LiveStream } from './liveStreamRules';
@@ -79,7 +80,9 @@ export async function saveHomeFeature(feature: HomeFeature): Promise<HomeFeature
   const clean = cleanHomeFeature(feature);
   const problem = validateHomeFeature(clean);
   if (problem) throw new Error(problem);
+  const before = (await getSiteContent(true)).feature;
   await write(SITE_CONTENT_KEYS.feature, clean);
+  if (before.imageUrl && before.imageUrl !== clean.imageUrl) await deleteIfUnused(before.imageUrl);
   return clean;
 }
 
@@ -93,7 +96,9 @@ export async function saveWelcomeSound(sound: WelcomeSound): Promise<WelcomeSoun
   const clean = cleanWelcomeSound(sound);
   const problem = validateWelcomeSound(clean);
   if (problem) throw new Error(problem);
+  const before = (await getSiteContent(true)).welcome;
   await write(SITE_CONTENT_KEYS.welcome, clean);
+  if (before.url && before.url !== clean.url) await deleteIfUnused(before.url);
   return clean;
 }
 
@@ -111,4 +116,13 @@ export async function readLiveStream(): Promise<LiveStream> {
   const { data, error } = await supabase.from('site_settings').select('value').eq('key', SITE_CONTENT_KEYS.live).maybeSingle();
   if (error) throw new Error(translateSupabaseError(error));
   return parseLiveStream(data?.value ?? null);
+}
+
+// Removes the welcome sound altogether: the setting is cleared (so nothing plays), and the file is deleted from storage
+// when it was uploaded to the site and no lesson uses the same file (a lesson's recording saved here by mistake stays).
+export async function removeWelcomeSound(current: WelcomeSound): Promise<WelcomeSound> {
+  const cleared = cleanWelcomeSound({ enabled: false, url: '', volume: current.volume });
+  await write(SITE_CONTENT_KEYS.welcome, cleared);
+  await deleteIfUnused(current.url);
+  return cleared;
 }

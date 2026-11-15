@@ -1,16 +1,20 @@
 [
   {
     "AllowedOrigins": [
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "http://localhost:4173",
       "https://ashraf-mazen.vercel.app",
       "https://ashraf-mazen-wepsite.vercel.app",
-      "https://ashrafmazenwepsite.vercel.app"
+      "https://ashrafmazenwepsite.vercel.app",
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:4173"
     ],
     "AllowedMethods": ["GET", "HEAD", "PUT"],
-    "AllowedHeaders": ["*"],
-    "ExposeHeaders": ["ETag"],
+    "AllowedHeaders": [
+      "*"
+    ],
+    "ExposeHeaders": [
+      "ETag"
+    ],
     "MaxAgeSeconds": 3600
   }
 ]

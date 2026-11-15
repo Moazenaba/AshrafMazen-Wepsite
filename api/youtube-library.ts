@@ -7,20 +7,22 @@
 // time from servers, which filled the logs with errors). The playlist pages are read with api/_youtubePage.ts.
 // (What the admin hid or removed is taken off on the site afterwards, so none of this brings it back.)
 import { YOUTUBE_LIBRARY, type LibraryPlaylist, type LibraryVideo } from '../src/data/youtube-library.js'; // Node on Vercel needs the extension
-import { parsePlaylists, parseVideos, withArabic, YOUTUBE_HEADERS } from './_youtubePage.js';
+import { inChannelOrder, parsePlaylists, parseVideos, withArabic, YOUTUBE_HEADERS } from './_youtubePage.js';
+import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
+import { logEvent } from './_log.js'; // Node on Vercel needs the extension
 
 const TTL_MS = 60 * 60 * 1000;
 const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || 'UCisGvsFtKyDU6NTFywaITzQ';
 // The list of the channel's uploads that are in no playlist
 const LATEST_ID = 'channel-latest';
 // One stored library per set of admin-added playlists: adding or removing one builds a new library at once
-// instead of waiting for the 6 hours to pass. The site asks with ?p=<those playlist ids>, so the CDN copy changes too.
+// instead of waiting for the hour (TTL_MS) to pass. The site asks with ?p=<those playlist ids>, so the CDN copy changes too.
 const cache = new Map<string, { at: number; body: string }>();
 
 async function fetchPage(url: string): Promise<string> {
   try {
     // Always the Arabic page: from a US server YouTube would otherwise send its English translation of the titles
-    const response = await fetch(withArabic(url), { headers: YOUTUBE_HEADERS });
+    const response = await fetchWithTimeout(withArabic(url), { headers: YOUTUBE_HEADERS });
     return response.ok ? await response.text() : '';
   } catch {
     return '';
@@ -58,7 +60,7 @@ export async function loadOverrides(): Promise<Record<string, any>> {
   const key = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
   if (!url || !key) return {};
   try {
-    const response = await fetch(`${url}/rest/v1/site_settings?select=value&key=eq.youtube_overrides`, {
+    const response = await fetchWithTimeout(`${url}/rest/v1/site_settings?select=value&key=eq.youtube_overrides`, {
       headers: { apikey: key, Authorization: `Bearer ${key}` },
     });
     if (!response.ok) return {};
@@ -77,14 +79,15 @@ async function extraPlaylists(): Promise<{ id: string; title: string }[]> {
 }
 
 // Playlists on the channel that neither the saved library nor the admin has: they are added by themselves
-async function discoverPlaylists(known: Set<string>): Promise<{ id: string; title: string }[]> {
+// `channelIds` is every playlist id on that page, in the channel's own order
+async function discoverPlaylists(known: Set<string>): Promise<{ fresh: { id: string; title: string }[]; channelIds: string[] }> {
   const found = parsePlaylists(await fetchPage(`https://www.youtube.com/channel/${CHANNEL_ID}/playlists`));
-  return found.filter((p) => !known.has(p.id)).slice(0, 30);
+  return { fresh: found.filter((p) => !known.has(p.id)).slice(0, 30), channelIds: found.map((p) => p.id) };
 }
 
 async function build(admins: { id: string; title: string }[]): Promise<string> {
   via.page = via.none = 0;
-  const discovered = await discoverPlaylists(new Set([...YOUTUBE_LIBRARY.map((p) => p.id), ...admins.map((p) => p.id)]));
+  const { fresh: discovered, channelIds } = await discoverPlaylists(new Set([...YOUTUBE_LIBRARY.map((p) => p.id), ...admins.map((p) => p.id)]));
   const extras = [...admins, ...discovered];
   const extraVideos = new Map<string, LibraryVideo[]>();
   await Promise.all(
@@ -102,9 +105,10 @@ async function build(admins: { id: string; title: string }[]): Promise<string> {
     }))
     .filter((p) => p.videos.length > 0);
   // The saved playlists are taken as they are: the GitHub job keeps them current
-  const playlists = [...YOUTUBE_LIBRARY, ...addedPlaylists];
+  // In the order of the channel's own playlists page (the videos inside each are already newest first)
+  const playlists = inChannelOrder([...YOUTUBE_LIBRARY, ...addedPlaylists], channelIds);
   const latest = await channelLatest(new Set(playlists.flatMap((p) => p.videos.map((v) => v.id))));
-  console.log(`youtube-library built: ${playlists.length} playlists (${discovered.length} found on the channel by themselves, ${admins.length} added by the admin); extra playlist pages read ${via.page}, empty ${via.none}; uploads in no playlist ${latest?.videos.length ?? 0}`);
+  void logEvent('info', 'youtube-library', `built: ${playlists.length} playlists (${discovered.length} found on the channel by themselves, ${admins.length} added by the admin); extra playlist pages read ${via.page}, empty ${via.none}; uploads in no playlist ${latest?.videos.length ?? 0}`);
   return JSON.stringify({ updatedAt: new Date().toISOString(), playlists: latest ? [latest, ...playlists] : playlists });
 }
 
@@ -119,8 +123,9 @@ export async function loadLibrary(): Promise<string> {
       entry = { at: Date.now(), body: await build(extras) };
       if (cache.size > 20) cache.clear();
       cache.set(signature, entry);
-    } catch {
+    } catch (err) {
       // Keep the copy we already have; if there is none, the site shows its saved library
+      await logEvent('error', 'youtube-library', 'library build failed', { reason: err instanceof Error ? err.message : String(err) });
     }
   }
   return entry?.body ?? JSON.stringify({ updatedAt: null, playlists: YOUTUBE_LIBRARY });

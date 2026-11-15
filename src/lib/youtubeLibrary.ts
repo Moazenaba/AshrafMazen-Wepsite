@@ -3,6 +3,7 @@ import type { LibraryPlaylist } from '../data/youtube-library';
 import { getYoutubeOverrides, type YoutubeOverrides } from '../services/dataService';
 import { EMPTY_OVERRIDES } from '../services/data/youtube';
 import { applyOverrides, type SitePlaylist } from './libraryOverrides';
+import { timedFetch } from './timedFetch';
 
 const LIBRARY_URL = '/api/youtube-library';
 const OVERRIDES_EVENT = 'youtube_overrides_changed';
@@ -59,7 +60,7 @@ function fetchBackendLibrary(): Promise<LibraryPlaylist[] | null> {
     const url = `${LIBRARY_URL}?p=${encodeURIComponent(extrasKey(overrides))}`;
     const known = requests.get(url);
     if (known && Date.now() - known.at < SHARE_MS) return known.result;
-    const result = fetch(url)
+    const result = timedFetch(url)
       .then((response) => (response.ok ? response.json() : null))
       .then((data: { playlists?: LibraryPlaylist[] } | null) => (data?.playlists?.length ? data.playlists : null))
       .catch(() => null);

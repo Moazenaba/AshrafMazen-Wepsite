@@ -7,6 +7,7 @@ import {
   cobaltRequest,
   invidiousRequest,
   isChannelVideo,
+  isSafeMediaUrl,
   parseCobalt,
   parseInvidious,
   parsePiped,
@@ -16,7 +17,9 @@ import {
   type MediaLink,
   type Provider,
 } from './_providers.js'; // Node on Vercel needs the extension
+import { addressOf, createLimiter } from './_rateLimit.js';
 import { YOUTUBE_LIBRARY } from '../src/data/youtube-library.js';
+import { logEvent } from './_log.js'; // Node on Vercel needs the extension
 
 const CHANNEL_HANDLE = process.env.YOUTUBE_CHANNEL_HANDLE || 'Ashrafmazen';
 const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID || 'UCisGvsFtKyDU6NTFywaITzQ';
@@ -32,6 +35,11 @@ const RETRY_UNTIL_MS = 25000;
 // Videos already checked to be the channel's
 // The site's saved library counts as the channel's (also when YouTube's oEmbed cannot be reached)
 const channelVideos = new Set<string>(YOUTUBE_LIBRARY.flatMap((p) => p.videos.map((v) => v.id)));
+
+// 6 calls per 10 minutes per address, and a successful answer is kept 2 minutes (at most 200 of them)
+const allowed = createLimiter(6, 600_000);
+const MEMO_MS = 120_000;
+const memo = new Map<string, { at: number; link: MediaLink & { provider: string } }>();
 
 async function timed(url: string, init: RequestInit = {}, ms = STEP_MS): Promise<Response> {
   const controller = new AbortController();
@@ -121,6 +129,10 @@ export default async function handler(req: any, res: any) {
   const id = String(req.query?.id || '');
   const kind: MediaKind = req.query?.kind === 'video' ? 'video' : req.query?.kind === 'listen' ? 'listen' : 'audio';
   if (!/^[A-Za-z0-9_-]{11}$/.test(id)) return res.status(400).send(JSON.stringify({ error: 'رابط فيديو غير صالح.' }));
+  if (!allowed(addressOf(req))) return res.status(429).send(JSON.stringify({ error: 'طلبات كثيرة. حاول بعد عشر دقائق.' }));
+  const memoKey = `${id}:${kind}`;
+  const known = memo.get(memoKey);
+  if (known && Date.now() - known.at < MEMO_MS) return res.status(200).send(JSON.stringify(known.link));
   if (!(await belongsToChannel(id))) return res.status(403).send(JSON.stringify({ error: 'التحميل متاح لفيديوهات قناة الشيخ فقط.' }));
 
   // All services are asked at once and the first working link wins. One after another, a slow cobalt video
@@ -136,8 +148,8 @@ export default async function handler(req: any, res: any) {
         const room = DEADLINE_MS - (Date.now() - started) - 1500;
         if (room < 3000) break;
         const { link, why } = await ask(p, id, kind, room);
-        if (!link) {
-          tried.push({ service, why });
+        if (!link || !isSafeMediaUrl(link.url)) {
+          tried.push({ service, why: link ? 'unsafe link' : why });
           break;
         }
         // Every link is checked to send real bytes before it is handed out: a cobalt link can answer 200 and then
@@ -156,11 +168,13 @@ export default async function handler(req: any, res: any) {
 
   try {
     const link = await Promise.any(providersFrom(process.env).map(attempt));
-    console.log(`media-link ok ${id} ${kind} via ${link.provider} ${new URL(link.url).host} in ${Date.now() - started} ms`);
+    if (memo.size >= 200) memo.delete(memo.keys().next().value as string);
+    memo.set(memoKey, { at: Date.now(), link });
+    await logEvent('info', 'media-link', `ok ${id} ${kind} via ${link.provider} ${new URL(link.url).host} in ${Date.now() - started} ms`);
     return res.status(200).send(JSON.stringify(link));
   } catch {
     // Written to the Vercel logs, so a failure can be read there (which service, and why)
-    console.warn(`media-link failed ${id} ${kind} after ${Date.now() - started} ms: ${JSON.stringify(tried)}`);
+    await logEvent('warn', 'media-link', `failed ${id} ${kind} after ${Date.now() - started} ms`, { tried });
     return res.status(502).send(JSON.stringify({ error: 'خدمات التحميل لا تستجيب الآن. حاول بعد قليل.', tried }));
   }
 }

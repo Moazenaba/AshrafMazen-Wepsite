@@ -12,7 +12,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { excerpt, loadSiteData, root, siteUrl, youtubeId } from './site-data.mjs';
-import { DEFAULT_NAME_FONT_ID, NAME_FONT_LIST } from '../src/constants/nameFontList.js';
+import { esc, render as renderPage, withNameFont, withSiteSeed } from './prerenderParts.mjs';
+import { contentHash } from './contentHash.mjs';
 
 const soft = process.argv.includes('--soft');
 const dist = resolve(root, 'dist');
@@ -22,16 +23,11 @@ const SITE_NAME = 'الشيخ أشرف مازن';
 const DEFAULT_DESCRIPTION =
   'الموقع الرسمي للشيخ أشرف مازن: دروس وشروحات وخطب ومحاضرات علمية مرئية ومسموعة ومكتوبة، ومكتبة كتب PDF.';
 
-const esc = (value) =>
-  String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
 
-// JSON inside <script>: "</" would end the script early
-const jsonLd = (data) => `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`;
-
+const site = { siteUrl, verification: '' };
+// The first-visit copy goes only into the home page and app.html (`seeded`), never into every page
+let seededTemplate = null;
+const render = (page) => renderPage(page.seeded && seededTemplate ? seededTemplate : template, page, site);
 const url = (path) => `${siteUrl}${encodeURI(path)}`;
 // The sheikh's name once: many channel titles already carry it
 const named = (text) => (/مازن/.test(text) ? text : `${text} - ${SITE_NAME}`);
@@ -45,92 +41,48 @@ const verification = [
 ]
   .filter(Boolean)
   .join('\n    ');
+site.verification = verification;
 
-const setMeta = (html, attr, name, value) =>
-  html.replace(new RegExp(`(<meta ${attr}="${name}" content=")[^"]*(")`), `$1${esc(value)}$2`);
 
-// The shell with one page's head and text
-function render({ path, title, description, image, schema = [], body, noCanonical = false }) {
-  let html = template.replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
-  html = setMeta(html, 'name', 'description', description);
-  html = setMeta(html, 'property', 'og:title', title);
-  html = setMeta(html, 'property', 'og:description', description);
-  html = setMeta(html, 'name', 'twitter:title', title);
-  html = setMeta(html, 'name', 'twitter:description', description);
-  if (noCanonical) {
-    html = html.replace(/\s*<link rel="canonical"[^>]*>/, '').replace(/\s*<meta property="og:url"[^>]*>/, '');
-  } else {
-    html = html.replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${esc(url(path))}$2`);
-    html = setMeta(html, 'property', 'og:url', url(path));
-  }
-  if (image) {
-    html = setMeta(html, 'name', 'twitter:card', 'summary_large_image');
-    html = html.replace('</head>', `  <meta property="og:image" content="${esc(image)}" />\n    <meta name="twitter:image" content="${esc(image)}" />\n  </head>`);
-  }
-  const extraHead = [verification, ...schema.map(jsonLd)].filter(Boolean).join('\n    ');
-  if (extraHead) html = html.replace('</head>', `  ${extraHead}\n  </head>`);
-  if (body) {
-    html = html.replace(
-      '<div id="root"></div>',
-      `<div id="root"><main dir="rtl" style="max-width:72rem;margin:0 auto;padding:2rem 1rem;line-height:1.9">${body}</main></div>`
-    );
-  }
-  return html;
-}
 
 const written = { count: 0 };
 function write(page) {
   const file = page.path === '/' ? resolve(dist, 'index.html') : resolve(dist, `.${page.path}`, 'index.html');
   mkdirSync(resolve(file, '..'), { recursive: true });
-  writeFileSync(file, render(page), 'utf8');
+  writeFileSync(file, render({ ...page, seeded: page.path === '/' }), 'utf8');
   written.count += 1;
 }
 
 // The fallback shell, written first so a failure below still leaves the site working
-writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true }), 'utf8');
-
-// The sheikh's name is drawn in the admin's font from the first paint, and that font's file is the one preloaded,
-// so the big name on the home page never changes font (and height) after the page appears
-function withNameFont(html, id) {
-  const font = NAME_FONT_LIST.find((f) => f.id === id) ?? NAME_FONT_LIST.find((f) => f.id === DEFAULT_NAME_FONT_ID);
-  return html
-    .replace(/(<link rel="preload" id="name-font-preload" href=")[^"]*(")/, `$1${font.file}$2`)
-    .replace(/<html ([^>]*)>/, (tag, attrs) => (attrs.includes('style=') ? tag : `<html ${attrs} style="--name-font: ${esc(font.family)}">`));
-}
-
-// The same answer /api/site gives, written into every page as inert JSON: a first-time visitor's first render already has
-// the texts, lessons and featured card (a returning visitor has the copy from the last visit), and the fresh answer replaces
-// it a moment later. When the database cannot be read here, pages are written without it and fetch as before.
-async function withSiteSeed(html) {
-  try {
-    const url = (process.env.VITE_SUPABASE_URL || '').replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
-    const key = process.env.VITE_SUPABASE_ANON_KEY || '';
-    const { readSiteData } = await import('../api/site.ts');
-    const json = JSON.stringify(await readSiteData(url, key)).replace(/</g, '\u003c');
-    return html.replace('</body>', () => `<script type="application/json" id="site-seed">${json}</script>
-  </body>`);
-  } catch (err) {
-    console.warn(`site seed skipped: ${err.message}`);
-    return html;
-  }
-}
+writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true, seeded: true }), 'utf8');
 
 let data;
 try {
   data = await loadSiteData();
   template = withNameFont(template, data.nameFont);
-  template = await withSiteSeed(template);
+  seededTemplate = await withSiteSeed(template, async () => {
+    const seedUrl = (process.env.VITE_SUPABASE_URL || '').replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
+    const { readSiteData } = await import('../api/site.ts');
+    return readSiteData(seedUrl, process.env.VITE_SUPABASE_ANON_KEY || '');
+  });
   // The fallback shell again, now with the chosen font
-  writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true }), 'utf8');
+  writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true, seeded: true }), 'utf8');
 } catch (err) {
-  if (soft) {
-    console.warn(`prerender skipped (pages will render in the browser only): ${err.message}`);
+  // PRERENDER_STRICT=1 (set in Vercel after one clean deploy) makes a production build fail instead of shipping unprerendered pages
+  if (soft && process.env.PRERENDER_STRICT !== '1') {
+    console.warn(`::warning::prerender skipped (pages will render in the browser only): ${err.message}`);
+    try {
+      writeFileSync(resolve(dist, 'build-warnings.json'), JSON.stringify({ prerender: false, reason: String(err.message).slice(0, 300) }));
+    } catch {
+      // dist is missing: the build itself failed earlier
+    }
     process.exit(0);
   }
   console.error(err.message);
   process.exit(1);
 }
 const { categories, series, lessons, books, socials, library } = data;
+writeFileSync(resolve(dist, 'content-hash.txt'), contentHash(lessons), 'utf8');
 
 // Only addresses that are safe as folder names (every id and slug the site makes today)
 const SAFE = /^[\p{L}\p{N}_-]{1,80}$/u;

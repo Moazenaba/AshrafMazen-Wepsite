@@ -2,6 +2,7 @@
 // Files starting with "_" in api/ are helpers, not endpoints. Everything secret stays on the server:
 // the browser only ever receives a signed link that works for one file for a few minutes.
 import { createHash, createHmac } from 'node:crypto';
+import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
 
 export interface R2Config {
   accountId: string;
@@ -52,7 +53,9 @@ export function presign(
   method: 'GET' | 'PUT' | 'DELETE',
   key: string,
   expires = 900,
-  extraQuery: Record<string, string> = {}
+  extraQuery: Record<string, string> = {},
+  // When given, the upload must send exactly this many bytes (the length is part of the signature)
+  contentLength?: number
 ): string {
   const { amzDate, date } = stamp();
   const host = hostOf(cfg);
@@ -64,13 +67,15 @@ export function presign(
     'X-Amz-Credential': `${cfg.accessKeyId}/${scope}`,
     'X-Amz-Date': amzDate,
     'X-Amz-Expires': String(expires),
-    'X-Amz-SignedHeaders': 'host',
+    'X-Amz-SignedHeaders': contentLength === undefined ? 'host' : 'content-length;host',
   };
   const canonicalQuery = Object.keys(query)
     .sort()
     .map((k) => `${encode(k)}=${encode(query[k])}`)
     .join('&');
-  const canonicalRequest = [method, path, canonicalQuery, `host:${host}\n`, 'host', 'UNSIGNED-PAYLOAD'].join('\n');
+  const signed = contentLength === undefined ? 'host' : 'content-length;host';
+  const headerLines = contentLength === undefined ? `host:${host}\n` : `content-length:${contentLength}\nhost:${host}\n`;
+  const canonicalRequest = [method, path, canonicalQuery, headerLines, signed, 'UNSIGNED-PAYLOAD'].join('\n');
   const toSign = ['AWS4-HMAC-SHA256', amzDate, scope, sha256(canonicalRequest)].join('\n');
   const signature = createHmac('sha256', signingKey(cfg, date)).update(toSign).digest('hex');
   return `https://${host}${path}?${canonicalQuery}&X-Amz-Signature=${signature}`;
@@ -122,11 +127,11 @@ export async function isAdminToken(token: string | undefined): Promise<boolean> 
   const anon = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
   if (!token || !url || !anon) return false;
   const headers = { apikey: anon, Authorization: `Bearer ${token}` };
-  const userRes = await fetch(`${url}/auth/v1/user`, { headers });
+  const userRes = await fetchWithTimeout(`${url}/auth/v1/user`, { headers }, 6000);
   if (!userRes.ok) return false;
   const user = (await userRes.json()) as { id?: string };
   if (!user.id) return false;
-  const adminRes = await fetch(`${url}/rest/v1/admins?select=user_id&user_id=eq.${encodeURIComponent(user.id)}`, { headers });
+  const adminRes = await fetchWithTimeout(`${url}/rest/v1/admins?select=user_id&user_id=eq.${encodeURIComponent(user.id)}`, { headers }, 6000);
   if (!adminRes.ok) return false;
   const rows = (await adminRes.json()) as unknown[];
   return Array.isArray(rows) && rows.length > 0;

@@ -50,3 +50,9 @@ export function parseLiveNow(html: string, channelId: string): LiveNow | null {
   const live = broadcast?.isLiveNow === true || (details.isLive === true && broadcast?.isLiveNow !== false);
   return live ? { videoId: details.videoId, title: String(details.title ?? '').replace(/\s+/g, ' ').trim().slice(0, 150) } : null;
 }
+
+// Whether this is a YouTube page we understand at all (it carries the player or page data). A consent page, an error
+// page or a changed layout does not, and then "no live" must not be taken as a real answer.
+export function looksLikeYoutubePage(html: string): boolean {
+  return html.includes('ytInitialData') || html.includes('ytInitialPlayerResponse');
+}

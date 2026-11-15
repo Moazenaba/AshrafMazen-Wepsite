@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { Loader2, Save } from 'lucide-react';
 import { getSiteContent, saveLiveStream } from '../../../services/data/siteContent';
 import { EMPTY_LIVE, type LiveStream } from '../../../services/data/liveStreamRules';
+import { timedFetch } from '../../../lib/timedFetch';
 
 const input =
   'w-full h-11 px-3 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-700';
@@ -20,7 +21,7 @@ export const LiveStreamSettings: React.FC = () => {
 
   useEffect(() => {
     getSiteContent(true).then((c) => setDraft(c.live));
-    fetch('/api/live')
+    timedFetch('/api/live')
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => setYoutube(data ? (data.live ? 'live' : 'off') : 'unknown'))
       .catch(() => setYoutube('unknown'));

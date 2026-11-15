@@ -3,6 +3,7 @@ import { AlertTriangle, CheckCircle2, Loader2, RefreshCw, XCircle } from 'lucide
 import { supabase } from '../../lib/supabase';
 import { getAdminStats } from '../../services/analytics';
 import { getPendingSubmissionsCount } from '../../services/dataService';
+import { timedFetch } from '../../lib/timedFetch';
 
 type State = 'checking' | 'ok' | 'warn' | 'fail';
 interface Check {
@@ -45,7 +46,7 @@ async function runChecks(): Promise<Check[]> {
   {
     try {
       const jwt = await token();
-      const response = await fetch('/api/r2', {
+      const response = await timedFetch('/api/r2', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
         body: JSON.stringify({ action: 'status' }),
@@ -87,15 +88,33 @@ async function runChecks(): Promise<Check[]> {
   // 3. The channel's videos
   {
     try {
-      const response = await fetch('/api/youtube-library');
+      const response = await timedFetch('/api/youtube-library');
       const data = response.ok ? await response.json() : null;
+      const stale = data?.updatedAt && Date.now() - Date.parse(data.updatedAt) > 3 * 3600_000;
       checks.push(
-        data?.playlists?.length
+        stale
+          ? { id: 'yt', name: 'مزامنة فيديوهات يوتيوب', state: 'warn', detail: `آخر تحديث للقائمة قديم (${new Date(data.updatedAt).toLocaleString('ar-EG')}).`, fix: 'يتأخر يوتيوب أحياناً؛ يعيد الخادم المحاولة تلقائياً.' }
+          : data?.playlists?.length
           ? { id: 'yt', name: 'مزامنة فيديوهات يوتيوب', state: 'ok', detail: `${new Intl.NumberFormat('ar-EG').format(data.playlists.length)} قائمة${data.updatedAt ? `، آخر تحديث ${new Date(data.updatedAt).toLocaleString('ar-EG')}` : ' (من النسخة المضمّنة في الموقع)'}.` }
           : { id: 'yt', name: 'مزامنة فيديوهات يوتيوب', state: 'warn', detail: 'الخادم لا يرد، والموقع يعرض النسخة المضمّنة فقط (لن تظهر الفيديوهات الجديدة).', fix: 'تأكد أن دالة /api/youtube-library منشورة على Vercel.' }
       );
     } catch {
       checks.push({ id: 'yt', name: 'مزامنة فيديوهات يوتيوب', state: 'warn', detail: 'الخادم لا يرد، والموقع يعرض النسخة المضمّنة فقط.' });
+    }
+  }
+
+  // 3b. The live-broadcast check
+  {
+    try {
+      const response = await timedFetch('/api/live');
+      const data = response.ok ? await response.json() : null;
+      checks.push(
+        typeof data?.live === 'boolean'
+          ? { id: 'live', name: 'كشف البث المباشر', state: 'ok', detail: data.live ? 'القناة تبث الآن.' : 'لا يوجد بث الآن.' }
+          : { id: 'live', name: 'كشف البث المباشر', state: 'warn', detail: 'الخادم لا يرد على فحص البث.' }
+      );
+    } catch {
+      checks.push({ id: 'live', name: 'كشف البث المباشر', state: 'warn', detail: 'الخادم لا يرد على فحص البث.' });
     }
   }
 
@@ -164,7 +183,7 @@ export const SystemStatus: React.FC = () => {
     setTestResult(null);
     try {
       const jwt = await token();
-      const sign = await fetch('/api/r2', {
+      const sign = await timedFetch('/api/r2', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
         body: JSON.stringify({ action: 'sign', kind: 'cover', filename: 'check.png', size: 68 }),
@@ -174,12 +193,12 @@ export const SystemStatus: React.FC = () => {
       const png = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='), (c) => c.charCodeAt(0));
       let put: Response;
       try {
-        put = await fetch(signed.uploadUrl, { method: 'PUT', headers: { 'Content-Type': signed.contentType }, body: png });
+        put = await timedFetch(signed.uploadUrl, { method: 'PUT', headers: { 'Content-Type': signed.contentType }, body: png });
       } catch {
         throw new Error('منع المتصفح الرفع: أضف عنوان الموقع إلى قواعد CORS للحاوية (R2 ← الحاوية ← Settings ← CORS Policy، والصق docs/r2-cors.json).');
       }
       if (!put.ok) throw new Error(`رفض التخزين الملف (${put.status}).`);
-      await fetch('/api/r2', {
+      await timedFetch('/api/r2', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
         body: JSON.stringify({ action: 'delete', url: signed.publicUrl }),
