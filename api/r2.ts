@@ -7,6 +7,7 @@
 // Until the R2 settings are present it answers 501, and the admin screens say that file uploads are not set up yet.
 import { randomUUID } from 'node:crypto';
 import { fileLink, isAdminToken, keyFromLink, presign, r2Config, type R2Config } from './_r2.js'; // Node on Vercel needs the extension (the .ts file is compiled to .js)
+import { FILE_RULES } from '../src/constants/fileRules.js'; // the one list of what may be uploaded
 import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
 import { logEvent } from './_log.js'; // Node on Vercel needs the extension
 
@@ -15,17 +16,7 @@ export const SITE_FOLDERS = /^(library\/(files|covers)|audio|branding|media\/vid
 const PUBLIC_FOLDERS = /^(library\/(files|covers)|audio|branding|media\/video)\//;
 const isSiteKey = (key: string) => SITE_FOLDERS.test(key) && !key.includes('..');
 
-const KINDS = {
-  pdf: { folder: 'library/files', extensions: ['pdf'], maxMb: 200, type: 'application/pdf' },
-  cover: { folder: 'library/covers', extensions: ['jpg', 'jpeg', 'png', 'webp'], maxMb: 5, type: '' },
-  // aac: recordings from an iPhone; opus: WhatsApp voice notes. Both play in current browsers.
-  audio: { folder: 'audio', extensions: ['mp3', 'm4a', 'aac', 'wav', 'ogg', 'opus'], maxMb: 500, type: '' },
-  logo: { folder: 'branding', extensions: ['png', 'jpg', 'jpeg', 'webp'], maxMb: 2, type: '' },
-  // The home page's featured picture
-  hero: { folder: 'branding/hero', extensions: ['png', 'jpg', 'jpeg', 'webp'], maxMb: 8, type: '' },
-  // Videos the admin uploads to the site itself (R2 takes a single upload of up to 5 GB)
-  video: { folder: 'media/video', extensions: ['mp4', 'webm', 'mov', 'm4v'], maxMb: 4000, type: '' },
-} as const;
+const KINDS = FILE_RULES as Record<string, { folder: string; extensions: string[]; maxMb: number; type: string }>;
 
 const IMAGE_TYPES: Record<string, string> = {
   jpg: 'image/jpeg',
@@ -50,11 +41,11 @@ function bearer(req: any): string | undefined {
 }
 
 async function sign(cfg: R2Config, body: any, res: any) {
-  const kind = body?.kind as keyof typeof KINDS;
+  const kind = String(body?.kind);
   const rules = KINDS[kind];
   if (!rules) return send(res, 400, { error: 'نوع الملف غير معروف.' });
   const extension = String(body?.filename || '').split('.').pop()?.toLowerCase() || '';
-  if (!(rules.extensions as readonly string[]).includes(extension)) {
+  if (!rules.extensions.includes(extension)) {
     return send(res, 400, { error: `صيغة الملف غير مدعومة. الصيغ المسموحة: ${rules.extensions.join('، ')}.` });
   }
   if (Number(body?.size) > rules.maxMb * 1024 * 1024) {

@@ -2,12 +2,8 @@
 import React, { useRef, useState } from 'react';
 import { Loader2, Upload } from 'lucide-react';
 import { uploadToR2, type R2Kind } from '../../services/r2';
+import { acceptOf, checkFile } from '../../constants/fileRules';
 
-const ACCEPT: Partial<Record<R2Kind, string>> = {
-  hero: 'image/png,image/jpeg,image/webp',
-  video: 'video/mp4,video/webm,video/quicktime,.m4v',
-  audio: 'audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/ogg,.m4a,.aac,.opus',
-};
 
 export const FileUploadButton: React.FC<{
   kind: R2Kind;
@@ -23,6 +19,11 @@ export const FileUploadButton: React.FC<{
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
+    const problem = checkFile(kind, file.name, file.size);
+    if (problem) {
+      onError(problem);
+      return;
+    }
     try {
       setProgress(0);
       const url = await uploadToR2(file, kind, setProgress);
@@ -36,7 +37,7 @@ export const FileUploadButton: React.FC<{
 
   return (
     <>
-      <input ref={inputRef} type="file" accept={ACCEPT[kind]} onChange={pick} className="sr-only" tabIndex={-1} aria-hidden="true" />
+      <input ref={inputRef} type="file" accept={acceptOf(kind)} onChange={pick} className="sr-only" tabIndex={-1} aria-hidden="true" />
       <button
         type="button"
         onClick={() => inputRef.current?.click()}

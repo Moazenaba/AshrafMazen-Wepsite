@@ -2,6 +2,7 @@
 import { supabase } from '../../lib/supabase';
 import { translateSupabaseError } from '../../utils/supabaseErrors';
 import { uploadToR2 } from '../r2';
+import { checkFile } from '../../constants/fileRules';
 import { deleteIfUnused } from './fileUsage';
 import type { SiteSettings } from '../../types';
 import { DEFAULT_NAME_FONT } from '../../constants/nameFonts';
@@ -81,17 +82,8 @@ export async function saveSiteSettings(settings: Partial<SiteSettings>): Promise
 export async function uploadBrandingLogo(file: File): Promise<string> {
   if (!file) throw new Error('لم يتم تحديد أي ملف شعار.');
 
-  // Validate format
-  const extension = file.name.split('.').pop()?.toLowerCase() || '';
-  const allowed = ['png', 'jpg', 'jpeg', 'svg', 'webp'];
-  if (!allowed.includes(extension)) {
-    throw new Error('صيغة الملف غير مدعومة. يرجى اختيار ملف صورة بصيغة (PNG, JPG, SVG, WebP).');
-  }
-
-  // Validate size (max 2MB)
-  if (file.size > 2 * 1024 * 1024) {
-    throw new Error('حجم الصورة كبير جداً. الحد الأقصى المسموح به هو 2 ميجابايت.');
-  }
+  const problem = checkFile('logo', file.name, file.size);
+  if (problem) throw new Error(problem);
 
   return uploadToR2(file, 'logo');
 }

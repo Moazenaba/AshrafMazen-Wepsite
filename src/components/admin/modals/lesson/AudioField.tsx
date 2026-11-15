@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link as LinkIcon, Headphones, Check, Loader2 } from 'lucide-react';
 import type { FormProps } from './lessonForm';
+import { acceptOf } from '../../../../constants/fileRules';
 
 export const AudioField = ({ form, update, uploading, onFile }: FormProps & { uploading: boolean; onFile: (e: React.ChangeEvent<HTMLInputElement>) => void }) => {
   return (
@@ -61,7 +62,7 @@ export const AudioField = ({ form, update, uploading, onFile }: FormProps & { up
             <div className="space-y-2">
               <input
                 type="file"
-                accept=".mp3,.m4a,.aac,.wav,.ogg,.opus,audio/*"
+                accept={`${acceptOf('audio')},audio/*`}
                 onChange={onFile}
                 disabled={uploading}
                 className="w-full text-xs text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-800 file:text-white hover:file:bg-emerald-700 cursor-pointer disabled:opacity-50"

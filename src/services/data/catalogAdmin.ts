@@ -4,6 +4,15 @@ import { translateSupabaseError } from '../../utils/supabaseErrors';
 import type { Category, Series } from '../../types';
 import { slugify } from './shared';
 
+const SLUG_TAKEN = 'هذا الاسم المختصر (slug) مستخدم من قبل. اختر اسماً آخر.';
+
+// Throws when another row of the table already has this slug (`exceptId` = the row being edited)
+async function assertSlugFree(table: 'categories' | 'series', slug: string, exceptId?: string): Promise<void> {
+  const { data, error } = await supabase.from(table).select('id').eq('slug', slug);
+  if (error) throw new Error(translateSupabaseError(error));
+  if ((data ?? []).some((row) => row.id !== exceptId)) throw new Error(SLUG_TAKEN);
+}
+
 // Categories CRUD
 export async function createCategory(categoryData: Partial<Category>): Promise<Category> {
   const name = (categoryData.name || '').trim();
@@ -11,6 +20,7 @@ export async function createCategory(categoryData: Partial<Category>): Promise<C
 
   let finalSlug = slugify(categoryData.slug ? categoryData.slug : name);
   if (!finalSlug) finalSlug = `cat-${Date.now().toString(36)}`;
+  await assertSlugFree('categories', finalSlug);
 
   const payload = {
     name,
@@ -38,6 +48,7 @@ export async function updateCategory(
   const payload: any = { ...categoryData };
   if (categoryData.slug) {
     payload.slug = slugify(categoryData.slug);
+    await assertSlugFree('categories', payload.slug, id);
   }
 
   const { data, error } = await supabase
@@ -81,6 +92,7 @@ export async function createSeries(seriesData: Partial<Series>): Promise<Series>
 
   let finalSlug = slugify(seriesData.slug ? seriesData.slug : title);
   if (!finalSlug) finalSlug = `series-${Date.now().toString(36)}`;
+  await assertSlugFree('series', finalSlug);
 
   const payload = {
     category_id: seriesData.category_id,
@@ -107,6 +119,7 @@ export async function updateSeries(
   const payload: any = { ...seriesData };
   if (seriesData.slug) {
     payload.slug = slugify(seriesData.slug);
+    await assertSlugFree('series', payload.slug, id);
   }
 
   const { data, error } = await supabase
