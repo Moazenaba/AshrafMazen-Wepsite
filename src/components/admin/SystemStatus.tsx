@@ -3,6 +3,7 @@ import { AlertTriangle, CheckCircle2, Loader2, RefreshCw, XCircle } from 'lucide
 import { supabase } from '../../lib/supabase';
 import { getAdminStats } from '../../services/analytics';
 import { getPendingSubmissionsCount } from '../../services/dataService';
+import { timedFetch } from '../../lib/timedFetch';
 
 type State = 'checking' | 'ok' | 'warn' | 'fail';
 interface Check {
@@ -45,7 +46,7 @@ async function runChecks(): Promise<Check[]> {
   {
     try {
       const jwt = await token();
-      const response = await fetch('/api/r2', {
+      const response = await timedFetch('/api/r2', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
         body: JSON.stringify({ action: 'status' }),
@@ -87,7 +88,7 @@ async function runChecks(): Promise<Check[]> {
   // 3. The channel's videos
   {
     try {
-      const response = await fetch('/api/youtube-library');
+      const response = await timedFetch('/api/youtube-library');
       const data = response.ok ? await response.json() : null;
       checks.push(
         data?.playlists?.length
@@ -164,7 +165,7 @@ export const SystemStatus: React.FC = () => {
     setTestResult(null);
     try {
       const jwt = await token();
-      const sign = await fetch('/api/r2', {
+      const sign = await timedFetch('/api/r2', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
         body: JSON.stringify({ action: 'sign', kind: 'cover', filename: 'check.png', size: 68 }),
@@ -174,12 +175,12 @@ export const SystemStatus: React.FC = () => {
       const png = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='), (c) => c.charCodeAt(0));
       let put: Response;
       try {
-        put = await fetch(signed.uploadUrl, { method: 'PUT', headers: { 'Content-Type': signed.contentType }, body: png });
+        put = await timedFetch(signed.uploadUrl, { method: 'PUT', headers: { 'Content-Type': signed.contentType }, body: png });
       } catch {
         throw new Error('منع المتصفح الرفع: أضف عنوان الموقع إلى قواعد CORS للحاوية (R2 ← الحاوية ← Settings ← CORS Policy، والصق docs/r2-cors.json).');
       }
       if (!put.ok) throw new Error(`رفض التخزين الملف (${put.status}).`);
-      await fetch('/api/r2', {
+      await timedFetch('/api/r2', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
         body: JSON.stringify({ action: 'delete', url: signed.publicUrl }),

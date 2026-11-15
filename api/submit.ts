@@ -8,6 +8,7 @@
 // and a few requests per hour per address. The database enforces its own limits again (see the migration).
 
 import { addressOf, createLimiter } from './_rateLimit.js'; // Node on Vercel needs the extension
+import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
 
 const KINDS = ['book', 'audio', 'video', 'correction', 'removal'] as const;
 type Kind = (typeof KINDS)[number];
@@ -71,7 +72,7 @@ export default async function handler(req: any, res: any) {
       let human = false;
       if (token) {
         try {
-          const check = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+          const check = await fetchWithTimeout('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({ secret: turnstileSecret, response: token }),
@@ -105,7 +106,7 @@ export default async function handler(req: any, res: any) {
       return send(res, 400, { error: 'اشرح المطلوب في جملة على الأقل.' });
     }
 
-    const response = await fetch(`${supabaseUrl}/rest/v1/submissions`, {
+    const response = await fetchWithTimeout(`${supabaseUrl}/rest/v1/submissions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

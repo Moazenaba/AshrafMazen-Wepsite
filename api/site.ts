@@ -27,7 +27,11 @@ const QUERIES = {
   social: 'social_links?select=*&is_active=eq.true&order=sort_order.asc',
 } as const;
 
-export async function readSiteData(url: string, key: string, fetcher: typeof fetch = fetch) {
+// Gives up after 8 s. Written here instead of importing api/_fetch.ts because scripts/prerender.mjs loads this file
+// directly with Node, which cannot resolve the ".js" import that Vercel needs.
+const timedGet: typeof fetch = (input, init) => fetch(input, { ...init, signal: AbortSignal.timeout(8000) });
+
+export async function readSiteData(url: string, key: string, fetcher: typeof fetch = timedGet) {
   const entries = await Promise.all(
     Object.entries(QUERIES).map(async ([name, query]) => {
       const response = await fetcher(`${url}/rest/v1/${query}`, { headers: { apikey: key, Authorization: `Bearer ${key}` } });

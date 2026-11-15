@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSiteContent } from './useSiteContent';
 import { readLiveStream } from '../services/data/siteContent';
 import { liveView, type AutoLive, type LiveStream, type LiveView } from '../services/data/liveStreamRules';
+import { timedFetch } from '../lib/timedFetch';
 
 const FIRST_CHECK_MS = 1500;
 // Every 3 minutes while the tab is in front (each check is a request in the logs): a broadcast shows within a few minutes
@@ -13,7 +14,7 @@ const SHARE_MS = 20_000;
 let sharedAuto: { at: number; result: Promise<AutoLive | null> } | null = null;
 function checkAutoLive(): Promise<AutoLive | null> {
   if (sharedAuto && Date.now() - sharedAuto.at < SHARE_MS) return sharedAuto.result;
-  const result = fetch('/api/live')
+  const result = timedFetch('/api/live')
     .then((response) => (response.ok ? response.json() : null))
     .then((data: { live?: boolean; videoId?: string; title?: string } | null) =>
       data?.live && data.videoId ? { videoId: data.videoId, title: data.title ?? '' } : null

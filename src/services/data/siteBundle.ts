@@ -3,6 +3,7 @@
 // An admin (a saved session in this browser) never uses it: admins read live rows, so their edits show at once.
 import { hasStoredSession } from '../../lib/supabase';
 import { isSiteBundle, type SiteBundle } from './siteBundleRules';
+import { timedFetch } from '../../lib/timedFetch';
 
 const STORAGE_KEY = 'site_bundle_v1';
 const ENDPOINT = '/api/site';
@@ -33,7 +34,7 @@ export function storedSiteBundle(): SiteBundle | null {
 export function loadSiteBundle(): Promise<SiteBundle | null> {
   if (hasStoredSession()) return Promise.resolve(null);
   if (!request) {
-    request = fetch(ENDPOINT)
+    request = timedFetch(ENDPOINT)
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         if (!isSiteBundle(data)) return null;

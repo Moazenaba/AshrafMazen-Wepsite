@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { timedFetch } from '../lib/timedFetch';
 
 // The site's files (recordings, books, covers, the logo) live on Cloudflare R2 and nowhere else.
 // The keys stay on the server (api/r2.ts); the browser only ever gets a short-lived signed link.
@@ -23,7 +24,7 @@ async function adminToken(): Promise<string> {
 export async function uploadToR2(file: File, kind: R2Kind, onProgress?: (fraction: number) => void): Promise<string> {
   let response: Response;
   try {
-    response = await fetch(ENDPOINT, {
+    response = await timedFetch(ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${await adminToken()}` },
       body: JSON.stringify({ action: 'sign', kind, filename: file.name, size: file.size }),
@@ -64,7 +65,7 @@ export const isR2Url = (url: string | null | undefined) =>
 // Removes a file the site uploaded to R2; failures are logged, not thrown, so a delete in the admin never sticks
 export async function deleteFromR2(url: string): Promise<void> {
   try {
-    const response = await fetch(ENDPOINT, {
+    const response = await timedFetch(ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${await adminToken()}` },
       body: JSON.stringify({ action: 'delete', url }),
