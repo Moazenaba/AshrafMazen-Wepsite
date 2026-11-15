@@ -13,7 +13,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 | 6 | WP-04 file lifecycle | DONE | prod/wp-04-file-lifecycle | 2026-11-15 | 333 | lines 23%, functions 20% |
 | 7 | WP-03 site bundle size | DONE | prod/wp-03-bundle-size | 2026-11-15 | 341 | lines 23%, functions 20% |
 | 8 | WP-05 error visibility | DONE | prod/wp-05-error-visibility | 2026-11-15 | 359 | lines 23%, functions 20% |
-| 9 | WP-06 monitoring | TODO | | | | |
+| 9 | WP-06 monitoring | DONE | prod/wp-06-monitoring | 2026-11-15 | 364 | lines 23%, functions 20% |
 | 10 | WP-08 YouTube robustness | TODO | | | | |
 | 11 | WP-11 admin forms | TODO | | | | |
 | 12 | WP-12 build, CI, documents | TODO | | | | |

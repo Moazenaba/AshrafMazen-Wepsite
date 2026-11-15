@@ -1,4 +1,4 @@
-name: Sync YouTube
+name: Sync YouTube and check the site
 
 # A new video on the channel reaches the saved library (src/data/youtube-library.ts), and so the sitemap and the
 # prerendered pages, without anyone touching the repo. When the file changes the job commits it to main and Vercel
@@ -12,6 +12,9 @@ name: Sync YouTube
 #   workflow_dispatch   the "Run workflow" button in the Actions tab
 #   repository_dispatch event type "youtube-upload": for anything that can call the GitHub API the moment a video goes up
 #                       (a Make/Zapier/IFTTT "new YouTube video" step, for example)
+#
+# The same job then checks the live site (scripts/smoke-test.mjs) as extra steps, which costs no extra Actions minutes. A failed
+# check is also written to the site's own error log (scripts/report-monitor.mjs) and turns the run red, so GitHub emails the owner.
 #
 # If YouTube answers no playlist (blocked, or its page changed) the script exits with an error and this run turns red;
 # GitHub then emails the repository owner.
@@ -57,3 +60,15 @@ jobs:
           git commit -m "YouTube: new videos added to the library automatically"
           git pull --rebase origin main
           git push origin main
+      - name: Check the live site
+        id: smoke
+        continue-on-error: true
+        run: node scripts/smoke-test.mjs https://ashraf-mazen.vercel.app --json > smoke.json
+      - name: Record a failed check
+        if: steps.smoke.outcome == 'failure'
+        run: node scripts/report-monitor.mjs smoke.json
+        env:
+          SITE_URL: https://ashraf-mazen.vercel.app
+      - name: Fail the run when the site is down
+        if: steps.smoke.outcome == 'failure'
+        run: exit 1
