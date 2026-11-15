@@ -90,13 +90,31 @@ async function runChecks(): Promise<Check[]> {
     try {
       const response = await timedFetch('/api/youtube-library');
       const data = response.ok ? await response.json() : null;
+      const stale = data?.updatedAt && Date.now() - Date.parse(data.updatedAt) > 3 * 3600_000;
       checks.push(
-        data?.playlists?.length
+        stale
+          ? { id: 'yt', name: 'مزامنة فيديوهات يوتيوب', state: 'warn', detail: `آخر تحديث للقائمة قديم (${new Date(data.updatedAt).toLocaleString('ar-EG')}).`, fix: 'يتأخر يوتيوب أحياناً؛ يعيد الخادم المحاولة تلقائياً.' }
+          : data?.playlists?.length
           ? { id: 'yt', name: 'مزامنة فيديوهات يوتيوب', state: 'ok', detail: `${new Intl.NumberFormat('ar-EG').format(data.playlists.length)} قائمة${data.updatedAt ? `، آخر تحديث ${new Date(data.updatedAt).toLocaleString('ar-EG')}` : ' (من النسخة المضمّنة في الموقع)'}.` }
           : { id: 'yt', name: 'مزامنة فيديوهات يوتيوب', state: 'warn', detail: 'الخادم لا يرد، والموقع يعرض النسخة المضمّنة فقط (لن تظهر الفيديوهات الجديدة).', fix: 'تأكد أن دالة /api/youtube-library منشورة على Vercel.' }
       );
     } catch {
       checks.push({ id: 'yt', name: 'مزامنة فيديوهات يوتيوب', state: 'warn', detail: 'الخادم لا يرد، والموقع يعرض النسخة المضمّنة فقط.' });
+    }
+  }
+
+  // 3b. The live-broadcast check
+  {
+    try {
+      const response = await timedFetch('/api/live');
+      const data = response.ok ? await response.json() : null;
+      checks.push(
+        typeof data?.live === 'boolean'
+          ? { id: 'live', name: 'كشف البث المباشر', state: 'ok', detail: data.live ? 'القناة تبث الآن.' : 'لا يوجد بث الآن.' }
+          : { id: 'live', name: 'كشف البث المباشر', state: 'warn', detail: 'الخادم لا يرد على فحص البث.' }
+      );
+    } catch {
+      checks.push({ id: 'live', name: 'كشف البث المباشر', state: 'warn', detail: 'الخادم لا يرد على فحص البث.' });
     }
   }
 
