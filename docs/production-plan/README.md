@@ -8,7 +8,7 @@ break it, leak data, or hide a failure was written down with its evidence. This 
 Start a session in the repository folder and give the model this command:
 
 ```
-/goal Follow docs/production-plan/GOAL.md exactly, one work package at a time. You are done when every row in docs/production-plan/STATE.md is DONE or BLOCKED and the "Final review" section of STATE.md is written.
+/goal Read GOAL.md and follow it exactly until it says you are finished.
 ```
 
 To continue in a later session, give the same command: the model reads `STATE.md` and resumes.
@@ -17,7 +17,7 @@ To continue in a later session, give the same command: the model reads `STATE.md
 
 | File | What it is |
 |---|---|
-| `GOAL.md` | **The master file.** Rules, the 16 steps in order, the procedure per step, the self-review, when to stop, the final review. |
+| `../../GOAL.md` (repository root) | **The master file, the only one you call.** Rules, the 16 steps in order, the procedure per step, the self-review, when to stop, the final review. |
 | `STATE.md` | Progress ledger. The executor updates it after each step; it is the memory between sessions. |
 | `OWNER-ACTIONS.md` | What only the owner can do (rotate secrets, two-factor, plans, backups, run SQL, merge). |
 | `problems/01-security.md` | SEC-01..12 |

@@ -1,45 +1,61 @@
 # GOAL: make this site production-grade, one work package at a time
 
-You are the executor. This file is your only instruction set. Read it fully, then `STATE.md`, then start.
-Do not re-audit the project: the audit is done (`problems/`), and each fix is specified (`wp/`).
+You are the executor. This file is your only instruction set. Read it fully, then `docs/production-plan/STATE.md`, then start.
+Do not re-audit the project: the audit is done (`docs/production-plan/problems/`), and each fix is specified (`docs/production-plan/wp/`).
+
+## 0. Map: every file of the plan and when you open it
+
+This file is the entry point and ties the whole plan together. You never need another instruction from the owner.
+
+| File | Open it when |
+|---|---|
+| `GOAL.md` (this file, repository root) | at the start of every session |
+| `docs/production-plan/STATE.md` | at the start of every session, and after every step (you write to it) |
+| `docs/production-plan/wp/WP-NN-*.md` | when you start that step (section 1 says which file belongs to which step) |
+| `docs/production-plan/problems/01-security.md` (SEC), `02-reliability.md` (REL), `03-data-and-integration.md` (DAT, INT), `04-observability-testing-ops.md` (OBS, TST, PRF, OPS) | only the rows a package says it closes (`grep -n "<ID>"`), to understand why |
+| `docs/production-plan/OWNER-ACTIONS.md` | when a step needs the owner, and for the final report |
+| `CLAUDE.md` | once, for the project's map and working rules |
+
+Session start, every time: read this file -> read `docs/production-plan/STATE.md` -> run
+`git status && git branch --show-current` -> continue with section 4.
 
 ## 1. The goal and when you are finished
 
-**Finished** = every row of the table in `STATE.md` is `DONE` or `BLOCKED` (with a reason), and the final review
-(section 8) is written in `STATE.md`. Then stop and report. Do not invent more work.
+**Finished** = every row of the table in `docs/production-plan/STATE.md` is `DONE` or `BLOCKED` (with a reason), and the final review
+(section 8) is written in `docs/production-plan/STATE.md`. Then stop and report. Do not invent more work.
 
 There are **16 steps**, in this fixed order. Do not reorder; a step marked "needs" cannot start before those are `DONE`.
 
 | # | Step | File | Needs |
 |---|---|---|---|
-| 1 | WP-09 test foundation | `wp/WP-09-test-foundation.md` | - |
-| 2 | WP-14a finished branches | `wp/WP-14-features-in-flight.md` step 1 | 1 |
-| 3 | WP-01 security | `wp/WP-01-security.md` | 1 |
-| 4 | WP-02 admin session | `wp/WP-02-admin-session.md` | 1 |
-| 5 | WP-07 timeouts and degraded states | `wp/WP-07-timeouts-and-degraded-states.md` | 1 |
-| 6 | WP-04 file lifecycle | `wp/WP-04-file-lifecycle.md` | 1, 2 |
-| 7 | WP-03 site bundle size | `wp/WP-03-site-bundle-size.md` | 1 |
-| 8 | WP-05 error visibility | `wp/WP-05-error-visibility.md` | 1, 3, 5 |
-| 9 | WP-06 monitoring | `wp/WP-06-monitoring.md` | 8 |
-| 10 | WP-08 YouTube robustness | `wp/WP-08-youtube-robustness.md` | 2, 5, 8 |
-| 11 | WP-11 admin forms | `wp/WP-11-admin-forms.md` | 1 |
-| 12 | WP-12 build, CI, documents | `wp/WP-12-build-ci-docs.md` | 1, 9 |
-| 13 | WP-10 browser tests | `wp/WP-10-browser-tests.md` | 1, 11 |
-| 14 | WP-14b Quran page | `wp/WP-14-features-in-flight.md` step 2 | 2, 5, 13 |
-| 15 | WP-13 performance | `wp/WP-13-performance.md` | 13 |
-| 16 | WP-15 database shape | `wp/WP-15-database-shape.md` | 1, 8 |
+| 1 | WP-09 test foundation | `docs/production-plan/wp/WP-09-test-foundation.md` | - |
+| 2 | WP-14a finished branches | `docs/production-plan/wp/WP-14-features-in-flight.md` step 1 | 1 |
+| 3 | WP-01 security | `docs/production-plan/wp/WP-01-security.md` | 1 |
+| 4 | WP-02 admin session | `docs/production-plan/wp/WP-02-admin-session.md` | 1 |
+| 5 | WP-07 timeouts and degraded states | `docs/production-plan/wp/WP-07-timeouts-and-degraded-states.md` | 1 |
+| 6 | WP-04 file lifecycle | `docs/production-plan/wp/WP-04-file-lifecycle.md` | 1, 2 |
+| 7 | WP-03 site bundle size | `docs/production-plan/wp/WP-03-site-bundle-size.md` | 1 |
+| 8 | WP-05 error visibility | `docs/production-plan/wp/WP-05-error-visibility.md` | 1, 3, 5 |
+| 9 | WP-06 monitoring | `docs/production-plan/wp/WP-06-monitoring.md` | 8 |
+| 10 | WP-08 YouTube robustness | `docs/production-plan/wp/WP-08-youtube-robustness.md` | 2, 5, 8 |
+| 11 | WP-11 admin forms | `docs/production-plan/wp/WP-11-admin-forms.md` | 1 |
+| 12 | WP-12 build, CI, documents | `docs/production-plan/wp/WP-12-build-ci-docs.md` | 1, 9 |
+| 13 | WP-10 browser tests | `docs/production-plan/wp/WP-10-browser-tests.md` | 1, 11 |
+| 14 | WP-14b Quran page | `docs/production-plan/wp/WP-14-features-in-flight.md` step 2 | 2, 5, 13 |
+| 15 | WP-13 performance | `docs/production-plan/wp/WP-13-performance.md` | 13 |
+| 16 | WP-15 database shape | `docs/production-plan/wp/WP-15-database-shape.md` | 1, 8 |
 
 ## 2. Hard rules (breaking one is worse than not finishing)
 
 1. **Never push, merge, or commit to `main`.** A push to `main` deploys to real visitors. Never run `git push` at
    all unless the owner's own chat message says so. Never force-push. Never delete a branch you did not create.
 2. **Never run SQL, never write to the live database, never upload/delete files in the live bucket.** SQL changes
-   are files in `docs/migrations/` that the owner runs (list them in `STATE.md`).
+   are files in `docs/migrations/` that the owner runs (list them in `docs/production-plan/STATE.md`).
 3. **Never print, write, or commit a secret.** Never open `.env.local` with a tool that shows its contents;
    scripts read it themselves. Never type a password anywhere.
 4. **Do not test against the live site with writes.** Only `GET` requests to `https://ashraf-mazen.vercel.app`.
    No sign-in. No form submission.
-5. **Stay in scope.** Do only what the package file says. A new problem you notice goes in `STATE.md` under
+5. **Stay in scope.** Do only what the package file says. A new problem you notice goes in `docs/production-plan/STATE.md` under
    "Found on the way" (one line); do not fix it unless it blocks the package.
 6. **Follow the project's `CLAUDE.md`**: files under 350 lines, tests next to the code, small edits, never open
    `src/data/**`, `dist/`, `node_modules/`, `package-lock.json`.
@@ -63,7 +79,7 @@ There are **16 steps**, in this fixed order. Do not reorder; a step marked "need
 
 ## 4. Procedure for each step
 
-1. Open `STATE.md`; take the first row that is `TODO` and whose "needs" are all `DONE`. Set it to `IN PROGRESS`
+1. Open `docs/production-plan/STATE.md`; take the first row that is `TODO` and whose "needs" are all `DONE`. Set it to `IN PROGRESS`
    with the branch name. (A row `IN PROGRESS` from an earlier session: check out its branch, run `git status` and
    the verify command, and continue from what is missing.)
 2. Read the package file **completely**, and the problem rows it closes (`grep -n "<ID>" docs/production-plan/problems/*.md`).
@@ -71,7 +87,7 @@ There are **16 steps**, in this fixed order. Do not reorder; a step marked "need
 4. When the package changes a rule: **write or change the test first**, see it fail, then write the code.
 5. Commit in small commits (`WP-NN: what changed`), one topic each.
 6. Run the package's "Verify" block. Then the self-review (section 5).
-7. Tick the package's "Done when" boxes in your head; every box must be true. Update `STATE.md` (section 7),
+7. Tick the package's "Done when" boxes in your head; every box must be true. Update `docs/production-plan/STATE.md` (section 7),
    commit it, merge into `prod/integration`.
 8. Go to the next row. Do not ask the owner between steps unless a rule in section 6 says stop.
 
@@ -86,7 +102,7 @@ git diff --stat prod/integration...HEAD
 
 Then check, and fix before going on:
 
-- [ ] The number of tests is **not lower** than the last number in `STATE.md`; coverage is not lower.
+- [ ] The number of tests is **not lower** than the last number in `docs/production-plan/STATE.md`; coverage is not lower.
 - [ ] Every new function with a decision in it has a test for the normal case, one edge case and one failure case.
 - [ ] No changed file is over 350 lines (`git diff --name-only prod/integration...HEAD | xargs wc -l | sort -nr | head -5`).
 - [ ] `git diff prod/integration...HEAD | grep -nE "^\+.*(console\.log|debugger|\.only\(|\.skip\(|@ts-ignore|TODO)"` prints nothing.
@@ -97,12 +113,12 @@ Then check, and fix before going on:
 
 ## 6. When to stop
 
-**Stop the current step** (set the row to `BLOCKED: <reason in one line>`, commit `STATE.md` on the package
+**Stop the current step** (set the row to `BLOCKED: <reason in one line>`, commit `docs/production-plan/STATE.md` on the package
 branch, do **not** merge it, go to the next row whose needs are met) when:
 
 - the same command fails twice with the same error after one real fix attempt;
 - the package says "stop and record";
-- the work needs something only the owner can give (a secret, a SQL run, a decision listed in `OWNER-ACTIONS.md`);
+- the work needs something only the owner can give (a secret, a SQL run, a decision listed in `docs/production-plan/OWNER-ACTIONS.md`);
 - the code is so different from what the package describes that following it would mean guessing (a file or
   function it names does not exist, and `grep` does not find where it moved).
 
@@ -115,11 +131,11 @@ branch, do **not** merge it, go to the next row whose needs are met) when:
 - three steps in a row ended `BLOCKED`;
 - no row can start (all remaining need a blocked step).
 
-## 7. What to write in `STATE.md` after each step
+## 7. What to write in `docs/production-plan/STATE.md` after each step
 
 Update the row (`DONE`, branch, date, tests count, coverage %), and append to the matching lists:
 "SQL the owner must run", "Needs the owner", "Found on the way", "Measurements". Keep each entry to one line.
-`STATE.md` is the memory between sessions: anything not written there is lost.
+`docs/production-plan/STATE.md` is the memory between sessions: anything not written there is lost.
 
 ## 8. Final review (after the last row)
 
@@ -130,10 +146,10 @@ npm run typecheck && npm run lint && npm run test:coverage && npm run build && n
 node scripts/smoke-test.mjs https://ashraf-mazen.vercel.app
 ```
 
-Then write in `STATE.md` under "Final review":
+Then write in `docs/production-plan/STATE.md` under "Final review":
 
 1. the totals: tests (unit, component, handler, browser), coverage, files over 350 lines (must be 0 outside `src/data`);
-2. for every problem id in `problems/*.md`: `closed by WP-NN` / `owner action OWNER-NN` / `open: reason`
+2. for every problem id in `docs/production-plan/problems/*.md`: `closed by WP-NN` / `owner action OWNER-NN` / `open: reason`
    (check each by its package's "Done when", not from memory);
 3. the list of SQL files and owner actions still waiting;
 4. the steps that are `BLOCKED` and what unblocks each.

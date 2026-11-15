@@ -40,4 +40,4 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 
 ## Final review
 
-(written after step 16; see `GOAL.md` section 8)
+(written after step 16; see `GOAL.md` (repository root) section 8)
