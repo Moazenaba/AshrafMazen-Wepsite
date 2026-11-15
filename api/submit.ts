@@ -9,6 +9,7 @@
 
 import { addressOf, createLimiter } from './_rateLimit.js'; // Node on Vercel needs the extension
 import { fetchWithTimeout } from './_fetch.js'; // Node on Vercel needs the extension
+import { logEvent } from './_log.js'; // Node on Vercel needs the extension
 
 const KINDS = ['book', 'audio', 'video', 'correction', 'removal'] as const;
 type Kind = (typeof KINDS)[number];
@@ -118,9 +119,9 @@ export default async function handler(req: any, res: any) {
     });
     if (!response.ok) {
       const text = await response.text();
-      console.error('submission rejected by the database:', response.status, text.slice(0, 300));
+      await logEvent('error', 'submit', 'submission rejected by the database', { status: response.status, body: text.slice(0, 300) });
       if (!process.env.SUPABASE_SERVICE_ROLE_KEY && [401, 403].includes(response.status)) {
-        console.error('SUPABASE_SERVICE_ROLE_KEY is not set in the environment: visitors can no longer write directly, set the key in Vercel.');
+        await logEvent('error', 'submit', 'the server key is not set in the environment: visitors can no longer write, set it in Vercel');
       }
       return send(res, 502, {
         error: /too many pending/i.test(text)
@@ -130,7 +131,7 @@ export default async function handler(req: any, res: any) {
     }
     return send(res, 201, { ok: true });
   } catch (err) {
-    console.error('submit function error:', err);
+    await logEvent('error', 'submit', 'function error', { reason: err instanceof Error ? err.message : String(err) });
     return send(res, 500, { error: 'حدث خطأ غير متوقع. حاول مرة أخرى.' });
   }
 }

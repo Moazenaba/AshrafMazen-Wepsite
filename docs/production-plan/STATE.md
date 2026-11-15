@@ -12,7 +12,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 | 5 | WP-07 timeouts and degraded states | DONE | prod/wp-07-timeouts | 2026-11-15 | 321 | lines 23%, functions 20% |
 | 6 | WP-04 file lifecycle | DONE | prod/wp-04-file-lifecycle | 2026-11-15 | 333 | lines 23%, functions 20% |
 | 7 | WP-03 site bundle size | DONE | prod/wp-03-bundle-size | 2026-11-15 | 341 | lines 23%, functions 20% |
-| 8 | WP-05 error visibility | TODO | | | | |
+| 8 | WP-05 error visibility | DONE | prod/wp-05-error-visibility | 2026-11-15 | 359 | lines 23%, functions 20% |
 | 9 | WP-06 monitoring | TODO | | | | |
 | 10 | WP-08 YouTube robustness | TODO | | | | |
 | 11 | WP-11 admin forms | TODO | | | | |
@@ -24,14 +24,14 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 
 ## SQL the owner must run
 
-(none yet)
+- `docs/migrations/2026-11-16-error-events.sql` (OWNER-09): error log table + daily cap on `record_event` (per kind, from `daily_stats`; the data has no per-key daily total).
 
 ## Needs the owner
 
 - Files are deleted by key now; orphans created before WP-04 remain (clean-up is the owner's decision).
 
 - WP-01 step 4 (signed upload length): after the merge, upload one small picture from the admin; if storage answers 403 SignatureDoesNotMatch, revert `contentLength` in `api/r2.ts` `sign` (kept, not yet checked live).
-- WP-01 CSP: mp3quran hosts and `report-uri /api/csp-report` not added yet (Quran branch and WP-05 are not merged); add them in WP-14b / WP-05.
+- WP-01 CSP: `report-uri /api/csp-report` added in WP-05; the mp3quran hosts are still to be added in WP-14b. Set `SUPABASE_SERVICE_ROLE_KEY` in Vercel for the error log to store events (it is already used by `api/submit`).
 
 - See `OWNER-ACTIONS.md` (OWNER-01 .. OWNER-11). Add new items here, one line each.
 

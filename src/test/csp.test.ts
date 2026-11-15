@@ -42,4 +42,8 @@ describe('Content-Security-Policy (vercel.json)', () => {
     const connect = csp.split(';').find((d) => d.trim().startsWith('connect-src')) ?? '';
     expect(connect).toContain('https://*.r2.dev');
   });
+
+  it('sends violation reports to the site', () => {
+    expect(csp).toContain('report-uri /api/csp-report');
+  });
 });
