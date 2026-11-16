@@ -392,9 +392,13 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
   {
     "id": "PLHcd1VuAeT_OaS9laiTEk1qiTT4Tvcm2E",
     "title": "٢٠٠ سؤال وجواب",
-    "count": "89 فيديو",
-    "latestVideoId": "0-_yz1mbdKE",
+    "count": "90 فيديو",
+    "latestVideoId": "qtjJ7u_XGDk",
     "videos": [
+      {
+        "id": "qtjJ7u_XGDk",
+        "title": "200 سؤال وجواب (85)| مامعنى التوبة النصوح وما شروطها ؟| #الشيخ _ أشرف _ مازن"
+      },
       {
         "id": "0-_yz1mbdKE",
         "title": "خطبة الجمعة /الدفاع عن الأوطان/ # لفضيلة الشيخ أشرف -مازن",
