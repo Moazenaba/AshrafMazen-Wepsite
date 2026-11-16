@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
-import { DEFAULT_BUTTON_LABEL, featureTarget, hasFeatureVideo, type HomeFeature } from '../../services/data/homeFeatureRules';
+import { DEFAULT_BUTTON_LABEL, featureImage, featureTarget, hasFeatureVideo, type HomeFeature } from '../../services/data/homeFeatureRules';
 import { fileSrc } from '../../lib/fileLinks';
+import { FeatureAudio } from './FeatureAudio';
 
 // The featured card the admin sets: the admin's own picture, and a button that opens the video the admin chose
 const Go: React.FC<{ feature: HomeFeature; className: string; label?: string; children: React.ReactNode }> = ({ feature, className, label, children }) => {
@@ -20,6 +21,7 @@ const Go: React.FC<{ feature: HomeFeature; className: string; label?: string; ch
 
 export const HomeFeatureCard: React.FC<{ feature: HomeFeature }> = ({ feature }) => (
   <article className="rounded-xl bg-mushaf text-white overflow-hidden border-b-4 border-gold">
+    {feature.audioUrl && <FeatureAudio url={feature.audioUrl} />}
     <div className="grid grid-cols-[84px_minmax(0,1fr)] min-[360px]:grid-cols-[108px_minmax(0,1fr)] sm:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-4 sm:gap-6 p-4 sm:p-7 items-center">
       <div className="order-2 sm:order-none min-w-0 space-y-2 sm:space-y-4">
         {feature.title && <h3 className="font-sans text-base min-[360px]:text-lg sm:text-3xl font-bold leading-snug text-balance line-clamp-3 sm:line-clamp-none">{feature.title}</h3>}
@@ -35,7 +37,7 @@ export const HomeFeatureCard: React.FC<{ feature: HomeFeature }> = ({ feature })
       <div className="order-1 sm:order-none">
         {hasFeatureVideo(feature) ? (
           <Go feature={feature} label={feature.title || DEFAULT_BUTTON_LABEL} className="group relative block aspect-video w-full overflow-hidden rounded-lg bg-mushaf-deep">
-            <img src={fileSrc(feature.imageUrl)} alt="" fetchPriority="high" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-[1.03]" />
+            <img src={fileSrc(featureImage(feature))} alt="" fetchPriority="high" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-[1.03]" />
             <span aria-hidden="true" className="absolute inset-0 hidden sm:flex items-center justify-center">
               <span className="flex items-center justify-center w-14 h-14 rounded-full bg-gold/90 text-mushaf-deep">
                 <Play className="w-6 h-6 fill-current ms-0.5" />
@@ -45,7 +47,7 @@ export const HomeFeatureCard: React.FC<{ feature: HomeFeature }> = ({ feature })
         ) : (
           // A picture alone (no video link): shown as it is, with no play sign and nothing to open
           <span className="relative block aspect-video w-full overflow-hidden rounded-lg bg-mushaf-deep">
-            <img src={fileSrc(feature.imageUrl)} alt={feature.title || ''} fetchPriority="high" className="absolute inset-0 w-full h-full object-cover" />
+            <img src={fileSrc(featureImage(feature))} alt={feature.title || ''} fetchPriority="high" className="absolute inset-0 w-full h-full object-cover" />
           </span>
         )}
       </div>

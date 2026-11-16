@@ -1,4 +1,4 @@
-// The admin's "البيانات والتكامل" tab: the live checks and the password change.
+// The admin's "صحة الموقع والأخطاء" tab: the live checks and the password change.
 import React from 'react';
 import { KeyRound } from 'lucide-react';
 import { SystemStatus } from '../../../components/admin/SystemStatus';

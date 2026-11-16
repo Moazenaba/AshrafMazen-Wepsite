@@ -139,7 +139,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
 
           <div>
             <label className="block font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-              الاسم اللطيف في الرابط (Slug)
+              الاسم في رابط الصفحة (اتركه فارغاً ليُكتب تلقائياً)
             </label>
             <input
               type="text"
