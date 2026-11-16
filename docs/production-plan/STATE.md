@@ -72,12 +72,13 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 
 ## Final review
 
-### Totals (2026-11-15, on `prod/integration` plus the threshold change)
+### Totals (2026-11-16, measured on `prod/integration` after step 14 and the owner's later requests)
 
-- Tests: 470 unit, component and handler tests pass (1 skipped on purpose: the schema contract, until `docs/schema/tables.json` exists); 32 browser tests pass, three runs in a row; 3 read-only live browser checks exist (need `E2E_BASE_URL`).
-- Coverage: lines 38.6%, functions 33.8% (gate raised to 35 / 30). Entry script 45 kB gzip, budget 48.8 kB.
+- Tests: 509 unit, component and handler tests pass (1 skipped on purpose: the schema contract, until `docs/schema/tables.json` exists); 35 browser tests pass (3 of them are the Quran reader); 3 read-only live browser checks exist (they need `E2E_BASE_URL`).
+- Coverage: lines 40.9%, functions 36.7% (gate 35 / 30). Entry script 37.5 kB gzip, budget 48.8 kB.
 - Files over 350 lines outside `src/data`: 0 (largest `src/context/AudioContext.tsx`, 349).
-- `npm run typecheck`, `npm run test:coverage`, `npm run build`, `npm run e2e` pass. `npm run lint` is only `tsc --noEmit` (see OPS-04 below). Live smoke test: ALL PASSED.
+- `npm run typecheck`, `npm run test:coverage`, `npm run build`, `npm run e2e` pass. `npm run lint` is only `tsc --noEmit` (see OPS-04 below). Live smoke test against https://ashraf-mazen.vercel.app: ALL PASSED.
+- Not checked on the live site: the home card's new picture, video and sound options (they were tested only in unit, component and local browser tests; the admin's "شكل الموقع والتواصل" tab was looked at in a screenshot).
 
 ### Problem ids
 
@@ -88,9 +89,10 @@ closed by WP-03: DAT-05, PRF-02, REL-12. closed by WP-05: OBS-01, OBS-02, OBS-03
 closed by WP-06: OBS-04, PRF-04. closed by WP-11: REL-09, INT-02, INT-03, INT-09, DAT-06, DAT-07.
 closed by WP-12: REL-05, REL-06, INT-01, INT-04, INT-05, INT-06, OPS-02, OPS-03, TST-06. closed by WP-10: OPS-06.
 closed by WP-13: PRF-03. closed by WP-08: REL-03, INT-07 (the publish dates themselves still need one run, see Needs the owner).
+closed by WP-14 (step 14, done 2026-11-16): INT-10, REL-07 (the Quran pages work without the v4 service: 8 s limit, `sessionStorage` copy, "no synchronised text" notice, tests with a dead address).
 closed in code by WP-15: DAT-03 (schema file and backup proof wait for the owner: OWNER-07), DAT-04 phase A (phase B is a design file that needs the owner's decision).
 owner action: SEC-09 and OWNER-01 (rotate secrets), SEC-10 and OWNER-02 (two-factor), REL-08 and OWNER-03 (custom bucket domain), REL-13 and OWNER-05 (plans), OPS-05 and OWNER-08 (leftover files), REL-04 and OWNER-06 (keep or remove downloads).
-open: OPS-01 (`api/tsconfig.json` already existed; the Vercel preview log cannot be read without a push); OPS-04 (dependabot added, but no lint: typescript-eslint does not support TypeScript 7); PRF-01 (WP-13 Part A not applied: the hero is text, the score is limited by script time; full hydration is the next option); 
+open: OPS-01 (`api/tsconfig.json` already existed; the Vercel preview log cannot be read without a push); OPS-04 (dependabot added, but no lint: typescript-eslint does not support TypeScript 7); PRF-01 (WP-13 Part A not applied: the hero is text, the score is limited by script time; full hydration is the next option).
 
 ### SQL files and owner actions still waiting
 
@@ -99,6 +101,6 @@ Owner actions: OWNER-01 .. OWNER-11 as in `OWNER-ACTIONS.md`, plus: set `SUPABAS
 
 ### BLOCKED steps and what unblocks them
 
-- Step 14 is no longer blocked: it was done on 2026-11-16 after the other session finished (`feat/quran-wire` merged, then the reader, REL-07 fallback, CSP hosts, sitemap and tests added). INT-10 and REL-07 are closed by it.
-- Parts done with a pending piece (not BLOCKED): WP-08 step 1 (publish dates), WP-12 lint.
+- No step is blocked outright any more: step 14 was done on 2026-11-16 after the other session finished.
+- Two rows are `BLOCKED (partial)`: step 10 (WP-08: the publish dates need YouTube to answer again; run `node scripts/refresh-youtube-library.mjs --redate` from a home connection, at most 3 times an hour, then commit `src/data/youtube-library.ts`) and step 12 (WP-12: lint needs a typescript-eslint release that supports TypeScript 7, or a decision to pin TypeScript 6.x, which this plan forbids).
 
