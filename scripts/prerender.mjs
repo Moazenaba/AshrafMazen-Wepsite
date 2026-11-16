@@ -137,6 +137,14 @@ const nav = `<nav><p>${[
 ].join(' · ')}</p></nav>`;
 const kind = (l) => [l.youtube_url && 'مرئي', l.audio_url && 'صوتي', l.transcript && 'مكتوب'].filter(Boolean).join('، ');
 
+// The Quran section (reciter and reader pages are not listed: they depend on an outside service)
+write({
+  path: '/quran',
+  title: 'القرآن الكريم | استماع وقراءة',
+  description: 'استمع إلى القرآن الكريم بأصوات القرّاء، واقرأ السورة مع الصوت، وإذاعات القرآن المباشرة.',
+  body: `${nav}<h1>القرآن الكريم</h1><p>استمع إلى المصحف بأصوات القرّاء، أو إلى إذاعات القرآن المباشرة.</p>`,
+});
+
 // Home
 write({
   path: '/',

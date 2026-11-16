@@ -5,6 +5,7 @@ import { useAudio } from '../context/AudioContext';
 import { SurahGrid } from './quran/SurahGrid';
 import { useQuranCatalog } from './quran/useQuranCatalog';
 import { moshafSurahs, surahAudioUrl } from '../services/quran/quranRules';
+import { readerPath } from './quran/useQuranCatalog';
 
 // One reciter: pick a moshaf (riwayah), then a surah to play in the site's player
 export const QuranReciterPage: React.FC = () => {
@@ -75,6 +76,7 @@ export const QuranReciterPage: React.FC = () => {
             {isCurrent && audio.playing ? <Pause className="w-5 h-5" aria-hidden="true" /> : <Play className="w-5 h-5" aria-hidden="true" />}
           </button>
           <span className="font-semibold text-stone-900 dark:text-stone-100">سورة {surahName}</span>
+          <Link to={readerPath(reciter.id, moshaf.id, chosen)} className="ms-auto font-semibold text-emerald-800 dark:text-emerald-400 hover:underline">قراءة مع الصوت</Link>
         </div>
       )}
       <p className="text-stone-600 dark:text-stone-400">اختر سورة للاستماع إليها.</p>

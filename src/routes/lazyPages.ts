@@ -22,3 +22,4 @@ export const QuranReciterPage = lazy(() => import('../pages/QuranReciterPage').t
 
 // The admin area is only for the site's managers; visitors never download it
 export const AdminPage = lazy(() => import('../pages/admin/AdminPage').then((m) => ({ default: m.AdminPage })));
+export const QuranReader = lazy(() => import('../pages/quran/reader/QuranReader').then((m) => ({ default: m.QuranReader })));
