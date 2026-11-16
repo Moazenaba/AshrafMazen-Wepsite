@@ -60,6 +60,10 @@ export const HomeFeatureSettings: React.FC = () => {
         إظهار هذه البطاقة
       </label>
 
+      <p role="status" className={`text-sm font-semibold ${featureStatus(draft) === 'shown' ? 'text-emerald-800 dark:text-emerald-300' : 'text-amber-800 dark:text-amber-300'}`}>
+        {FEATURE_STATUS_TEXT[featureStatus(draft)]}
+      </p>
+
       <div className="grid gap-5 lg:grid-cols-2">
         <div className="space-y-4">
           <div>
@@ -131,13 +135,15 @@ export const HomeFeatureSettings: React.FC = () => {
             </div>
           </div>
 
-          <div>
-            <label htmlFor="hf-title" className={label}>العنوان</label>
-            <input id="hf-title" value={draft.title} onChange={(e) => set('title', e.target.value)} className={input} />
-          </div>
-          <div>
-            <label htmlFor="hf-sub" className={label}>السطر تحت العنوان</label>
-            <input id="hf-sub" value={draft.subtitle} onChange={(e) => set('subtitle', e.target.value)} className={input} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="hf-title" className={label}>العنوان</label>
+              <input id="hf-title" value={draft.title} onChange={(e) => set('title', e.target.value)} className={input} />
+            </div>
+            <div>
+              <label htmlFor="hf-sub" className={label}>السطر تحت العنوان</label>
+              <input id="hf-sub" value={draft.subtitle} onChange={(e) => set('subtitle', e.target.value)} className={input} />
+            </div>
           </div>
           <div>
             <label htmlFor="hf-btn" className={label}>كلمة الزر</label>
@@ -152,10 +158,6 @@ export const HomeFeatureSettings: React.FC = () => {
           </div>
         </div>
       </div>
-
-      <p role="status" className={`text-sm font-semibold ${featureStatus(draft) === 'shown' ? 'text-emerald-800 dark:text-emerald-300' : 'text-amber-800 dark:text-amber-300'}`}>
-        {FEATURE_STATUS_TEXT[featureStatus(draft)]}
-      </p>
 
       {message && (
         <p role={message.type === 'error' ? 'alert' : 'status'} className={`p-3 rounded-xl text-sm font-semibold ${message.type === 'error' ? 'bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-300' : 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300'}`}>
