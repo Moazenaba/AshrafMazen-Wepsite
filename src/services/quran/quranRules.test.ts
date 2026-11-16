@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ayahAt, ayahsFromWords, hasSeparateBasmalah, moshafSurahs, parseAyahs, parseText, parseWords, recitationCode, surahAudioUrl, wordIndexAt, type WordTiming } from './quranRules';
+import { ayahAt, ayahsFromWords, hasSeparateBasmalah, moshafSurahs, parseAyahs, parseText, parseWords, recitationCode, surahAudioUrl, wordIndexAt, type WordTiming, firstReciterWith, shouldLoopBack } from './quranRules';
 
 // Al-Fatihah by Al-Husary, as the API answers (first two ayahs)
 const WORDS: WordTiming[] = [
@@ -75,5 +75,32 @@ describe('quran: reading the API answers', () => {
     expect(hasSeparateBasmalah(1)).toBe(false);
     expect(hasSeparateBasmalah(9)).toBe(false);
     expect(hasSeparateBasmalah(2)).toBe(true);
+  });
+});
+
+describe('shouldLoopBack', () => {
+  const ayah: [number, number, number] = [3, 5000, 9000];
+  it('jumps to the start of the ayah when it is about to end', () => {
+    expect(shouldLoopBack(8950, ayah, true)).toBe(5000);
+  });
+  it('does nothing in the middle of the ayah, when off, or with no ayah', () => {
+    expect(shouldLoopBack(7000, ayah, true)).toBeNull();
+    expect(shouldLoopBack(8950, ayah, false)).toBeNull();
+    expect(shouldLoopBack(8950, undefined, true)).toBeNull();
+  });
+});
+
+describe('firstReciterWith', () => {
+  const moshaf = (id: number, list: string) => ({ id, name: '', server: 'https://s/', rewaya_id: 1, surah_list: list, surah_total: 0 });
+  const reciters = [
+    { id: 1, name: 'أ', moshaf: [moshaf(10, '1,2')] },
+    { id: 2, name: 'ب', moshaf: [moshaf(20, '1,2,3')] },
+  ] as never;
+  it('finds the first reciter who has the surah', () => {
+    expect(firstReciterWith(3, reciters)?.reciter.id).toBe(2);
+    expect(firstReciterWith(1, reciters)?.reciter.id).toBe(1);
+  });
+  it('gives null when nobody has it', () => {
+    expect(firstReciterWith(50, reciters)).toBeNull();
   });
 });

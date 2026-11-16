@@ -23,5 +23,5 @@ test('/api/site lists lessons and the first lesson link opens', async ({ page, r
 test('/admin shows the login form and nothing of the dashboard', async ({ page }) => {
   await page.goto('/admin');
   await expect(page.locator('input[type="password"]').first()).toBeVisible();
-  await expect(page.getByRole('button', { name: /إدارة الدروس/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^الدروس/ })).toHaveCount(0);
 });

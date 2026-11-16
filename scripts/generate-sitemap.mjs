@@ -45,7 +45,7 @@ const videoEntry = ({ id, title, description, date }) => `
       ${date ? `<video:publication_date>${escapeXml(date)}</video:publication_date>` : ''}
     </video:video>`;
 
-['/', '/videos', '/audio', '/books'].forEach((path) => pushUrl(path));
+['/', '/videos', '/audio', '/books', '/quran'].forEach((path) => pushUrl(path));
 categories.forEach((c) => pushUrl(`/category/${encodeURIComponent(c.slug)}`));
 series.forEach((s) => pushUrl(`/series/${encodeURIComponent(s.slug)}`));
 

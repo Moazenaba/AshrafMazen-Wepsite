@@ -83,6 +83,7 @@ export async function saveHomeFeature(feature: HomeFeature): Promise<HomeFeature
   const before = (await getSiteContent(true)).feature;
   await write(SITE_CONTENT_KEYS.feature, clean);
   if (before.imageUrl && before.imageUrl !== clean.imageUrl) await deleteIfUnused(before.imageUrl);
+  if (before.audioUrl && before.audioUrl !== clean.audioUrl) await deleteIfUnused(before.audioUrl);
   return clean;
 }
 

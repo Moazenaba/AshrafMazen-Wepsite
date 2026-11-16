@@ -6,13 +6,15 @@ import { deleteIfUnused } from './fileUsage';
 import { checkFile } from '../../constants/fileRules';
 import type { Category, Book } from '../../types';
 import { getCategories } from './catalog';
-import { updateSiteRecord } from './jsonRecord';
+import { assertReadable, updateSiteRecord, type RecordOptions } from './jsonRecord';
 
 export interface BookWithCategory extends Book {
   category?: Category | null;
 }
 
 const LIBRARY_KEY = 'library_books';
+// A book is an object with an id; the whole record is a list of them
+const isBook = (x: unknown): x is Book => !!x && typeof x === 'object' && typeof (x as Book).id === 'string';
 
 // The stored text (or nothing / something unreadable) as a list of books
 export function parseBooks(raw: string | null): Book[] {
@@ -28,11 +30,14 @@ export function parseBooks(raw: string | null): Book[] {
 async function readLibrary(): Promise<Book[]> {
   const { data, error } = await supabase.from('site_settings').select('value').eq('key', LIBRARY_KEY).maybeSingle();
   if (error) throw new Error(translateSupabaseError(error));
+  // A stored value that is not a list of books is never taken for an empty library
+  assertReadable(LIBRARY_KEY, data?.value ?? null, 'array');
   return parseBooks(data?.value ?? null);
 }
 
 // A change to the list, applied to the latest saved copy (another admin's books are kept)
-const updateLibrary = (mutate: (books: Book[]) => Book[]) => updateSiteRecord(LIBRARY_KEY, parseBooks, mutate);
+const updateLibrary = (mutate: (books: Book[]) => Book[], options: RecordOptions = {}) =>
+  updateSiteRecord(LIBRARY_KEY, parseBooks, mutate, { shape: 'array', isItem: isBook, ...options });
 
 // What visitors may see of the library: published books only. Since docs/migrations/2026-11-05-security.sql the
 // library record is readable by admins only, and visitors get it through the published_books() function, which
@@ -144,7 +149,8 @@ export async function updateBook(id: string, bookData: Partial<Book>): Promise<B
 // Deletes the book and the files it uploaded; a file that cannot be removed does not block the delete
 export async function deleteBook(book: Pick<Book, 'id' | 'file_url' | 'cover_url'>): Promise<boolean> {
   let remaining: Book[] = [];
-  await updateLibrary((books) => (remaining = books.filter((b) => b.id !== book.id)));
+  // A single delete may empty the library (the half-list rule is for bulk damage)
+  await updateLibrary((books) => (remaining = books.filter((b) => b.id !== book.id)), { allowShrink: true });
   for (const url of [book.file_url, book.cover_url]) {
     await deleteIfUnused(url);
   }

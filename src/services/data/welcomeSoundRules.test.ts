@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanWelcomeSound, parseWelcomeSound, shouldWelcome, validateWelcomeSound, isShortWelcome, MAX_WELCOME_SECONDS, welcomeTooLongMessage } from './welcomeSoundRules';
+import { cleanWelcomeSound, parseWelcomeSound, shouldWelcome, validateWelcomeSound, isShortWelcome, MAX_WELCOME_SECONDS, shouldLoadWelcome, welcomeTooLongMessage } from './welcomeSoundRules';
 
 const on = { enabled: true, url: 'https://cdn.example/welcome.mp3', volume: 30 };
 
@@ -42,5 +42,19 @@ describe('welcome sound rules', () => {
     expect(isShortWelcome(Infinity)).toBe(false);
     expect(welcomeTooLongMessage(1380)).toContain('23 دقيقة');
     expect(welcomeTooLongMessage(45)).toContain('45 ثانية');
+  });
+});
+
+describe('shouldLoadWelcome', () => {
+  it('loads a short recording and one whose length is unknown, never a long one', () => {
+    expect(shouldLoadWelcome(8)).toBe(true);
+    expect(shouldLoadWelcome(undefined)).toBe(true);
+    expect(shouldLoadWelcome(60)).toBe(false);
+  });
+
+  it('keeps the saved length only next to a recording', () => {
+    expect(cleanWelcomeSound({ url: '/api/r2?file=audio%2Fw.mp3', seconds: 12.34 }).seconds).toBe(12.3);
+    expect(cleanWelcomeSound({ url: '', seconds: 12 }).seconds).toBeUndefined();
+    expect(cleanWelcomeSound({ url: 'https://x.test/a.mp3', seconds: -3 }).seconds).toBeUndefined();
   });
 });

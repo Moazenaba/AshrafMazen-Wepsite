@@ -27,3 +27,7 @@ npm run health
 ```sql
 drop table public.admin_users;
 ```
+
+بعد تشغيل أي ملف هجرة شغّل `npm run schema` ثم احفظ مجلد `docs/schema/` في git (After running any migration, run `npm run schema` and commit `docs/schema/`).
+
+| 6 | `2026-11-16-hide-prev-copies.sql` | نسخ التراجع `<key>__prev` (تُحفظ قبل كل حفظ للكتب والفصول وإعدادات يوتيوب) تُقرأ للأدمن فقط. شغّله قبل الاعتماد على زر «استرجاع النسخة السابقة» |

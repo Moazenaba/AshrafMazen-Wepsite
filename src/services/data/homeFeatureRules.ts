@@ -1,6 +1,6 @@
 // Pure rules for the home page's featured card the admin controls: its own picture, its texts, and the video
 // the "شاهد واستمع الآن" button opens (the picture may differ from the video). No database or screen here.
-import { getYouTubeId } from '../../lib/youtube';
+import { getYouTubeId, getYouTubeThumbnail } from '../../lib/youtube';
 
 export interface HomeFeature {
   enabled: boolean;
@@ -8,12 +8,14 @@ export interface HomeFeature {
   subtitle: string;
   imageUrl: string;
   videoUrl: string;
+  // A sound that plays quietly in the background on the visitor's first tap (optional, independent of the picture and video)
+  audioUrl: string;
   buttonLabel: string;
 }
 
 export const DEFAULT_BUTTON_LABEL = 'شاهد واستمع الآن';
 
-export const EMPTY_FEATURE: HomeFeature = { enabled: false, title: '', subtitle: '', imageUrl: '', videoUrl: '', buttonLabel: '' };
+export const EMPTY_FEATURE: HomeFeature = { enabled: false, title: '', subtitle: '', imageUrl: '', videoUrl: '', audioUrl: '', buttonLabel: '' };
 
 const text = (value: unknown, max: number) => String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 
@@ -24,6 +26,7 @@ export function cleanHomeFeature(data: Partial<HomeFeature> | undefined): HomeFe
     subtitle: text(data?.subtitle, 200),
     imageUrl: text(data?.imageUrl, 1000),
     videoUrl: text(data?.videoUrl, 1000),
+    audioUrl: text(data?.audioUrl, 1000),
     buttonLabel: text(data?.buttonLabel, 40),
   };
 }
@@ -39,7 +42,10 @@ export function parseHomeFeature(raw: string | null | undefined): HomeFeature {
 }
 
 // Shown when the admin turned it on and gave it a picture; the video link is optional (without one there is no button)
-export const isFeatureShown = (f: HomeFeature) => f.enabled && !!f.imageUrl;
+// The picture the card shows: the admin's own, else the first frame (thumbnail) of the video when it is a YouTube link
+export const featureImage = (f: HomeFeature): string => f.imageUrl || getYouTubeThumbnail(f.videoUrl) || '';
+
+export const isFeatureShown = (f: HomeFeature) => f.enabled && !!featureImage(f);
 
 export const hasFeatureVideo = (f: HomeFeature) => !!f.videoUrl.trim();
 
@@ -62,7 +68,7 @@ export function featureTarget(f: HomeFeature): { kind: 'internal' | 'external'; 
 
 export function validateHomeFeature(f: HomeFeature): string | null {
   if (!f.enabled) return null;
-  if (!f.imageUrl) return 'ارفع صورة للواجهة أو الصق رابطها.';
+  if (!featureImage(f)) return 'ارفع صورة، أو الصق رابط فيديو من يوتيوب ليظهر أول إطار منه.';
   return null;
 }
 
@@ -71,15 +77,30 @@ export type FeatureStatus = 'shown' | 'off' | 'no-image';
 
 export function featureStatus(f: HomeFeature): FeatureStatus {
   if (!f.enabled) return 'off';
-  if (!f.imageUrl) return 'no-image';
+  if (!featureImage(f)) return 'no-image';
   return 'shown';
 }
 
 export const FEATURE_STATUS_TEXT: Record<FeatureStatus, string> = {
   shown: 'الحالة: ستظهر البطاقة بالصورة في الصفحة الرئيسية بعد الحفظ.',
   off: 'الحالة: البطاقة مطفأة، فلن تظهر الصورة. يظهر مكانها الدرس المميز. علّم مربع «إظهار هذه البطاقة» لتظهر.',
-  'no-image': 'الحالة: ناقصة الصورة. ارفع صورة أو الصق رابطها.',
+  'no-image': 'الحالة: ناقصة الصورة. ارفع صورة، أو ضع رابط فيديو من يوتيوب.',
 };
 
 // A new picture means the admin wants the card shown: it is switched on with it
 export const withUploadedImage = (f: HomeFeature, imageUrl: string): HomeFeature => ({ ...f, imageUrl, enabled: true });
+
+// What YouTube knows about a video (its oEmbed answer), as far as the card needs it
+export interface VideoInfo {
+  title: string;
+  author: string;
+}
+
+// Fills the title and the line under it from the video, only where the admin has not written anything (never overwrites)
+export function autoFillFromVideo(f: HomeFeature, info: VideoInfo): HomeFeature {
+  return {
+    ...f,
+    title: f.title.trim() ? f.title : text(info.title, 200),
+    subtitle: f.subtitle.trim() ? f.subtitle : text(info.author, 200),
+  };
+}

@@ -17,11 +17,13 @@ describe('home feature', () => {
   it('shows only when on, with a picture and a video', () => {
     expect(isFeatureShown(f())).toBe(true);
     expect(isFeatureShown(f({ enabled: false }))).toBe(false);
-    expect(isFeatureShown(f({ imageUrl: '' }))).toBe(false);
+    // No picture and a video that gives no first frame (not YouTube): nothing to show. A YouTube video gives its own frame.
+    expect(isFeatureShown(f({ imageUrl: '', videoUrl: '/lesson/abc' }))).toBe(false);
+    expect(isFeatureShown(f({ imageUrl: '', videoUrl: 'https://youtu.be/loVFoAlqeCc' }))).toBe(true);
     // A picture alone is enough: the video link is optional (without one the card has no button)
     expect(isFeatureShown(f({ videoUrl: '' }))).toBe(true);
     expect(validateHomeFeature(f({ videoUrl: '' }))).toBeNull();
-    expect(validateHomeFeature(f({ imageUrl: '' }))).toMatch(/صورة/);
+    expect(validateHomeFeature(f({ imageUrl: '', videoUrl: '/lesson/abc' }))).toMatch(/صورة/);
   });
 
   it('reads bad saved data as off', () => {
@@ -32,7 +34,7 @@ describe('home feature', () => {
   it('says why the card is or is not shown', () => {
     expect(featureStatus(f())).toBe('shown');
     expect(featureStatus(f({ enabled: false }))).toBe('off');
-    expect(featureStatus(f({ imageUrl: '' }))).toBe('no-image');
+    expect(featureStatus(f({ imageUrl: '', videoUrl: '/lesson/abc' }))).toBe('no-image');
     expect(featureStatus(f({ videoUrl: '' }))).toBe('shown');
   });
 

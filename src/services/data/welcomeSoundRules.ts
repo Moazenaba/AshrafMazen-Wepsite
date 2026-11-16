@@ -6,6 +6,8 @@ export interface WelcomeSound {
   url: string;
   // 5..100 (%)
   volume: number;
+  // The recording's length, measured by the admin screen when it was saved; absent in older records
+  seconds?: number;
 }
 
 export const DEFAULT_VOLUME = 30;
@@ -17,10 +19,14 @@ const volumeOf = (value: unknown) => {
 };
 
 export function cleanWelcomeSound(data: Partial<WelcomeSound> | undefined): WelcomeSound {
+  const url = String(data?.url ?? '').trim().slice(0, 1000);
+  const seconds = Number(data?.seconds);
   return {
     enabled: !!data?.enabled,
-    url: String(data?.url ?? '').trim().slice(0, 1000),
+    url,
     volume: volumeOf(data?.volume),
+    // A length only means something next to its recording
+    ...(url && Number.isFinite(seconds) && seconds > 0 ? { seconds: Math.round(seconds * 10) / 10 } : {}),
   };
 }
 
@@ -63,3 +69,7 @@ export function welcomeTooLongMessage(seconds: number): string {
   const length = seconds >= 90 ? `${minutes} دقيقة` : `${Math.round(seconds)} ثانية`;
   return `الصوت الترحيبي يجب أن يكون قصيراً (${MAX_WELCOME_SECONDS} ثانية أو أقل)، وهذا الملف مدته ${length}. إن كان تسجيل درس فارفعه من «إدارة الدروس».`;
 }
+
+// Whether the visitor's browser should fetch the recording at all: not when its saved length says it would be refused.
+// A record without a length (saved before the length was kept) is loaded as before and measured on arrival.
+export const shouldLoadWelcome = (seconds: number | undefined) => seconds === undefined || isShortWelcome(seconds);

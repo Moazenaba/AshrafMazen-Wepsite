@@ -86,14 +86,16 @@ export const WelcomeSoundSettings: React.FC = () => {
       setSaving(true);
       setMessage(null);
       // A lesson saved here by mistake would play to every visitor: its length is checked before saving
-      if (draft.enabled && draft.url) {
-        const seconds = await durationOf(draft.url);
-        if (seconds !== null && !isShortWelcome(seconds)) {
+      // The length is saved with the sound, so visitors' browsers can skip a recording that would be refused
+      let seconds: number | null = null;
+      if (draft.url) {
+        seconds = await durationOf(draft.url);
+        if (draft.enabled && seconds !== null && !isShortWelcome(seconds)) {
           setMessage({ type: 'error', text: welcomeTooLongMessage(seconds) });
           return;
         }
       }
-      const saved = await saveWelcomeSound(draft);
+      const saved = await saveWelcomeSound({ ...draft, seconds: seconds ?? undefined });
       setDraft(saved);
       setMessage({ type: 'ok', text: saved.enabled ? 'تم الحفظ. يسمعه الزائر مرة واحدة مع أول ضغطة في الموقع.' : 'تم الحفظ. الصوت الترحيبي مطفأ.' });
     } catch (err: any) {

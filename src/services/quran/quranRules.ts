@@ -145,3 +145,18 @@ export function parseAyahs(raw: unknown): AyahTiming[] {
 
 // Every surah opens with the basmalah except At-Tawbah (9); in Al-Fatihah (1) it is the first ayah itself
 export const hasSeparateBasmalah = (surah: number) => surah !== 1 && surah !== 9;
+
+// "Repeat the ayah": when the current ayah is about to end (within 80 ms), the time to jump back to (its start); else null
+export function shouldLoopBack(timeMs: number, ayah: AyahTiming | undefined, enabled: boolean): number | null {
+  if (!enabled || !ayah) return null;
+  return timeMs >= ayah[2] - 80 && timeMs >= ayah[1] ? ayah[1] : null;
+}
+
+// The first reciter (in the given order) whose moshaf has this surah
+export function firstReciterWith(surah: number, reciters: Reciter[]): { reciter: Reciter; moshaf: Moshaf } | null {
+  for (const reciter of reciters) {
+    const moshaf = reciter.moshaf.find((m) => moshafSurahs(m).includes(surah));
+    if (moshaf) return { reciter, moshaf };
+  }
+  return null;
+}
