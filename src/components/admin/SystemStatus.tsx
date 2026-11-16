@@ -37,8 +37,8 @@ async function runChecks(): Promise<Check[]> {
     const ms = Math.round(performance.now() - started);
     checks.push(
       error
-        ? { id: 'db', name: 'قاعدة البيانات (Supabase)', state: 'fail', detail: error.message, fix: 'تحقق من VITE_SUPABASE_URL وVITE_SUPABASE_ANON_KEY، ومن أن مشروع Supabase يعمل.' }
-        : { id: 'db', name: 'قاعدة البيانات (Supabase)', state: ms > 2500 ? 'warn' : 'ok', detail: `تستجيب خلال ${new Intl.NumberFormat('ar-EG').format(ms)} ملّي ثانية.` }
+        ? { id: 'db', name: 'قاعدة البيانات', state: 'fail', detail: error.message, fix: 'تحقق من VITE_SUPABASE_URL وVITE_SUPABASE_ANON_KEY، ومن أن مشروع Supabase يعمل.' }
+        : { id: 'db', name: 'قاعدة البيانات', state: ms > 2500 ? 'warn' : 'ok', detail: `تستجيب خلال ${new Intl.NumberFormat('ar-EG').format(ms)} ملّي ثانية.` }
     );
   }
 
@@ -54,26 +54,26 @@ async function runChecks(): Promise<Check[]> {
       if (response.status === 501 || response.status === 404) {
         checks.push({
           id: 'r2',
-          name: 'تخزين الملفات (Cloudflare R2)',
+          name: 'تخزين الصور والصوتيات والكتب',
           state: 'fail',
           detail: 'إعدادات R2 غير موجودة على الخادم، فلا يمكن رفع صوت أو كتب أو لوجو.',
           fix: 'أضف R2_ACCOUNT_ID وR2_BUCKET وR2_ACCESS_KEY_ID وR2_SECRET_ACCESS_KEY (وSUPABASE_URL وSUPABASE_ANON_KEY) في Vercel ← Settings ← Environment Variables ثم أعد النشر.',
         });
       } else if (response.status === 403) {
-        checks.push({ id: 'r2', name: 'تخزين الملفات (Cloudflare R2)', state: 'warn', detail: 'تعذّر التحقق: انتهت جلسة الإدارة.', fix: 'سجّل الخروج ثم الدخول مرة أخرى.' });
+        checks.push({ id: 'r2', name: 'تخزين الصور والصوتيات والكتب', state: 'warn', detail: 'تعذّر التحقق: انتهت جلسة الإدارة.', fix: 'سجّل الخروج ثم الدخول مرة أخرى.' });
       } else {
         const data = await response.json();
         checks.push(
           data.write && data.remove
             ? {
                 id: 'r2',
-                name: 'تخزين الملفات (Cloudflare R2)',
+                name: 'تخزين الصور والصوتيات والكتب',
                 state: 'ok',
                 detail: `الحاوية ${data.bucket}: الكتابة والحذف يعملان. ${data.publicAddress ? 'لها عنوان عام.' : 'الحاوية خاصة، والموقع يقدّم الملفات بنفسه.'}`,
               }
             : {
                 id: 'r2',
-                name: 'تخزين الملفات (Cloudflare R2)',
+                name: 'تخزين الصور والصوتيات والكتب',
                 state: 'fail',
                 detail: 'المفاتيح موجودة لكن الكتابة أو الحذف مرفوضان.',
                 fix: 'تأكد أن توكن R2 بصلاحية Object Read & Write على هذه الحاوية، وأن اسم الحاوية صحيح.',
@@ -81,7 +81,7 @@ async function runChecks(): Promise<Check[]> {
         );
       }
     } catch {
-      checks.push({ id: 'r2', name: 'تخزين الملفات (Cloudflare R2)', state: 'warn', detail: 'تعذّر الاتصال بدالة الخادم /api/r2 (طبيعي في معاينة ثابتة بلا خادم).' });
+      checks.push({ id: 'r2', name: 'تخزين الصور والصوتيات والكتب', state: 'warn', detail: 'تعذّر الاتصال بدالة الخادم /api/r2 (طبيعي في معاينة ثابتة بلا خادم).' });
     }
   }
 
@@ -93,13 +93,13 @@ async function runChecks(): Promise<Check[]> {
       const stale = data?.updatedAt && Date.now() - Date.parse(data.updatedAt) > 3 * 3600_000;
       checks.push(
         stale
-          ? { id: 'yt', name: 'مزامنة فيديوهات يوتيوب', state: 'warn', detail: `آخر تحديث للقائمة قديم (${new Date(data.updatedAt).toLocaleString('ar-EG')}).`, fix: 'يتأخر يوتيوب أحياناً؛ يعيد الخادم المحاولة تلقائياً.' }
+          ? { id: 'yt', name: 'فيديوهات القناة', state: 'warn', detail: `آخر تحديث للقائمة قديم (${new Date(data.updatedAt).toLocaleString('ar-EG')}).`, fix: 'يتأخر يوتيوب أحياناً؛ يعيد الخادم المحاولة تلقائياً.' }
           : data?.playlists?.length
-          ? { id: 'yt', name: 'مزامنة فيديوهات يوتيوب', state: 'ok', detail: `${new Intl.NumberFormat('ar-EG').format(data.playlists.length)} قائمة${data.updatedAt ? `، آخر تحديث ${new Date(data.updatedAt).toLocaleString('ar-EG')}` : ' (من النسخة المضمّنة في الموقع)'}.` }
-          : { id: 'yt', name: 'مزامنة فيديوهات يوتيوب', state: 'warn', detail: 'الخادم لا يرد، والموقع يعرض النسخة المضمّنة فقط (لن تظهر الفيديوهات الجديدة).', fix: 'تأكد أن دالة /api/youtube-library منشورة على Vercel.' }
+          ? { id: 'yt', name: 'فيديوهات القناة', state: 'ok', detail: `${new Intl.NumberFormat('ar-EG').format(data.playlists.length)} قائمة${data.updatedAt ? `، آخر تحديث ${new Date(data.updatedAt).toLocaleString('ar-EG')}` : ' (من النسخة المضمّنة في الموقع)'}.` }
+          : { id: 'yt', name: 'فيديوهات القناة', state: 'warn', detail: 'الخادم لا يرد، والموقع يعرض النسخة المضمّنة فقط (لن تظهر الفيديوهات الجديدة).', fix: 'تأكد أن دالة /api/youtube-library منشورة على Vercel.' }
       );
     } catch {
-      checks.push({ id: 'yt', name: 'مزامنة فيديوهات يوتيوب', state: 'warn', detail: 'الخادم لا يرد، والموقع يعرض النسخة المضمّنة فقط.' });
+      checks.push({ id: 'yt', name: 'فيديوهات القناة', state: 'warn', detail: 'الخادم لا يرد، والموقع يعرض النسخة المضمّنة فقط.' });
     }
   }
 
@@ -122,11 +122,11 @@ async function runChecks(): Promise<Check[]> {
   {
     try {
       await getAdminStats(1);
-      checks.push({ id: 'stats', name: 'الإحصائيات', state: 'ok', detail: 'جداول الإحصائيات والدوال تعمل.' });
+      checks.push({ id: 'stats', name: 'عدّاد الزيارات', state: 'ok', detail: 'جداول الإحصائيات والدوال تعمل.' });
     } catch (err: any) {
       checks.push({
         id: 'stats',
-        name: 'الإحصائيات',
+        name: 'عدّاد الزيارات',
         state: 'fail',
         detail: err?.message || 'تعذّر القراءة.',
         fix: 'شغّل docs/migrations/2026-11-04-analytics.sql في Supabase SQL Editor.',

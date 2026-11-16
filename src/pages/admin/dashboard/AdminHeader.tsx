@@ -17,16 +17,16 @@ export interface HeaderCounts {
 
 // The tabs, in order; the numbers beside them come from the counts the dashboard already has
 const tabLabels = (c: HeaderCounts): { id: AdminTab; label: string }[] => [
-  { id: 'stats', label: 'الزيارات' },
-  { id: 'requests', label: `الطلبات${c.requests ? ` (${c.requests})` : ''}` },
-  { id: 'videos', label: 'فيديوهات القناة' },
-  { id: 'reels', label: 'الريلز' },
   { id: 'lessons', label: `الدروس (${c.lessons})` },
   { id: 'series', label: `السلاسل (${c.series})` },
   { id: 'categories', label: `الأقسام (${c.categories})` },
   { id: 'books', label: `الكتب${c.books !== null ? ` (${c.books})` : ''}` },
+  { id: 'requests', label: `الطلبات${c.requests ? ` (${c.requests})` : ''}` },
+  { id: 'videos', label: 'فيديوهات القناة' },
+  { id: 'reels', label: 'الريلز' },
   { id: 'quotes', label: 'الأقوال والأحاديث' },
   { id: 'branding', label: 'شكل الموقع والتواصل' },
+  { id: 'stats', label: 'الزيارات' },
   { id: 'system', label: 'صحة الموقع والأخطاء' },
 ];
 
@@ -97,7 +97,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ admin, activeTab, coun
       </div>
 
       {/* Admin Navigation Tabs */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 flex gap-2 overflow-x-auto border-t border-stone-100 dark:border-stone-800">
+      <div className="w-full px-4 sm:px-6 lg:px-8 flex flex-wrap gap-x-1 border-t border-stone-100 dark:border-stone-800">
         {tabLabels(counts).map((tab) => (
           <button key={tab.id} type="button" onClick={() => onTabChange(tab.id)} className={`py-3 px-4 font-semibold text-sm border-b-2 whitespace-nowrap transition-all ${
             activeTab === tab.id
