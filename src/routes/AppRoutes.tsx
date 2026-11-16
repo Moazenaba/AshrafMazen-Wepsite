@@ -18,6 +18,9 @@ import {
   AudioLibrary,
   BooksLibrary,
   BookView,
+  QuranPage,
+  QuranReciterPage,
+  QuranReader,
   AdminPage,
 } from './lazyPages';
 
@@ -40,6 +43,10 @@ export const AppRoutes: React.FC = () => (
       <Route path="/audio" element={<AudioLibrary />} />
       <Route path="/books" element={<BooksLibrary />} />
       <Route path="/book/:id" element={<BookView />} />
+
+      <Route path="/quran" element={<QuranPage />} />
+      <Route path="/quran/reciter/:id" element={<QuranReciterPage />} />
+      <Route path="/quran/read/:reciterId/:moshafId/:surah" element={<QuranReader />} />
 
       {/* Admin Routes */}
       <Route

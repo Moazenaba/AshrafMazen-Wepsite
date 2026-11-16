@@ -17,6 +17,9 @@ export const VideosLibrary = lazy(() => import('../pages/VideosLibrary').then((m
 export const AudioLibrary = lazy(() => import('../pages/AudioLibrary').then((m) => ({ default: m.AudioLibrary })));
 export const BooksLibrary = lazy(() => import('../pages/BooksLibrary').then((m) => ({ default: m.BooksLibrary })));
 export const BookView = lazy(() => import('../pages/BookView').then((m) => ({ default: m.BookView })));
+export const QuranPage = lazy(() => import('../pages/QuranPage').then((m) => ({ default: m.QuranPage })));
+export const QuranReciterPage = lazy(() => import('../pages/QuranReciterPage').then((m) => ({ default: m.QuranReciterPage })));
 
 // The admin area is only for the site's managers; visitors never download it
 export const AdminPage = lazy(() => import('../pages/admin/AdminPage').then((m) => ({ default: m.AdminPage })));
+export const QuranReader = lazy(() => import('../pages/quran/reader/QuranReader').then((m) => ({ default: m.QuranReader })));

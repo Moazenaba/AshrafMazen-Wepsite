@@ -15,7 +15,7 @@ const json = (route: Route, body: unknown, status = 200, headers: Record<string,
   route.fulfill({ status, contentType: 'application/json', headers: { 'access-control-allow-origin': '*', ...headers }, body: JSON.stringify(body) });
 
 // A silent one-second WAV: the only audio the tests ever play
-function silence(): Buffer {
+export function silence(): Buffer {
   const rate = 8000;
   const data = Buffer.alloc(rate * 2);
   const header = Buffer.alloc(44);
