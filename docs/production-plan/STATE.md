@@ -60,6 +60,7 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 - WP-10: found by browser tests: the lesson text-size buttons had an accessible name that did not match their text (fixed); the contribute form is `noValidate`, so an empty form is sent and only the server refuses it. The local dev server must not be started with file watching off while editing (stale code); Playwright starts its own.
 - Another Claude session used this same folder on 2026-11-15 and switched branches under the executor; keep one session per folder.
 - WP-15: the three `catch` blocks left in `books.ts`, `extras.ts`, `youtube.ts` are the lenient parsers visitors' pages use; every admin read and every save goes through `assertReadable` and never treats a broken record as empty.
+- 2026-11-16 (owner request, outside the 16 steps): the home card now takes a picture, a YouTube video (its first frame is the picture; Enter fills the title and the line under it) and an optional background sound; the admin tabs were renamed in plain words, the stats row was removed, and the "شكل الموقع والتواصل" tab got a jump menu. Branch `feat/home-feature-media`, merged into `prod/integration`.
 
 ## Measurements
 

@@ -5,11 +5,11 @@ import { consoleErrors, mockServer } from '../fixtures/mock';
 test.beforeEach(async ({ page }) => {
   await mockServer(page);
   await page.goto('/dev/admin');
-  await expect(page.getByRole('button', { name: /إدارة الدروس/ })).toBeVisible({ timeout: 20000 });
+  await expect(page.getByRole('button', { name: /^الدروس/ })).toBeVisible({ timeout: 20000 });
 });
 
 test('every tab opens with no console error', async ({ page }) => {
-  const tabs = ['الإحصائيات', 'الطلبات', 'فيديوهات القناة', 'الريلز', 'إدارة الدروس', 'إدارة السلاسل', 'إدارة الأقسام', 'المكتبة', 'الأحاديث والأقوال', 'إدارة الواجهة والتواصل', 'البيانات والتكامل'];
+  const tabs = ['الزيارات', 'الطلبات', 'فيديوهات القناة', 'الريلز', 'الدروس', 'السلاسل', 'الأقسام', 'الكتب', 'الأقوال والأحاديث', 'شكل الموقع والتواصل', 'صحة الموقع والأخطاء'];
   for (const name of tabs) {
     await page.getByRole('button', { name: new RegExp(`^${name}`) }).click();
     await expect(page.getByRole('button', { name: new RegExp(`^${name}`) })).toBeVisible();
@@ -18,7 +18,7 @@ test('every tab opens with no console error', async ({ page }) => {
 });
 
 test('a category can be created and edited', async ({ page }) => {
-  await page.getByRole('button', { name: /إدارة الأقسام/ }).click();
+  await page.getByRole('button', { name: /^الأقسام/ }).click();
   await page.getByRole('button', { name: 'إضافة قسم جديد' }).first().click();
   await page.getByPlaceholder(/العقيدة، الفقه/).fill('قسم اختباري');
   await page.getByRole('button', { name: /حفظ|إضافة القسم/ }).last().click();
@@ -26,7 +26,7 @@ test('a category can be created and edited', async ({ page }) => {
 });
 
 test('an invalid lesson form shows its message and stays open', async ({ page }) => {
-  await page.getByRole('button', { name: /إدارة الدروس/ }).click();
+  await page.getByRole('button', { name: /^الدروس/ }).click();
   await page.getByRole('button', { name: /إضافة درس/ }).first().click();
   await page.getByRole('button', { name: /حفظ|نشر|إضافة الدرس/ }).last().click();
   // The empty required title stops the save; the window stays open
@@ -35,7 +35,7 @@ test('an invalid lesson form shows its message and stays open', async ({ page })
 });
 
 test('a lesson can be created, edited and deleted', async ({ page }) => {
-  await page.getByRole('button', { name: /إدارة الدروس/ }).click();
+  await page.getByRole('button', { name: /^الدروس/ }).click();
   await page.getByRole('button', { name: /إضافة درس/ }).first().click();
   await page.getByPlaceholder(/باب فضل التوحيد/).fill('درس اختباري جديد');
   await page.locator('textarea').first().fill('نص تفريغ للاختبار');

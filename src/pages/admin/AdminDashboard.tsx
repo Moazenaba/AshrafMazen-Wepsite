@@ -67,7 +67,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
   const blockedReason = deleteConfirm.request?.blockedReason;
 
   return (
-    <div className="min-h-screen bg-stone-100/50 dark:bg-stone-950/60 pb-20">
+    <div className="min-h-screen bg-stone-100/50 dark:bg-stone-950/60 pb-10">
       {error && <DataErrorBanner message={error} onRetry={reload} />}
 
       <AdminHeader
@@ -88,7 +88,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin, onLogout 
       />
 
       {/* Main Content Area */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-5">
         {activeTab === 'lessons' && (
           <LessonsTab
             lessons={lessons}

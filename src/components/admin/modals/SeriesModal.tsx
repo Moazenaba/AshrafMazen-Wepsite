@@ -142,7 +142,7 @@ export const SeriesModal: React.FC<SeriesModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                الاسم اللطيف (Slug)
+                الاسم في رابط الصفحة (اتركه فارغاً ليُكتب تلقائياً)
               </label>
               <input
                 type="text"

@@ -11,9 +11,10 @@ vi.mock('../../../services/data/siteContent', () => ({
   getSiteContent: vi.fn(async () => ({ feature: { ...EMPTY_FEATURE, imageUrl: 'https://x.test/p.jpg', enabled: false } })),
   saveHomeFeature: h.save,
 }));
+vi.mock('../../../services/data/videoInfo', () => ({ fetchVideoInfo: vi.fn(async () => ({ title: 'عنوان من الفيديو', author: 'قناة الفيديو' })) }));
 vi.mock('../FileUploadButton', () => ({
-  FileUploadButton: ({ onUploaded }: { onUploaded: (url: string) => void }) => {
-    uploaded = onUploaded;
+  FileUploadButton: ({ kind, onUploaded }: { kind: string; onUploaded: (url: string) => void }) => {
+    if (kind === 'hero') uploaded = onUploaded;
     return <button type="button">رفع</button>;
   },
 }));
@@ -48,5 +49,24 @@ describe('HomeFeatureSettings', () => {
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(FEATURE_STATUS_TEXT.off));
     await userEvent.click(screen.getByRole('button', { name: /حفظ/ }));
     expect(await screen.findByRole('alert')).toHaveTextContent('أضف صورة أولاً');
+  });
+
+  it('Enter in the video box fills the title and the line under it, which stay editable', async () => {
+    render(<HomeFeatureSettings />);
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(FEATURE_STATUS_TEXT.off));
+    await userEvent.type(screen.getByLabelText('رابط فيديو يوتيوب (اختياري)'), 'https://youtu.be/loVFoAlqeCc{Enter}');
+    await waitFor(() => expect(screen.getByLabelText('العنوان')).toHaveValue('عنوان من الفيديو'));
+    expect(screen.getByLabelText('السطر تحت العنوان')).toHaveValue('قناة الفيديو');
+    await userEvent.type(screen.getByLabelText('العنوان'), ' معدّل');
+    expect(screen.getByLabelText('العنوان')).toHaveValue('عنوان من الفيديو معدّل');
+  });
+
+  it('a YouTube link alone is enough for the card to show', async () => {
+    render(<HomeFeatureSettings />);
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(FEATURE_STATUS_TEXT.off));
+    await userEvent.click(screen.getByRole('checkbox'));
+    await userEvent.clear(screen.getByLabelText('أو رابط صورة'));
+    await userEvent.type(screen.getByLabelText('رابط فيديو يوتيوب (اختياري)'), 'https://youtu.be/loVFoAlqeCc');
+    expect(screen.getByText(FEATURE_STATUS_TEXT.shown)).toBeInTheDocument();
   });
 });

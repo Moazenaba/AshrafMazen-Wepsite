@@ -28,7 +28,7 @@ export const BannerSettings: React.FC = () => {
       .then(setSettings)
       .catch((err: any) => {
         console.error('Error loading banner settings:', err);
-        setSettingsMessage({ type: 'error', text: err?.message || 'تعذّر تحميل إعدادات الترويسة.' });
+        setSettingsMessage({ type: 'error', text: err?.message || 'تعذّر تحميل الاسم والشعار.' });
       })
       .finally(() => setLoadingSettings(false));
   }, []);
@@ -51,7 +51,7 @@ export const BannerSettings: React.FC = () => {
       setSettings((prev) => ({ ...prev, banner_logo_url: publicUrl }));
       setSettingsMessage({
         type: 'success',
-        text: 'تم رفع الشعار بنجاح. لا تنسَ الضغط على "حفظ إعدادات الترويسة".',
+        text: 'تم رفع الشعار بنجاح. لا تنسَ الضغط على "حفظ".',
       });
     } catch (err: any) {
       console.error('Failed to upload logo:', err);
@@ -69,7 +69,7 @@ export const BannerSettings: React.FC = () => {
     setSettings((prev) => ({ ...prev, banner_logo_url: null }));
     setSettingsMessage({
       type: 'success',
-      text: 'تمت إزالة الشعار. اضغط "حفظ إعدادات الترويسة" لتطبيق التغيير.',
+      text: 'تمت إزالة الشعار. اضغط "حفظ" لتطبيق التغيير.',
     });
   };
 
@@ -82,7 +82,7 @@ export const BannerSettings: React.FC = () => {
       await saveSiteSettings(settings);
       setSettingsMessage({
         type: 'success',
-        text: 'تم حفظ إعدادات الترويسة بنجاح وتحديث الموقع.',
+        text: 'تم الحفظ بنجاح وتحديث الموقع.',
       });
     } catch (err: any) {
       console.error('Failed to save settings:', err);
@@ -98,14 +98,14 @@ export const BannerSettings: React.FC = () => {
   return (
     <>
       {/* ======================================================== */}
-      {/* 1. SECTION: BANNER SETTINGS (الترويسة) */}
+      {/* 1. SECTION: BANNER SETTINGS (أعلى الصفحة) */}
       {/* ======================================================== */}
       <div className="bg-white dark:bg-stone-900 rounded-2xl p-6 sm:p-8 border border-stone-200 dark:border-stone-800 shadow-xs space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-stone-200 dark:border-stone-800 pb-4">
           <div>
             <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 dark:bg-amber-400" />
-              <span>إعدادات ترويسة الموقع (البانر الرئيسي)</span>
+              <span>اسم الشيخ والشعار في أعلى كل صفحة</span>
             </h3>
             <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
               التحكم في نص الاسم والخط أو رفع شعار مصور مخصص يظهر في أعلى صفحات الموقع.
@@ -131,7 +131,7 @@ export const BannerSettings: React.FC = () => {
             {/* Banner Full Name */}
             <div>
               <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
-                الاسم الكامل في الترويسة (بخط الرقعة العربي)
+                الاسم الذي يظهر في أعلى الصفحة (بخط الرقعة)
               </label>
               <input
                 type="text"
@@ -152,10 +152,10 @@ export const BannerSettings: React.FC = () => {
               <div>
                 <h4 className="text-sm font-bold text-stone-800 dark:text-stone-200 flex items-center gap-2">
                   <ImageIcon className="w-4 h-4 text-emerald-700 dark:text-amber-400" />
-                  <span>الشعار المصور للترويسة (اختياري)</span>
+                  <span>الشعار (اختياري)</span>
                 </h4>
                 <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                  إذا قمت برفع شعار مخصص، فسيظهر بدلاً من النص الخطي في الترويسة ({describeRule('logo')}).
+                  إذا قمت برفع شعار مخصص، فسيظهر بدلاً من النص الخطي في أعلى الصفحة ({describeRule('logo')}).
                 </p>
               </div>
             </div>
@@ -238,7 +238,7 @@ export const BannerSettings: React.FC = () => {
               className="px-6 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-sm shadow-md transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
             >
               {savingSettings ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-              <span>حفظ إعدادات الترويسة</span>
+              <span>حفظ</span>
             </button>
           </div>
         </form>
@@ -249,7 +249,7 @@ export const BannerSettings: React.FC = () => {
             <div className="flex items-center gap-2">
               <Eye className="w-4 h-4 text-emerald-700 dark:text-amber-400" />
               <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
-                معاينة حية لشكل الترويسة
+                هكذا يظهر أعلى الصفحة
               </span>
             </div>
             {/* Light / Dark Preview Switcher */}
