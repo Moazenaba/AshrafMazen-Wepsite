@@ -74,11 +74,11 @@ Baseline on 2026-11-15 (`main` at `2ead989`): 243 tests, all passing; no coverag
 
 ### Totals (2026-11-16, measured on `prod/integration` after step 14 and the owner's later requests)
 
-- Tests: 509 unit, component and handler tests pass (1 skipped on purpose: the schema contract, until `docs/schema/tables.json` exists); 35 browser tests pass (3 of them are the Quran reader); 3 read-only live browser checks exist (they need `E2E_BASE_URL`).
+- Tests: 509 unit, component and handler tests pass (1 skipped on purpose: the schema contract, until `docs/schema/tables.json` exists); 38 browser tests pass, two full runs in a row (3 are the Quran reader, 3 are the home card: video-only first frame and open, background sound only after a tap, Enter fills the title in the admin); 3 read-only live browser checks exist (they need `E2E_BASE_URL`).
 - Coverage: lines 40.9%, functions 36.7% (gate 35 / 30). Entry script 37.5 kB gzip, budget 48.8 kB.
 - Files over 350 lines outside `src/data`: 0 (largest `src/context/AudioContext.tsx`, 349).
 - `npm run typecheck`, `npm run test:coverage`, `npm run build`, `npm run e2e` pass. `npm run lint` is only `tsc --noEmit` (see OPS-04 below). Live smoke test against https://ashraf-mazen.vercel.app: ALL PASSED.
-- Not checked on the live site: the home card's new picture, video and sound options (they were tested only in unit, component and local browser tests; the admin's "شكل الموقع والتواصل" tab was looked at in a screenshot).
+- Not checked on the live site (that needs a sign-in and a save, which this plan forbids): the home card's picture, video and sound options. They are covered by unit, component and 3 local browser tests, and the admin tab was looked at in a screenshot. The owner tries them once from the admin after merging.
 
 ### Problem ids
 
