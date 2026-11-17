@@ -12,6 +12,9 @@ vi.mock('../../../services/data/siteContent', () => ({
   saveHomeFeature: h.save,
 }));
 vi.mock('../../../services/data/videoInfo', () => ({ fetchVideoInfo: vi.fn(async () => ({ title: 'عنوان من الفيديو', author: 'قناة الفيديو' })) }));
+vi.mock('../../../services/data/lessonSearch', () => ({ searchLessons: vi.fn(async () => [{ id: 'l1', title: 'شرح الأربعين' }]) }));
+vi.mock('../../../services/data/books', () => ({ getPublishedBooks: vi.fn(async () => [{ id: 'b1', title: 'كتاب التوحيد' }]) }));
+vi.mock('../../../lib/youtubeLibrary', () => ({ useYoutubeLibrary: () => [] }));
 vi.mock('../FileUploadButton', () => ({
   FileUploadButton: ({ kind, onUploaded }: { kind: string; onUploaded: (url: string) => void }) => {
     if (kind === 'hero') uploaded = onUploaded;
@@ -51,22 +54,23 @@ describe('HomeFeatureSettings', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('أضف صورة أولاً');
   });
 
-  it('Enter in the video box fills the title and the line under it, which stay editable', async () => {
-    render(<HomeFeatureSettings />);
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(FEATURE_STATUS_TEXT.off));
-    await userEvent.type(screen.getByLabelText('رابط فيديو يوتيوب (اختياري)'), 'https://youtu.be/loVFoAlqeCc{Enter}');
-    await waitFor(() => expect(screen.getByLabelText('العنوان')).toHaveValue('عنوان من الفيديو'));
-    expect(screen.getByLabelText('السطر تحت العنوان')).toHaveValue('قناة الفيديو');
-    await userEvent.type(screen.getByLabelText('العنوان'), ' معدّل');
-    expect(screen.getByLabelText('العنوان')).toHaveValue('عنوان من الفيديو معدّل');
-  });
-
-  it('a YouTube link alone is enough for the card to show', async () => {
+  it('a video link for the picture alone is enough for the card to show', async () => {
     render(<HomeFeatureSettings />);
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(FEATURE_STATUS_TEXT.off));
     await userEvent.click(screen.getByRole('checkbox'));
     await userEvent.clear(screen.getByLabelText('أو رابط صورة'));
-    await userEvent.type(screen.getByLabelText('رابط فيديو يوتيوب (اختياري)'), 'https://youtu.be/loVFoAlqeCc');
+    await userEvent.type(screen.getByLabelText('رابط فيديو لأخذ صورة منه (اختياري)'), 'https://youtu.be/loVFoAlqeCc');
     expect(screen.getByText(FEATURE_STATUS_TEXT.shown)).toBeInTheDocument();
+  });
+
+  it('picking a lesson by name saves its address and fills the empty title', async () => {
+    h.save.mockReset().mockImplementation(async (f) => f);
+    render(<HomeFeatureSettings />);
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(FEATURE_STATUS_TEXT.off));
+    await userEvent.type(screen.getByLabelText('ابحث باسم الدرس أو الكتاب أو الفيديو'), 'التوحيد');
+    await userEvent.click(await screen.findByRole('button', { name: /كتاب التوحيد/ }));
+    expect(screen.getByLabelText('العنوان')).toHaveValue('كتاب التوحيد');
+    await userEvent.click(screen.getByRole('button', { name: /حفظ/ }));
+    await waitFor(() => expect(h.save).toHaveBeenCalledWith(expect.objectContaining({ videoUrl: '/book/b1', targetLabel: 'كتاب التوحيد' })));
   });
 });

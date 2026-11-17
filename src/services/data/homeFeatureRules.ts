@@ -7,7 +7,12 @@ export interface HomeFeature {
   title: string;
   subtitle: string;
   imageUrl: string;
+  // Where the button leads: any published page of the site (lesson, book, channel video), picked by the admin
   videoUrl: string;
+  // The name of that content, shown in the admin screen only
+  targetLabel: string;
+  // A video link used only to take a still picture from (never played from the card)
+  imageFrom: string;
   // A sound that plays quietly in the background on the visitor's first tap (optional, independent of the picture and video)
   audioUrl: string;
   buttonLabel: string;
@@ -15,7 +20,7 @@ export interface HomeFeature {
 
 export const DEFAULT_BUTTON_LABEL = 'شاهد واستمع الآن';
 
-export const EMPTY_FEATURE: HomeFeature = { enabled: false, title: '', subtitle: '', imageUrl: '', videoUrl: '', audioUrl: '', buttonLabel: '' };
+export const EMPTY_FEATURE: HomeFeature = { enabled: false, title: '', subtitle: '', imageUrl: '', videoUrl: '', targetLabel: '', imageFrom: '', audioUrl: '', buttonLabel: '' };
 
 const text = (value: unknown, max: number) => String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 
@@ -26,6 +31,8 @@ export function cleanHomeFeature(data: Partial<HomeFeature> | undefined): HomeFe
     subtitle: text(data?.subtitle, 200),
     imageUrl: text(data?.imageUrl, 1000),
     videoUrl: text(data?.videoUrl, 1000),
+    targetLabel: text(data?.targetLabel, 200),
+    imageFrom: text(data?.imageFrom, 1000),
     audioUrl: text(data?.audioUrl, 1000),
     buttonLabel: text(data?.buttonLabel, 40),
   };
@@ -43,7 +50,7 @@ export function parseHomeFeature(raw: string | null | undefined): HomeFeature {
 
 // Shown when the admin turned it on and gave it a picture; the video link is optional (without one there is no button)
 // The picture the card shows: the admin's own, else the first frame (thumbnail) of the video when it is a YouTube link
-export const featureImage = (f: HomeFeature): string => f.imageUrl || getYouTubeThumbnail(f.videoUrl) || '';
+export const featureImage = (f: HomeFeature): string => f.imageUrl || getYouTubeThumbnail(f.imageFrom) || getYouTubeThumbnail(f.videoUrl) || '';
 
 export const isFeatureShown = (f: HomeFeature) => f.enabled && !!featureImage(f);
 

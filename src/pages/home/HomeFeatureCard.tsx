@@ -5,7 +5,7 @@ import { DEFAULT_BUTTON_LABEL, featureImage, featureTarget, hasFeatureVideo, typ
 import { fileSrc } from '../../lib/fileLinks';
 import { FeatureAudio } from './FeatureAudio';
 
-// The featured card the admin sets: the admin's own picture, and a button that opens the video the admin chose
+// The featured card the admin sets: a still picture, and a button that opens the lesson the admin chose
 const Go: React.FC<{ feature: HomeFeature; className: string; label?: string; children: React.ReactNode }> = ({ feature, className, label, children }) => {
   const target = featureTarget(feature);
   return target.kind === 'internal' ? (
@@ -35,21 +35,10 @@ export const HomeFeatureCard: React.FC<{ feature: HomeFeature }> = ({ feature })
         </Go>}
       </div>
       <div className="order-1 sm:order-none">
-        {hasFeatureVideo(feature) ? (
-          <Go feature={feature} label={feature.title || DEFAULT_BUTTON_LABEL} className="group relative block aspect-video w-full overflow-hidden rounded-lg bg-mushaf-deep">
-            <img src={fileSrc(featureImage(feature))} alt="" fetchPriority="high" className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-[1.03]" />
-            <span aria-hidden="true" className="absolute inset-0 hidden sm:flex items-center justify-center">
-              <span className="flex items-center justify-center w-14 h-14 rounded-full bg-gold/90 text-mushaf-deep">
-                <Play className="w-6 h-6 fill-current ms-0.5" />
-              </span>
-            </span>
-          </Go>
-        ) : (
-          // A picture alone (no video link): shown as it is, with no play sign and nothing to open
-          <span className="relative block aspect-video w-full overflow-hidden rounded-lg bg-mushaf-deep">
-            <img src={fileSrc(featureImage(feature))} alt={feature.title || ''} fetchPriority="high" className="absolute inset-0 w-full h-full object-cover" />
-          </span>
-        )}
+        {/* Always a still picture: nothing to open, no play sign. Only the button leads to the lesson */}
+        <span className="relative block aspect-video w-full overflow-hidden rounded-lg bg-mushaf-deep">
+          <img src={fileSrc(featureImage(feature))} alt={feature.title || ''} fetchPriority="high" className="absolute inset-0 w-full h-full object-cover" />
+        </span>
       </div>
     </div>
   </article>

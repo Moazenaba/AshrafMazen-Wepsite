@@ -24,6 +24,21 @@ export function FeatureAudio({ url }: { url: string }) {
         audio = null;
       });
     };
+    // Tried at once (some browsers allow it for a returning visitor); otherwise it waits for the first tap
+    const begin = () => {
+      if (audio) return;
+      const trial = new Audio(fileSrc(url));
+      trial.volume = VOLUME;
+      trial.play().then(
+        () => {
+          if (audio) return trial.pause();
+          audio = trial;
+          for (const type of GESTURES) window.removeEventListener(type, start);
+        },
+        () => {}
+      );
+    };
+    begin();
     for (const type of GESTURES) window.addEventListener(type, start, { once: true, passive: true });
     return () => {
       for (const type of GESTURES) window.removeEventListener(type, start);

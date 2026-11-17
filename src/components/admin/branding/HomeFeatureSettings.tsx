@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, Save } from 'lucide-react';
 import { getSiteContent, saveHomeFeature } from '../../../services/data/siteContent';
-import { autoFillFromVideo, DEFAULT_BUTTON_LABEL, EMPTY_FEATURE, FEATURE_STATUS_TEXT, featureImage, featureStatus, withUploadedImage, type HomeFeature } from '../../../services/data/homeFeatureRules';
-import { fetchVideoInfo } from '../../../services/data/videoInfo';
+import { DEFAULT_BUTTON_LABEL, EMPTY_FEATURE, FEATURE_STATUS_TEXT, featureImage, featureStatus, withUploadedImage, type HomeFeature } from '../../../services/data/homeFeatureRules';
+import { FeatureTargetPicker } from './FeatureTargetPicker';
 import { FileUploadButton } from '../FileUploadButton';
 
 const input =
@@ -21,17 +21,6 @@ export const HomeFeatureSettings: React.FC = () => {
   }, []);
 
   const set = <K extends keyof HomeFeature>(key: K, value: HomeFeature[K]) => setDraft((d) => ({ ...d, [key]: value }));
-
-  // Pressing Enter in the video box fills the title and the line under it from the video, where they are still empty
-  const fillFromVideo = async () => {
-    const info = await fetchVideoInfo(draft.videoUrl);
-    if (!info) {
-      setMessage({ type: 'error', text: 'لم أستطع قراءة بيانات الفيديو. اكتب العنوان بنفسك.' });
-      return;
-    }
-    setDraft((d) => autoFillFromVideo(d, info));
-    setMessage({ type: 'ok', text: 'ملأتُ العنوان والسطر الذي تحته من الفيديو، وتستطيع تعديلهما.' });
-  };
 
   const save = async () => {
     try {
@@ -52,7 +41,7 @@ export const HomeFeatureSettings: React.FC = () => {
     <section className="bg-white dark:bg-stone-900 rounded-2xl p-5 sm:p-6 border border-stone-200 dark:border-stone-800 shadow-xs space-y-5">
       <div>
         <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100">البطاقة الكبيرة في أول الصفحة الرئيسية</h3>
-        <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">صورة أو فيديو يظهران أول ما يفتح الزائر الموقع. إن أطفأتها يظهر مكانها الدرس المميز.</p>
+        <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">صورة ثابتة، وزر يفتح الدرس الذي تختاره، وصوت اختياري يعمل في الخلفية. إن أطفأتها يظهر مكانها الدرس المميز.</p>
       </div>
 
       <label className="flex items-center gap-3 font-semibold text-stone-900 dark:text-stone-100">
@@ -66,23 +55,20 @@ export const HomeFeatureSettings: React.FC = () => {
 
       <div className="grid gap-5 lg:grid-cols-2">
         <div className="space-y-4">
+          <FeatureTargetPicker
+            href={draft.videoUrl}
+            label={draft.targetLabel}
+            onPick={(t) => {
+              setDraft((d) => ({ ...d, videoUrl: t.href, targetLabel: t.title, title: d.title.trim() ? d.title : t.title }));
+              setMessage({ type: 'ok', text: 'اخترتَ الدرس. اضغط «حفظ» لتثبيته.' });
+            }}
+            onClear={() => setDraft((d) => ({ ...d, videoUrl: '', targetLabel: '' }))}
+          />
+
           <div>
-            <label htmlFor="hf-video" className={label}>رابط فيديو يوتيوب (اختياري)</label>
-            <input
-              id="hf-video"
-              dir="ltr"
-              value={draft.videoUrl}
-              onChange={(e) => set('videoUrl', e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  void fillFromVideo();
-                }
-              }}
-              placeholder="https://youtu.be/..."
-              className={input}
-            />
-            <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">اضغط Enter بعد اللصق: يظهر أول إطار منه كصورة، ويُكتب العنوان تلقائياً. وعند الضغط على البطاقة يفتح الفيديو.</p>
+            <label htmlFor="hf-from" className={label}>رابط فيديو لأخذ صورة منه (اختياري)</label>
+            <input id="hf-from" dir="ltr" value={draft.imageFrom} onChange={(e) => set('imageFrom', e.target.value)} placeholder="https://youtu.be/..." className={input} />
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">تُؤخذ منه صورة ثابتة فقط. لا يُشغَّل الفيديو من الصورة ولا تظهر عليها علامة تشغيل.</p>
           </div>
 
           <div>
