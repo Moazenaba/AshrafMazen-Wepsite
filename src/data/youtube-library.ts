@@ -18,9 +18,13 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
   {
     "id": "PLHcd1VuAeT_OGrX6jYN80Rw8XaCkBqGTW",
     "title": "الوابل الصيب",
-    "count": "20 فيديو",
-    "latestVideoId": "-qpAA8FYfpc",
+    "count": "21 فيديو",
+    "latestVideoId": "97IefgSKav4",
     "videos": [
+      {
+        "id": "97IefgSKav4",
+        "title": "الوابل الصيب (22)| تعظيم أومر الله عزوجل ونواهيه (1) | # الشيخ _ أشرف _ مازن"
+      },
       {
         "id": "-qpAA8FYfpc",
         "title": "الوابل الصيب (20 ) | سُبل استقامة القلب | # الشيخ _ أشرف _ مازن",
