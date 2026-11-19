@@ -28,3 +28,16 @@ describe('lesson extras: the lesson picture', () => {
     expect(row).toEqual({ title: 'درس' });
   });
 });
+
+describe('lesson extras: the order of the pinned lessons', () => {
+  it('saves the new order, and never pins a lesson that was not pinned', async () => {
+    const { saveFeaturedOrder } = await import('./extras');
+    const { updateSiteRecord } = await import('./jsonRecord');
+    let saved: any = null;
+    vi.mocked(updateSiteRecord).mockImplementation(async (_key: string, parse: any, updater: any) => {
+      saved = updater(parse(JSON.stringify({ featured: ['a', 'b', 'c'], chapters: {}, images: {} })));
+    });
+    await saveFeaturedOrder(['c', 'a', 'x']);
+    expect(saved.featured).toEqual(['c', 'a', 'b']);
+  });
+});

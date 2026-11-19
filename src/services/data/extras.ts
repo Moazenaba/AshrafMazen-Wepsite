@@ -96,3 +96,14 @@ function sharedLessonExtras(): Promise<LessonExtras> {
 export async function withLessonPictures<T extends Lesson>(lessons: T[]): Promise<T[]> {
   return withImages(lessons, await sharedLessonExtras());
 }
+
+// Saves the order of the pinned lessons ("اخترنا لك"): the first id is the one the home page shows first.
+// Ids not pinned any more are not added; a pinned id missing from the list keeps its place after the ones listed.
+export async function saveFeaturedOrder(order: string[]): Promise<void> {
+  await updateSiteRecord(LESSON_EXTRAS_KEY, parseLessonExtras, (extras) => {
+    const pinned = new Set(extras.featured);
+    const listed = order.filter((id) => pinned.has(id));
+    extras.featured = [...listed, ...extras.featured.filter((id) => !listed.includes(id))];
+    return extras;
+  }, { shape: 'object' });
+}

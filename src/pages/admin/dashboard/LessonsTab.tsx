@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2, BookOpen, FileText, Video, Headphones, Search, Che
 import { formatArabicDate, getCategoryColorTheme } from '../../../utils/helpers';
 import { type Series, type Lesson } from '../../../types';
 import { type LessonAdminItem } from './types';
+import { FeaturedOrderPanel } from '../../../components/admin/FeaturedOrderPanel';
 
 interface LessonsTabProps {
   lessons: LessonAdminItem[];
@@ -35,6 +36,8 @@ export const LessonsTab: React.FC<LessonsTabProps> = ({ lessons, seriesList, onA
 
   return (
       <div className="space-y-6">
+        <FeaturedOrderPanel lessons={lessons} />
+
         {/* Action Bar & Filters */}
         <div className="bg-white dark:bg-stone-900 p-5 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
