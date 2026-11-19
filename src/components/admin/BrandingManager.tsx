@@ -13,7 +13,7 @@ const SECTIONS: { id: string; label: string; element: React.ReactNode }[] = [
   { id: 'sec-live', label: 'البث المباشر', element: <LiveStreamSettings /> },
   { id: 'sec-name', label: 'الاسم والشعار', element: <BannerSettings /> },
   { id: 'sec-font', label: 'خط الاسم', element: <NameFontSettings /> },
-  { id: 'sec-card', label: 'البطاقة الكبيرة', element: <HomeFeatureSettings /> },
+  { id: 'sec-card', label: 'البطاقة الكبيرة (صورة وصوت)',element: <HomeFeatureSettings /> },
   { id: 'sec-menu', label: 'القائمة الجانبية', element: <SideMenuSettings /> },
   { id: 'sec-welcome', label: 'صوت الترحيب', element: <WelcomeSoundSettings /> },
   { id: 'sec-contact', label: 'بيانات التواصل', element: <ContactSettings /> },

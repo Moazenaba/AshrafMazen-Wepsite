@@ -101,7 +101,8 @@ export const SocialLinks: React.FC = () => {
           is_active: socialFormData.is_active,
         });
       } else {
-        const nextOrder = socialLinks.length > 0 ? Math.max(...socialLinks.map((l) => l.sort_order)) + 1 : 0;
+        // A new link goes to the top of the list (the public site sorts by sort_order, ascending)
+        const nextOrder = socialLinks.length > 0 ? Math.min(...socialLinks.map((l) => l.sort_order)) - 1 : 0;
         await createSocialLink({
           platform: socialFormData.platform,
           url: urlTrimmed,
