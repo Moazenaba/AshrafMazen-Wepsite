@@ -1219,9 +1219,13 @@ export const YOUTUBE_LIBRARY: LibraryPlaylist[] = [
   {
     "id": "PLHcd1VuAeT_NcmgwOimYSUQVJVK9WwM3_",
     "title": "خطب الجمعة",
-    "count": "140 فيديو",
-    "latestVideoId": "DILQkTLFZg0",
+    "count": "141 فيديو",
+    "latestVideoId": "sDUAvNfkJzQ",
     "videos": [
+      {
+        "id": "sDUAvNfkJzQ",
+        "title": "خطبة الجمعة|  حقوق الطفل فى الإسلام | # الشيخ _ أشرف _ مازن"
+      },
       {
         "id": "DILQkTLFZg0",
         "title": "خطبة الجمعة | فقه صنائع المعروف | # الشيخ _ أشرف _ مازن",
