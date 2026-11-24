@@ -5,7 +5,7 @@ These systems rely on the same foundations as normal search: crawlable HTML, cle
 | Signal | State | Evidence |
 |---|---|---|
 | Crawlable without JavaScript | yes: every public page prerendered with text and links in `#root` | `dist/*/index.html`, `seo-audit` (h1 check) |
-| Crawler access | `robots.txt` is `User-agent: * / Allow: /` with 4 private disallows. No AI crawler (GPTBot, OAI-SearchBot, ChatGPT-User, PerplexityBot, ClaudeBot, Google-Extended, Bingbot, CCBot) is blocked | `public/robots.txt` (generated) |
+| Crawler access | `robots.txt` is `User-agent: * / Allow: /` with 3 private disallows (`/admin`, `/bookmarks`, `/dev/`). No AI crawler (GPTBot, OAI-SearchBot, ChatGPT-User, PerplexityBot, ClaudeBot, Google-Extended, Bingbot, CCBot) is blocked | `public/robots.txt` (generated) |
 | Cloudflare bot blocking | none in the path: the domain is DNS only (grey cloud), so Cloudflare's "Block AI bots" / Bot Fight Mode do not apply | DNS answers are Vercel IPs |
 | Entity clarity | one Person + WebSite graph on every page, sameAs to real profiles | ENTITY-ARCHITECTURE.md |
 | Descriptive headings | `h1` = the page subject; `h2` per section | prerender |

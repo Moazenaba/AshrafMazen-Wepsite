@@ -107,6 +107,15 @@ export function auditSite({ pages, siteUrl, prerendered = true, sitemap = '', ro
   if (!robots.includes(`Sitemap: ${siteUrl}/sitemap.xml`)) errors.push('robots.txt does not name the sitemap');
   if (!robots.includes(`Sitemap: ${siteUrl}/sitemap-videos.xml`)) warnings.push('robots.txt does not name the videos sitemap');
   if (/^Disallow:\s*\/\s*$/m.test(robots)) errors.push('robots.txt blocks the whole site');
+  // Google renders pages with their data; blocking /api/, /assets/ or /fonts/ leaves the rendered page empty
+  const disallowed = robots
+    .split(/\r?\n/)
+    .filter((line) => /^disallow:/i.test(line.trim()))
+    .map((line) => line.slice(line.indexOf(':') + 1).trim())
+    .filter(Boolean);
+  for (const path of ['/api/', '/assets/', '/fonts/']) {
+    if (disallowed.some((d) => path.startsWith(d) || d.startsWith(path))) errors.push(`robots.txt blocks ${path}, which pages need to render`);
+  }
   if (!llms.startsWith('# ')) warnings.push('llms.txt is missing');
   if (/vercel\.app/.test(robots + llms + sitemap)) errors.push('robots, llms or sitemap names a vercel.app address');
   if (appShell && /<link rel="canonical"/.test(appShell)) errors.push('app.html has a canonical (it serves pages added after the build)');

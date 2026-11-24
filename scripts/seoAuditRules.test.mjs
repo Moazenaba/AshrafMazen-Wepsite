@@ -55,4 +55,9 @@ describe('auditSite', () => {
     expect(errors).toContain('sitemap.xml lists a URL twice');
     expect(errors).toContain('robots.txt blocks the whole site');
   });
+  it('catches a robots.txt that blocks the data pages render from', () => {
+    const { errors } = auditSite({ pages, siteUrl, sitemap: sitemap([`${siteUrl}/`]), robots: `${robots}Disallow: /api/
+`, llms: '# x' });
+    expect(errors).toContain('robots.txt blocks /api/, which pages need to render');
+  });
 });

@@ -21,4 +21,8 @@
 | Testing | build audit + live audit, unit tests, wired into `npm run check` and CI | `scripts/seo-audit.mjs`, `scripts/seoAuditRules.mjs`, `scripts/seo-live.mjs`, `*.test.*`, `package.json`, `.github/workflows/ci.yml` |
 | Docs | this folder | `docs/seo/` |
 
+## 2026-11-25 — let Google render pages with their data
+
+Search Console URL Inspection of `/reels` showed 5 of 36 resources blocked by robots.txt (`/api/site`, `/api/live`, `/api/youtube-library`, `/api/youtube-shorts`) and the rendered page empty. `Disallow: /api/` removed from robots.txt (`scripts/generate-sitemap.mjs`); every `/api/*` answer now sends `X-Robots-Tag: noindex` (`vercel.json`) so the JSON is fetched for rendering but never indexed; `seo-audit` fails if robots.txt blocks `/api/`, `/assets/` or `/fonts/`.
+
 Not changed: visible titles in the app (except the browser tab title of a video), routes, admin, uploads, playback, APIs, the CSP.

@@ -97,7 +97,9 @@ mkdirSync(resolve(root, 'public'), { recursive: true });
 writeFileSync(resolve(root, 'public', 'sitemap.xml'), xml, 'utf8');
 writeFileSync(
   resolve(root, 'public', 'robots.txt'),
-  `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /bookmarks\nDisallow: /dev/\n\nSitemap: ${siteUrl}/sitemap.xml\nSitemap: ${siteUrl}/sitemap-videos.xml\n`,
+  // /api/ is NOT disallowed: Google renders each page and needs its data (/api/site, youtube-library, shorts, live).
+  // The JSON answers stay out of the index through the X-Robots-Tag: noindex header in vercel.json.
+  `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /bookmarks\nDisallow: /dev/\n\nSitemap: ${siteUrl}/sitemap.xml\nSitemap: ${siteUrl}/sitemap-videos.xml\n`,
   'utf8'
 );
 writeFileSync(resolve(root, 'public', 'llms.txt'), llmsText({ siteUrl, categories, series, library, lessons, books }), 'utf8');

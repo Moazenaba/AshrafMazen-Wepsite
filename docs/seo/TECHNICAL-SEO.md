@@ -18,7 +18,10 @@ Note on unknown paths: a real HTTP 404 would need a server function per request 
 |---|---|---|
 | All content pages | `index, follow, max-image-preview:large` | `index.html` shell |
 | `/search`, `/contribute` | `noindex, follow` | prerender (`robots:`) + `robotsFor` in `src/hooks/useCanonical.ts` |
-| `/bookmarks`, `/admin`, `/dev`, `/api/` | `Disallow` in robots.txt; `noindex` in the app | `scripts/generate-sitemap.mjs`, `robotsFor` |
+| `/bookmarks`, `/admin`, `/dev` | `Disallow` in robots.txt; `noindex` in the app | `scripts/generate-sitemap.mjs`, `robotsFor` |
+| `/api/*` | **crawlable** (Google renders pages with this data) but every answer carries `X-Robots-Tag: noindex` | `vercel.json` headers |
+
+Never disallow `/api/`, `/assets/` or `/fonts/`: Google renders the page and a blocked resource leaves it empty (seen on 2026-11-25: URL Inspection of `/reels` showed "لا توجد مقاطع قصيرة بعد" because `/api/youtube-shorts` was blocked). `seo-audit` fails the build if robots.txt blocks them.
 
 ## Prerendered pages (408 in the current build)
 
