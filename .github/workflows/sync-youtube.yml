@@ -80,12 +80,12 @@ jobs:
       - name: Check the live site
         id: smoke
         continue-on-error: true
-        run: node scripts/smoke-test.mjs https://ashraf-mazen.vercel.app --json > smoke.json
+        run: node scripts/smoke-test.mjs https://ashrafmazen.com --json > smoke.json
       - name: Record a failed check
         if: steps.smoke.outcome == 'failure'
         run: node scripts/report-monitor.mjs smoke.json
         env:
-          SITE_URL: https://ashraf-mazen.vercel.app
+          SITE_URL: https://ashrafmazen.com
       - name: Fail the run when the site is down
         if: steps.smoke.outcome == 'failure'
         run: exit 1

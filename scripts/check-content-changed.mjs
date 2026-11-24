@@ -4,7 +4,7 @@
 //   node scripts/check-content-changed.mjs            prints "changed" or "same" and exits 0 (also when it cannot tell)
 import { contentHash } from './contentHash.mjs';
 
-const SITE = (process.env.SITE_URL || 'https://ashraf-mazen.vercel.app').replace(/\/+$/, '');
+const SITE = (process.env.SITE_URL || 'https://ashrafmazen.com').replace(/\/+$/, '');
 
 // 'changed' | 'same' | 'unknown'
 export async function compare(fetcher = fetch, site = SITE) {

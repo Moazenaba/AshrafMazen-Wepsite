@@ -4,13 +4,13 @@
 
 ## الأقسام الرئيسية
 
-- [الصفحة الرئيسية](https://ashraf-mazen.vercel.app/): أحدث الدروس والخطب والأقسام العلمية
-- [المرئيات](https://ashraf-mazen.vercel.app/videos): فيديوهات قناة الشيخ وقوائم التشغيل
-- [الصوتيات](https://ashraf-mazen.vercel.app/audio): الدروس والمحاضرات الصوتية
-- [المكتبة](https://ashraf-mazen.vercel.app/books): كتب ورسائل بصيغة PDF
-- [البحث](https://ashraf-mazen.vercel.app/search): البحث في الدروس والفيديوهات والكتب
+- [الصفحة الرئيسية](https://ashrafmazen.com/): أحدث الدروس والخطب والأقسام العلمية
+- [المرئيات](https://ashrafmazen.com/videos): فيديوهات قناة الشيخ وقوائم التشغيل
+- [الصوتيات](https://ashrafmazen.com/audio): الدروس والمحاضرات الصوتية
+- [المكتبة](https://ashrafmazen.com/books): كتب ورسائل بصيغة PDF
+- [البحث](https://ashrafmazen.com/search): البحث في الدروس والفيديوهات والكتب
 
 ## معلومات للزواحف
 
-- [خريطة الموقع](https://ashraf-mazen.vercel.app/sitemap.xml)
-- [robots.txt](https://ashraf-mazen.vercel.app/robots.txt)
+- [خريطة الموقع](https://ashrafmazen.com/sitemap.xml)
+- [robots.txt](https://ashrafmazen.com/robots.txt)

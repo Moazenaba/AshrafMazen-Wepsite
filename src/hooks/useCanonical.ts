@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 // The site's one public address. Every page names its own address on it as canonical, so search engines index
 // each lesson as itself (not as a copy of the home page) and never the duplicate Vercel addresses.
-export const SITE_URL = 'https://ashraf-mazen.vercel.app';
+export const SITE_URL = 'https://ashrafmazen.com';
 
 export function canonicalFor(pathname: string): string {
   const path = pathname.replace(/\/+$/, '') || '/';

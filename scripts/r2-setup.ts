@@ -22,6 +22,8 @@ if (!cfg) {
 
 // The live domain first: uploads fail when the bucket's CORS list does not name it
 const origins = [
+  'https://ashrafmazen.com',
+  'https://www.ashrafmazen.com',
   'https://ashraf-mazen.vercel.app',
   'https://ashraf-mazen-wepsite.vercel.app',
   'https://ashrafmazenwepsite.vercel.app',

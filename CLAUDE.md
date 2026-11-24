@@ -36,8 +36,8 @@ channel id). The admin only controls Telegram (a manual switch + link in "الو
 
 **SEO:** `npm run build` = sitemap → vite build → `scripts/prerender.mjs`, which writes a real HTML page per public URL into
 `dist/` (own title, description, canonical, schema.org, text with links; data from `scripts/site-data.mjs`). Pages added after
-a deploy fall back to `dist/app.html` (no canonical) and `useCanonical` sets it. The one public domain is `https://ashraf-mazen.vercel.app`;
-`ashraf-mazen-wepsite.vercel.app` redirects to it (`vercel.json`). Search Console tag: env `GOOGLE_SITE_VERIFICATION` (Vercel), then redeploy.
+a deploy fall back to `dist/app.html` (no canonical) and `useCanonical` sets it. The one public domain is `https://ashrafmazen.com`;
+`www.ashrafmazen.com` and the `*.vercel.app` addresses redirect to it (Vercel domains + `vercel.json`); DNS is on Cloudflare, DNS only (grey cloud). Search Console tag: env `GOOGLE_SITE_VERIFICATION` (Vercel), then redeploy.
 
 Admin screens without a login: run `npm run dev`, open `/dev/admin` (fake in-memory database and fake storage, dev only).
 

@@ -17,7 +17,7 @@
 | `API /api/r2 serves only the site's own folders` | الدالة قدّمت ملفاً خارج مجلدات الموقع | **أمان**: راجع `PUBLIC_FOLDERS` في `api/r2.ts` |
 | `API /api/submit …` | دالة طلبات الزوار لا تردّ كما يجب | راجع سجل الدالة و`SUPABASE_SERVICE_ROLE_KEY` في Vercel |
 
-بعد الإصلاح شغّل يدوياً: `node scripts/smoke-test.mjs https://ashraf-mazen.vercel.app` وانتظر `ALL PASSED`.
+بعد الإصلاح شغّل يدوياً: `node scripts/smoke-test.mjs https://ashrafmazen.com` وانتظر `ALL PASSED`.
 
 ## قبل الدمج (Before merging)
 

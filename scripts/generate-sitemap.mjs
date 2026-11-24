@@ -6,7 +6,7 @@
 //                                              warning, so it can never stop the site from building
 //
 // Settings come from the environment or from .env.local: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, and
-// SITE_URL (the public address; defaults to the Vercel address).
+// SITE_URL (the public address; defaults to https://ashrafmazen.com).
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { excerpt, loadSiteData, root, siteUrl, youtubeId } from './site-data.mjs';
@@ -87,7 +87,7 @@ mkdirSync(resolve(root, 'public'), { recursive: true });
 writeFileSync(resolve(root, 'public', 'sitemap.xml'), xml, 'utf8');
 writeFileSync(
   resolve(root, 'public', 'robots.txt'),
-  `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /bookmarks\nDisallow: /dev/\n\nSitemap: ${siteUrl}/sitemap.xml\n`,
+  `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /bookmarks\nDisallow: /dev/\n\nSitemap: ${siteUrl}/sitemap.xml\nSitemap: ${siteUrl}/sitemap-videos.xml\n`,
   'utf8'
 );
 

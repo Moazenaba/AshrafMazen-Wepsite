@@ -19,7 +19,7 @@ for (const file of ['.env.local', '.env']) {
 }
 
 // The one public address of the site; every canonical link and sitemap entry uses it
-export const siteUrl = (process.env.SITE_URL || 'https://ashraf-mazen.vercel.app').replace(/\/$/, '');
+export const siteUrl = (process.env.SITE_URL || 'https://ashrafmazen.com').replace(/\/$/, '');
 
 const ID_IN_URL = /(?:youtu\.be\/|[?&]v=|youtube\.com\/(?:embed|shorts|live)\/)([a-zA-Z0-9_-]{11})/;
 export const youtubeId = (url) => {

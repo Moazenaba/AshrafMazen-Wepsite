@@ -5,7 +5,7 @@ import { applyOverrides } from '../src/lib/libraryOverrides.js';
 import { loadLibrary, loadOverrides } from './youtube-library.js';
 import { normalizeOverrides, videosSitemap } from './_sitemapVideos.js';
 
-const SITE_URL = (process.env.SITE_URL || 'https://ashraf-mazen.vercel.app').replace(/\/+$/, '');
+const SITE_URL = (process.env.SITE_URL || 'https://ashrafmazen.com').replace(/\/+$/, '');
 // A video's true publication date, when the saved library has it
 const dates = new Map(YOUTUBE_LIBRARY.flatMap((p) => p.videos.map((v) => [v.id, v.published] as const)));
 

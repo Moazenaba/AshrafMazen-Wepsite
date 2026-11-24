@@ -5,5 +5,5 @@ Disallow: /api/
 Disallow: /bookmarks
 Disallow: /dev/
 
-Sitemap: https://ashraf-mazen.vercel.app/sitemap.xml
-Sitemap: https://ashraf-mazen.vercel.app/sitemap-videos.xml
+Sitemap: https://ashrafmazen.com/sitemap.xml
+Sitemap: https://ashrafmazen.com/sitemap-videos.xml
