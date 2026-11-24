@@ -9,6 +9,15 @@ export function canonicalFor(pathname: string): string {
   return `${SITE_URL}${path === '/' ? '/' : path}`;
 }
 
+// Pages that should never show in search results: search results, the visitor's own bookmarks, the request form.
+// Their links are still followed. Everything else keeps the shell's index directive.
+export const INDEX = 'index, follow, max-image-preview:large';
+const NOINDEX_PATHS = ['/search', '/bookmarks', '/contribute', '/admin', '/dev'];
+export function robotsFor(pathname: string): string {
+  const path = pathname.replace(/\/+$/, '') || '/';
+  return NOINDEX_PATHS.some((p) => path === p || path.startsWith(`${p}/`)) ? 'noindex, follow' : INDEX;
+}
+
 function setHeadTag(selector: string, create: () => HTMLElement, attr: string, value: string) {
   let tag = document.head.querySelector<HTMLElement>(selector);
   if (!tag) {
@@ -39,6 +48,12 @@ export function useCanonical(pathname: string, isAdmin: boolean): void {
       },
       'content',
       href
+    );
+    setHeadTag(
+      'meta[name="robots"]',
+      () => Object.assign(document.createElement('meta'), { name: 'robots' }),
+      'content',
+      robotsFor(pathname)
     );
   }, [pathname, isAdmin]);
 }

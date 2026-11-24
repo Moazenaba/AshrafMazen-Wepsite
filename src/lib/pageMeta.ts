@@ -2,10 +2,8 @@
 // channel since): the prerendered pages already carry theirs, and a search engine that runs the page reads these.
 import { useEffect } from 'react';
 
-export const SITE_NAME = 'الشيخ أشرف مازن';
-
-// The page title the prerender gives a video or a playlist: its own name, with the site's name unless it has it
-export const namedTitle = (text: string) => (/مازن/.test(text) ? text : `${text} - ${SITE_NAME}`);
+// The page title the prerender gives a video or a playlist: its clean name, with the site's name unless it has it
+export { SITE_NAME, namedTitle, videoDescription } from './seoText';
 
 function setMeta(selector: string, create: () => HTMLElement, value: string) {
   let tag = document.head.querySelector<HTMLElement>(selector);

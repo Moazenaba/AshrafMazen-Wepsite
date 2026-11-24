@@ -15,10 +15,11 @@ const setMeta = (html, attr, name, value) =>
   html.replace(new RegExp(`(<meta ${attr}="${name}" content=")[^"]*(")`), `$1${esc(value)}$2`);
 
 // The shell with one page's head and text. `site` = { siteUrl, verification }.
-export function render(template, { path, title, description, image, schema = [], body, noCanonical = false }, site) {
+export function render(template, { path, title, description, image, schema = [], body, noCanonical = false, robots }, site) {
   const url = (p) => `${site.siteUrl}${encodeURI(p)}`;
   let html = template.replace(/<title>[^<]*<\/title>/, () => `<title>${esc(title)}</title>`);
   html = setMeta(html, 'name', 'description', description);
+  if (robots) html = setMeta(html, 'name', 'robots', robots);
   html = setMeta(html, 'property', 'og:title', title);
   html = setMeta(html, 'property', 'og:description', description);
   html = setMeta(html, 'name', 'twitter:title', title);

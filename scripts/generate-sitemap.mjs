@@ -10,6 +10,8 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { excerpt, loadSiteData, root, siteUrl, youtubeId } from './site-data.mjs';
+import { cleanVideoTitle, videoDescription } from '../src/lib/seoText.ts';
+import { llmsText } from './llms.mjs';
 
 const soft = process.argv.includes('--soft');
 
@@ -39,15 +41,23 @@ const pushUrl = (path, extra = '') => urls.push(`  <url>\n    <loc>${escapeXml(`
 const videoEntry = ({ id, title, description, date }) => `
     <video:video>
       <video:thumbnail_loc>${escapeXml(`https://i.ytimg.com/vi/${id}/hqdefault.jpg`)}</video:thumbnail_loc>
-      <video:title>${escapeXml(title)}</video:title>
+      <video:title>${escapeXml(cleanVideoTitle(title))}</video:title>
       <video:description>${escapeXml(description || title)}</video:description>
       <video:player_loc>${escapeXml(`https://www.youtube-nocookie.com/embed/${id}`)}</video:player_loc>
       ${date ? `<video:publication_date>${escapeXml(date)}</video:publication_date>` : ''}
     </video:video>`;
 
-['/', '/videos', '/audio', '/books', '/quran'].forEach((path) => pushUrl(path));
-categories.forEach((c) => pushUrl(`/category/${encodeURIComponent(c.slug)}`));
-series.forEach((s) => pushUrl(`/series/${encodeURIComponent(s.slug)}`));
+// lastmod only where a real date is known: the newest lesson for the lists that show lessons
+const day = (d) => (d ? String(d).slice(0, 10) : '');
+const lastmodTag = (d) => (day(d) ? `\n    <lastmod>${day(d)}</lastmod>` : '');
+const newest = (items) => items.map((l) => l.published_at || l.created_at).filter(Boolean).sort().at(-1);
+pushUrl('/', lastmodTag(newest(lessons)));
+['/videos', '/reels', '/quran'].forEach((path) => pushUrl(path));
+pushUrl('/audio', lastmodTag(newest(lessons.filter((l) => l.audio_url))));
+pushUrl('/books', lastmodTag(books.map((b) => b.published_at).filter(Boolean).sort().at(-1)));
+const seriesIdsOf = (categoryId) => new Set(series.filter((s) => s.category_id === categoryId).map((s) => s.id));
+categories.forEach((c) => pushUrl(`/category/${encodeURIComponent(c.slug)}`, lastmodTag(newest(lessons.filter((l) => seriesIdsOf(c.id).has(l.series_id))))));
+series.forEach((s) => pushUrl(`/series/${encodeURIComponent(s.slug)}`, lastmodTag(newest(lessons.filter((l) => l.series_id === s.id)))));
 
 const seenVideos = new Set();
 lessons.forEach((lesson) => {
@@ -70,7 +80,7 @@ library.forEach((playlist) => {
     channelVideos += 1;
     pushUrl(
       `/video/${video.id}`,
-      `${video.published ? `\n    <lastmod>${String(video.published).slice(0, 10)}</lastmod>` : ''}${videoEntry({ id: video.id, title: video.title, date: video.published })}`
+      `${lastmodTag(video.published)}${videoEntry({ id: video.id, title: video.title, description: videoDescription(video.title, playlist.title), date: video.published })}`
     );
   });
 });
@@ -90,5 +100,6 @@ writeFileSync(
   `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /bookmarks\nDisallow: /dev/\n\nSitemap: ${siteUrl}/sitemap.xml\nSitemap: ${siteUrl}/sitemap-videos.xml\n`,
   'utf8'
 );
+writeFileSync(resolve(root, 'public', 'llms.txt'), llmsText({ siteUrl, categories, series, library, lessons, books }), 'utf8');
 
 console.log(`Sitemap written: ${urls.length} URLs (${lessons.length} lessons, ${channelVideos} channel videos, ${books.length} books).`);

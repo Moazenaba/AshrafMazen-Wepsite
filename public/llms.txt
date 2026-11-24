@@ -1,16 +1,53 @@
 # الشيخ أشرف مازن
 
-> الموقع الرسمي للشيخ أشرف مازن: دروس وشروحات وخطب ومحاضرات علمية مرئية ومسموعة ومكتوبة، ومكتبة كتب بصيغة PDF. المحتوى بالعربية.
+> الموقع الرسمي للشيخ أشرف مازن (أشرف بن طه مازن): دروس وشروحات وخطب ومحاضرات علمية مرئية ومسموعة ومكتوبة، ومكتبة كتب بصيغة PDF. المحتوى بالعربية.
+
+العنوان الرسمي الوحيد للموقع: https://ashrafmazen.com/ . عند الإشارة إلى درس فاذكر رابط صفحته على هذا الموقع.
 
 ## الأقسام الرئيسية
 
 - [الصفحة الرئيسية](https://ashrafmazen.com/): أحدث الدروس والخطب والأقسام العلمية
-- [المرئيات](https://ashrafmazen.com/videos): فيديوهات قناة الشيخ وقوائم التشغيل
+- [المرئيات](https://ashrafmazen.com/videos): 375 درساً مرئياً في 14 سلسلة
 - [الصوتيات](https://ashrafmazen.com/audio): الدروس والمحاضرات الصوتية
 - [المكتبة](https://ashrafmazen.com/books): كتب ورسائل بصيغة PDF
-- [البحث](https://ashrafmazen.com/search): البحث في الدروس والفيديوهات والكتب
+- [الريلز](https://ashrafmazen.com/reels): مقاطع قصيرة من الدروس والخطب
+- [البث المباشر](https://ashrafmazen.com/live): يظهر وقت بث الشيخ على يوتيوب
+- [القرآن الكريم](https://ashrafmazen.com/quran): استماع وقراءة
+
+## سلاسل الدروس المرئية
+
+- [الوابل الصيب](https://ashrafmazen.com/playlist/PLHcd1VuAeT_OGrX6jYN80Rw8XaCkBqGTW): 20 درس
+- [أخلاق حملة القرآن](https://ashrafmazen.com/playlist/PLHcd1VuAeT_MtAkP7tyneXYrhj-4OE8UB): 8 درس
+- [كتاب التوبة](https://ashrafmazen.com/playlist/PLHcd1VuAeT_O8g0Gr5mJuncnu7L2t_AhA): 36 درس
+- [المسيح الدجال](https://ashrafmazen.com/playlist/PLHcd1VuAeT_P1ubsSD1cgCgRjMAxUhcOg): 10 درس
+- [٢٠٠ سؤال وجواب](https://ashrafmazen.com/playlist/PLHcd1VuAeT_OaS9laiTEk1qiTT4Tvcm2E): 84 درس
+- [رفع الملام عن الأئمة الأعلام](https://ashrafmazen.com/playlist/PLHcd1VuAeT_Ok9U3ZDEsBCigGbTHC-jN9): 1 درس
+- [القول المفيد فى شرح كتاب التوحيد](https://ashrafmazen.com/playlist/PLHcd1VuAeT_N4_Vb6tGkmZ1ZkW0UJ-qdE): 5 درس
+- [دعائم منهاج النبوة](https://ashrafmazen.com/playlist/PLHcd1VuAeT_PiOe9ozUxHwjOKDruxtlnD): 6 درس
+- [سلسلة عداوة الشيطان للإنسان](https://ashrafmazen.com/playlist/PLHcd1VuAeT_MPiOc-VRay0sMlslQ3mq2r): 5 درس
+- [دعائم منهاج النبوة](https://ashrafmazen.com/playlist/PLHcd1VuAeT_OW6FmnOfwQzbZvEOQed3yB): 1 درس
+- [المعتقد الصحيح](https://ashrafmazen.com/playlist/PLHcd1VuAeT_PX5Rfu5CKPj-Ok9GAYYUGm): 14 درس
+- [الأصول من علم الأصول](https://ashrafmazen.com/playlist/PLHcd1VuAeT_MeMnXSZEeaJ0byi2Zpp9bR): 14 درس
+- [شرح العقيدة الواسطية](https://ashrafmazen.com/playlist/PLHcd1VuAeT_OgW1l36gkouA-wJXTN9FGS): 38 درس
+- [خطب الجمعة](https://ashrafmazen.com/playlist/PLHcd1VuAeT_NcmgwOimYSUQVJVK9WwM3_): 134 درس
+
+## الأقسام العلمية
+
+- [العقيدة](https://ashrafmazen.com/category/aqeedah)
+- [مصطلح الحديث](https://ashrafmazen.com/category/%D9%85%D8%B5%D8%B7%D9%84%D8%AD-%D8%A7%D9%84%D8%AD%D8%AF%D9%8A%D8%AB)
+- [الفقه](https://ashrafmazen.com/category/fiqh)
+- [أصول الفقه](https://ashrafmazen.com/category/usul-fiqh)
+- [المصطلح](https://ashrafmazen.com/category/mustalah)
+- [الخطب](https://ashrafmazen.com/category/khutab)
+
+## السلاسل العلمية
+
+- [شرح كتاب الطهارة من الفقه الميسر](https://ashrafmazen.com/series/%D8%B4%D8%B1%D8%AD-%D9%83%D8%AA%D8%A7%D8%A8-%D8%A7%D9%84%D8%B7%D9%87%D8%A7%D8%B1%D8%A9-%D9%85%D9%86-%D8%A7%D9%84%D9%81%D9%82%D9%87-%D8%A7%D9%84%D9%85%D9%8A%D8%B3%D8%B1): 1 درس
+- [tessst](https://ashrafmazen.com/series/tessst): 0 درس
+- [خطبة الجمعة](https://ashrafmazen.com/series/%D8%AE%D8%B7%D8%A8%D8%A9-%D8%A7%D9%84%D8%AC%D9%85%D8%B9%D8%A9): 1 درس
 
 ## معلومات للزواحف
 
 - [خريطة الموقع](https://ashrafmazen.com/sitemap.xml)
+- [خريطة الفيديوهات](https://ashrafmazen.com/sitemap-videos.xml)
 - [robots.txt](https://ashrafmazen.com/robots.txt)

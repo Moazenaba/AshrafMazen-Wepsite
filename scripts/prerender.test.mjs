@@ -68,3 +68,26 @@ describe('withSiteSeed', () => {
     expect(html).toBe(SHELL);
   });
 });
+
+describe('render: robots', () => {
+  const shell = SHELL.replace('</head>', '<meta name="robots" content="index, follow" />\n</head>');
+  it('keeps the shell directive by default and sets a page\'s own when given', () => {
+    expect(render(shell, { path: '/videos', title: 't', description: 'd' }, site)).toContain('content="index, follow"');
+    expect(render(shell, { path: '/search', title: 't', description: 'd', robots: 'noindex, follow' }, site)).toContain('<meta name="robots" content="noindex, follow" />');
+  });
+});
+
+describe('llmsText', async () => {
+  const { llmsText } = await import('./llms.mjs');
+  const text = llmsText({
+    siteUrl: 'https://site.test',
+    library: [{ id: 'PL1', title: 'الأصول | #الشيخ_أشرف_مازن', videos: [{ id: 'a' }, { id: 'b' }] }],
+    series: [{ id: 1, slug: 'tawheed', title: 'التوحيد' }],
+    lessons: [{ series_id: 1 }],
+  });
+  it('lists the real series with absolute links on the site and clean titles', () => {
+    expect(text).toContain('- [الأصول](https://site.test/playlist/PL1): 2 درس');
+    expect(text).toContain('- [التوحيد](https://site.test/series/tawheed): 1 درس');
+    expect(text).not.toContain('#الشيخ');
+  });
+});

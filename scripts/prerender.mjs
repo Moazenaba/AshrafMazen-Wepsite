@@ -9,15 +9,18 @@
 //
 //   node scripts/prerender.mjs          fails loudly on a problem
 //   node scripts/prerender.mjs --soft   used by `npm run build`: on a problem it only writes app.html
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { excerpt, loadSiteData, root, siteUrl, youtubeId } from './site-data.mjs';
 import { esc, render as renderPage, withNameFont, withSiteSeed } from './prerenderParts.mjs';
 import { contentHash } from './contentHash.mjs';
+import { makeSchema } from './seoSchema.mjs';
+import { cleanVideoTitle, namedTitle as named, videoDescription } from '../src/lib/seoText.ts';
 
 const soft = process.argv.includes('--soft');
 const dist = resolve(root, 'dist');
-let template = readFileSync(resolve(dist, 'index.html'), 'utf8');
+// The shell's own JSON-LD is replaced by each page's graph (one identity, no duplicate Person)
+let template = readFileSync(resolve(dist, 'index.html'), 'utf8').replace(/\s*<script type="application\/ld\+json">[\s\S]*?<\/script>/, '');
 
 const SITE_NAME = 'الشيخ أشرف مازن';
 const DEFAULT_DESCRIPTION =
@@ -25,12 +28,14 @@ const DEFAULT_DESCRIPTION =
 
 
 const site = { siteUrl, verification: '' };
+// Rebuilt with the admin's social links once the data is read
+let schema = makeSchema({ siteUrl, siteName: SITE_NAME, description: DEFAULT_DESCRIPTION });
 // The first-visit copy goes only into the home page and app.html (`seeded`), never into every page
 let seededTemplate = null;
-const render = (page) => renderPage(page.seeded && seededTemplate ? seededTemplate : template, page, site);
+// The share picture of pages that have none of their own (public/og-image.png, 1200×630)
+const defaultImage = existsSync(resolve(dist, 'og-image.png')) ? `${siteUrl}/og-image.png` : undefined;
+const render = (page) => renderPage(page.seeded && seededTemplate ? seededTemplate : template, { ...page, image: page.image || defaultImage }, site);
 const url = (path) => `${siteUrl}${encodeURI(path)}`;
-// The sheikh's name once: many channel titles already carry it
-const named = (text) => (/مازن/.test(text) ? text : `${text} - ${SITE_NAME}`);
 const thumb = (id) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 const link = (path, text) => `<a href="${esc(path)}">${esc(text)}</a>`;
 const list = (items) => (items.length ? `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>` : '');
@@ -54,7 +59,7 @@ function write(page) {
 }
 
 // The fallback shell, written first so a failure below still leaves the site working
-writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true, seeded: true }), 'utf8');
+writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true, seeded: true, schema: [schema.graph([])] }), 'utf8');
 
 let data;
 try {
@@ -65,8 +70,9 @@ try {
     const { readSiteData } = await import('../api/site.ts');
     return readSiteData(seedUrl, process.env.VITE_SUPABASE_ANON_KEY || '');
   });
+  schema = makeSchema({ siteUrl, siteName: SITE_NAME, description: DEFAULT_DESCRIPTION, socials: data.socials });
   // The fallback shell again, now with the chosen font
-  writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true, seeded: true }), 'utf8');
+  writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true, seeded: true, schema: [schema.graph([])] }), 'utf8');
 } catch (err) {
   // PRERENDER_STRICT=1 (set in Vercel after one clean deploy) makes a production build fail instead of shipping unprerendered pages
   if (soft && process.env.PRERENDER_STRICT !== '1') {
@@ -95,99 +101,124 @@ for (const lesson of lessons) {
 }
 for (const items of lessonsBySeries.values()) items.sort((a, b) => (a.lesson_number ?? 0) - (b.lesson_number ?? 0));
 
-const person = {
-  '@type': 'Person',
-  '@id': `${siteUrl}/#person`,
-  name: SITE_NAME,
-  alternateName: ['أشرف مازن', 'أبو عبد الرحمن أشرف بن طه بن مازن', 'Sheikh Ashraf Mazen'],
-  url: `${siteUrl}/`,
-  jobTitle: 'داعية وطالب علم',
-  sameAs: socials.map((s) => s.url).filter((u) => /^https:\/\//.test(u)),
-};
-const breadcrumbs = (items) => ({
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [{ name: 'الرئيسية', path: '/' }, ...items].map((item, i) => ({
-    '@type': 'ListItem',
-    position: i + 1,
-    name: item.name,
-    item: url(item.path),
-  })),
-});
-const videoObject = ({ id, name, description, date, path }) =>
-  date
-    ? {
-        '@context': 'https://schema.org',
-        '@type': 'VideoObject',
-        name,
-        description: description || name,
-        thumbnailUrl: thumb(id),
-        uploadDate: date,
-        embedUrl: `https://www.youtube-nocookie.com/embed/${id}`,
-        url: url(path),
-        inLanguage: 'ar',
-        author: { '@id': `${siteUrl}/#person` },
-      }
-    : null;
+schema = makeSchema({ siteUrl, siteName: SITE_NAME, description: DEFAULT_DESCRIPTION, socials });
 const nav = `<nav><p>${[
   link('/', 'الرئيسية'),
   link('/videos', 'المرئيات'),
   link('/audio', 'الصوتيات'),
   link('/books', 'المكتبة'),
+  link('/reels', 'الريلز'),
+  link('/quran', 'القرآن الكريم'),
 ].join(' · ')}</p></nav>`;
 const kind = (l) => [l.youtube_url && 'مرئي', l.audio_url && 'صوتي', l.transcript && 'مكتوب'].filter(Boolean).join('، ');
-
-// The Quran section (reciter and reader pages are not listed: they depend on an outside service)
-write({
-  path: '/quran',
-  title: 'القرآن الكريم | استماع وقراءة',
-  description: 'استمع إلى القرآن الكريم بأصوات القرّاء، واقرأ السورة مع الصوت، وإذاعات القرآن المباشرة.',
-  body: `${nav}<h1>القرآن الكريم</h1><p>استمع إلى المصحف بأصوات القرّاء، أو إلى إذاعات القرآن المباشرة.</p>`,
-});
+// One page: its graph is the site, the sheikh, the page and (when given) its breadcrumb trail and own nodes
+const page = ({ path, type, title, description, image, crumbs, date, nodes = [], ...rest }) =>
+  write({
+    path,
+    title,
+    description,
+    image,
+    schema: [
+      schema.graph([
+        schema.webPage({ path, type, name: title, description, image, crumbs, date }),
+        crumbs && schema.breadcrumbs(path, crumbs),
+        ...nodes,
+      ]),
+    ],
+    ...rest,
+  });
 
 // Home
-write({
+page({
   path: '/',
   title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`,
   description: DEFAULT_DESCRIPTION,
-  schema: [{ '@context': 'https://schema.org', ...person }],
   body: `${nav}<h1>${SITE_NAME}</h1><p>${esc(DEFAULT_DESCRIPTION)}</p>
-<h2>الأقسام</h2>${list(categories.map((c) => link(`/category/${c.slug}`, c.name)))}
+<h2>الأقسام العلمية</h2>${list(categories.map((c) => link(`/category/${c.slug}`, c.name)))}
 <h2>السلاسل العلمية</h2>${list(series.map((s) => link(`/series/${s.slug}`, s.title)))}
 <h2>أحدث الدروس</h2>${list(lessons.slice(0, 40).map((l) => link(`/lesson/${l.id}`, l.title)))}
-<h2>قوائم فيديوهات القناة</h2>${list(library.map((p) => link(`/playlist/${p.id}`, p.title)))}`,
+<h2>سلاسل الدروس المرئية</h2>${list(library.map((p) => `${link(`/playlist/${p.id}`, cleanVideoTitle(p.title))} (${p.videos.length} فيديو)`))}
+<h2>أحدث الفيديوهات</h2>${list(library.flatMap((p) => p.videos.slice(0, 2)).filter((v) => !lessons.some((l) => youtubeId(l.youtube_url) === v.id)).slice(0, 20).map((v) => link(`/video/${v.id}`, cleanVideoTitle(v.title))))}`,
 });
 
 // Libraries
-write({
+page({
   path: '/videos',
-  title: `المرئيات - ${SITE_NAME}`,
-  description: `دروس وخطب ومحاضرات الشيخ أشرف مازن المرئية، مرتبة في ${library.length} قائمة.`,
-  body: `${nav}<h1>المرئيات</h1>${list(library.map((p) => `${link(`/playlist/${p.id}`, p.title)} (${p.videos.length} فيديو)`))}`,
+  type: 'CollectionPage',
+  title: `المرئيات: دروس ومحاضرات الشيخ أشرف مازن بالفيديو`,
+  description: `دروس وخطب ومحاضرات الشيخ أشرف مازن المرئية، مرتبة في ${library.length} سلسلة منها ${library
+    .slice(0, 3)
+    .map((p) => `«${cleanVideoTitle(p.title)}»`)
+    .join(' و')}.`,
+  crumbs: [{ name: 'المرئيات', path: '/videos' }],
+  body: `${nav}<h1>المرئيات</h1><p>دروس الشيخ أشرف مازن المرئية مرتبة في سلاسل؛ اختر سلسلة لتشاهد دروسها بالترتيب.</p>
+${list(library.map((p) => `${link(`/playlist/${p.id}`, cleanVideoTitle(p.title))} (${p.videos.length} فيديو)`))}`,
 });
 const audioLessons = lessons.filter((l) => l.audio_url);
-write({
+page({
   path: '/audio',
-  title: `دروس صوتية - ${SITE_NAME}`,
-  description: 'استمع إلى دروس الشيخ أشرف مازن الصوتية: شروح وخطب ومحاضرات.',
-  body: `${nav}<h1>الصوتيات</h1>${list(audioLessons.map((l) => link(`/lesson/${l.id}`, l.title)))}`,
+  type: 'CollectionPage',
+  title: `الصوتيات: دروس ومحاضرات الشيخ أشرف مازن الصوتية`,
+  description: 'استمع إلى دروس الشيخ أشرف مازن الصوتية: شروح وخطب ومحاضرات، مع إمكانية التحميل.',
+  crumbs: [{ name: 'الصوتيات', path: '/audio' }],
+  body: `${nav}<h1>الصوتيات</h1><p>الدروس الصوتية للشيخ أشرف مازن.</p>${list(audioLessons.map((l) => link(`/lesson/${l.id}`, l.title)))}`,
 });
-write({
+page({
   path: '/books',
-  title: `المكتبة - ${SITE_NAME}`,
+  type: 'CollectionPage',
+  title: `المكتبة: كتب ورسائل PDF - ${SITE_NAME}`,
   description: 'مكتبة كتب ورسائل PDF للقراءة والتحميل من موقع الشيخ أشرف مازن.',
-  body: `${nav}<h1>المكتبة</h1>${list(books.map((b) => link(`/book/${b.id}`, b.title)))}`,
+  crumbs: [{ name: 'المكتبة', path: '/books' }],
+  body: `${nav}<h1>المكتبة</h1>${books.length ? list(books.map((b) => link(`/book/${b.id}`, b.title))) : '<p>تضاف الكتب هنا عند نشرها.</p>'}`,
+});
+page({
+  path: '/reels',
+  type: 'CollectionPage',
+  title: `الريلز: مقاطع قصيرة - ${SITE_NAME}`,
+  description: 'مقاطع قصيرة من دروس وخطب الشيخ أشرف مازن.',
+  crumbs: [{ name: 'الريلز', path: '/reels' }],
+  body: `${nav}<h1>الريلز</h1><p>مقاطع قصيرة من دروس وخطب الشيخ أشرف مازن.</p>`,
+});
+page({
+  path: '/live',
+  title: `البث المباشر - ${SITE_NAME}`,
+  description: 'البث المباشر لدروس وخطب الشيخ أشرف مازن على قناته في يوتيوب، يظهر هنا وقت البث.',
+  body: `${nav}<h1>البث المباشر</h1><p>يظهر هنا بث الشيخ أشرف مازن المباشر على يوتيوب وقت إذاعته.</p>`,
+});
+// Pages kept out of search results (their links are still followed); the app sets the same rule (useCanonical)
+page({
+  path: '/search',
+  title: `البحث - ${SITE_NAME}`,
+  description: 'ابحث في دروس الشيخ أشرف مازن وفيديوهاته وكتبه.',
+  robots: 'noindex, follow',
+  body: `${nav}<h1>البحث</h1>`,
+});
+page({
+  path: '/contribute',
+  title: `شارك - ${SITE_NAME}`,
+  description: 'أرسل اقتراحاً أو تصحيحاً لموقع الشيخ أشرف مازن.',
+  robots: 'noindex, follow',
+  body: `${nav}<h1>شارك</h1>`,
+});
+// The Quran section (reciter and reader pages are not listed: they depend on an outside service)
+page({
+  path: '/quran',
+  title: `القرآن الكريم: استماع وقراءة - موقع ${SITE_NAME}`,
+  description: 'استمع إلى القرآن الكريم بأصوات القرّاء، واقرأ السورة مع الصوت، وإذاعات القرآن المباشرة.',
+  crumbs: [{ name: 'القرآن الكريم', path: '/quran' }],
+  body: `${nav}<h1>القرآن الكريم</h1><p>استمع إلى المصحف بأصوات القرّاء، أو إلى إذاعات القرآن المباشرة.</p>`,
 });
 
 // Categories and series
 for (const category of categories) {
   if (!SAFE.test(category.slug)) continue;
   const inCategory = series.filter((s) => s.category_id === category.id);
-  write({
+  page({
     path: `/category/${category.slug}`,
+    type: 'CollectionPage',
     title: `${category.name} - ${SITE_NAME}`,
     description: excerpt(category.description) || `دروس وسلاسل الشيخ أشرف مازن في ${category.name}.`,
-    schema: [breadcrumbs([{ name: category.name, path: `/category/${category.slug}` }])],
+    crumbs: [{ name: category.name, path: `/category/${category.slug}` }],
     body: `${nav}<h1>${esc(category.name)}</h1><p>${esc(category.description)}</p>
 <h2>السلاسل</h2>${list(inCategory.map((s) => link(`/series/${s.slug}`, s.title)))}
 <h2>الدروس</h2>${list(inCategory.flatMap((s) => lessonsBySeries.get(s.id) ?? []).map((l) => link(`/lesson/${l.id}`, l.title)))}`,
@@ -197,16 +228,12 @@ for (const s of series) {
   if (!SAFE.test(s.slug)) continue;
   const category = categoryById.get(s.category_id);
   const items = lessonsBySeries.get(s.id) ?? [];
-  write({
+  page({
     path: `/series/${s.slug}`,
+    type: 'CollectionPage',
     title: `${s.title} - ${SITE_NAME}`,
     description: excerpt(s.description) || `سلسلة «${s.title}» للشيخ أشرف مازن: ${items.length} درس.`,
-    schema: [
-      breadcrumbs([
-        ...(category ? [{ name: category.name, path: `/category/${category.slug}` }] : []),
-        { name: s.title, path: `/series/${s.slug}` },
-      ]),
-    ],
+    crumbs: [...(category ? [{ name: category.name, path: `/category/${category.slug}` }] : []), { name: s.title, path: `/series/${s.slug}` }],
     body: `${nav}<h1>${esc(s.title)}</h1>${category ? `<p>${link(`/category/${category.slug}`, category.name)}</p>` : ''}<p>${esc(s.description)}</p>
 <h2>دروس السلسلة</h2><ol>${items.map((l) => `<li>${link(`/lesson/${l.id}`, l.title)}</li>`).join('')}</ol>`,
   });
@@ -222,19 +249,24 @@ for (const lesson of lessons) {
   const description =
     excerpt(lesson.transcript) || `${s ? `درس من سلسلة «${s.title}»` : 'درس'} للشيخ أشرف مازن${kind(lesson) ? ` (${kind(lesson)})` : ''}.`;
   const siblings = s ? lessonsBySeries.get(s.id) ?? [] : [];
-  write({
+  const date = lesson.published_at || lesson.created_at || undefined;
+  const image = vid ? thumb(vid) : undefined;
+  page({
     path,
+    type: 'ItemPage',
     title: named(`${lesson.title}${s ? ` | ${s.title}` : ''}`),
     description,
-    image: vid ? thumb(vid) : undefined,
-    schema: [
-      breadcrumbs([
-        ...(category ? [{ name: category.name, path: `/category/${category.slug}` }] : []),
-        ...(s ? [{ name: s.title, path: `/series/${s.slug}` }] : []),
-        { name: lesson.title, path },
-      ]),
-      vid && videoObject({ id: vid, name: lesson.title, description, date: lesson.published_at || lesson.created_at, path }),
-    ].filter(Boolean),
+    image,
+    date,
+    crumbs: [
+      ...(category ? [{ name: category.name, path: `/category/${category.slug}` }] : []),
+      ...(s ? [{ name: s.title, path: `/series/${s.slug}` }] : []),
+      { name: lesson.title, path },
+    ],
+    nodes: [
+      vid && schema.videoObject({ id: vid, name: lesson.title, description, date, path }),
+      lesson.transcript && schema.article({ path, title: lesson.title, text: description, date, image }),
+    ],
     body: `${nav}<h1>${esc(lesson.title)}</h1>
 <p>${[category && link(`/category/${category.slug}`, category.name), s && link(`/series/${s.slug}`, s.title)].filter(Boolean).join(' · ')}</p>
 <p>${esc(kind(lesson))}</p>
@@ -243,41 +275,46 @@ ${siblings.length > 1 ? `<h2>دروس السلسلة</h2><ol>${siblings.map((l) 
   });
 }
 
-// Channel playlists and videos (a video in several playlists gets one page, under its first playlist)
+// Channel playlists and videos (a video in several playlists gets one page, under its first playlist).
+// Titles drop the channel's hashtag tail (cleanVideoTitle); each video links to its neighbours in the series.
 const lessonVideos = new Set(lessons.map((l) => youtubeId(l.youtube_url)).filter(Boolean));
 const seenVideos = new Set();
 for (const playlist of library) {
   if (!SAFE.test(playlist.id)) continue;
-  write({
-    path: `/playlist/${playlist.id}`,
-    title: named(playlist.title),
-    description: `${playlist.title}: ${playlist.videos.length} فيديو للشيخ أشرف مازن.`,
+  const listTitle = cleanVideoTitle(playlist.title);
+  const listPath = `/playlist/${playlist.id}`;
+  page({
+    path: listPath,
+    type: 'CollectionPage',
+    title: named(listTitle),
+    description: `«${listTitle}»: ${playlist.videos.length} درس مرئي للشيخ أشرف مازن، مرتبة للمشاهدة بالترتيب.`,
     image: playlist.videos[0] ? thumb(playlist.videos[0].id) : undefined,
-    schema: [breadcrumbs([{ name: 'المرئيات', path: '/videos' }, { name: playlist.title, path: `/playlist/${playlist.id}` }])],
-    body: `${nav}<h1>${esc(playlist.title)}</h1><ol>${playlist.videos.map((v) => `<li>${link(`/video/${v.id}`, v.title)}</li>`).join('')}</ol>`,
+    crumbs: [{ name: 'المرئيات', path: '/videos' }, { name: listTitle, path: listPath }],
+    body: `${nav}<h1>${esc(listTitle)}</h1><p>${playlist.videos.length} درس مرئي للشيخ أشرف مازن.</p><ol>${playlist.videos
+      .map((v) => `<li>${link(`/video/${v.id}`, cleanVideoTitle(v.title))}</li>`)
+      .join('')}</ol>`,
   });
-  for (const video of playlist.videos) {
-    if (seenVideos.has(video.id) || lessonVideos.has(video.id) || !SAFE.test(video.id)) continue;
+  playlist.videos.forEach((video, i) => {
+    if (seenVideos.has(video.id) || lessonVideos.has(video.id) || !SAFE.test(video.id)) return;
     seenVideos.add(video.id);
     const path = `/video/${video.id}`;
-    const description = `${video.title} - من «${playlist.title}» للشيخ أشرف مازن.`;
-    write({
+    const title = cleanVideoTitle(video.title);
+    const description = videoDescription(video.title, playlist.title);
+    const near = [playlist.videos[i - 1], playlist.videos[i + 1]].filter(Boolean);
+    page({
       path,
-      title: named(video.title),
+      type: 'ItemPage',
+      title: named(title),
       description,
       image: thumb(video.id),
-      schema: [
-        breadcrumbs([
-          { name: 'المرئيات', path: '/videos' },
-          { name: playlist.title, path: `/playlist/${playlist.id}` },
-          { name: video.title, path },
-        ]),
-        videoObject({ id: video.id, name: video.title, description, date: video.published, path }),
-      ].filter(Boolean),
-      body: `${nav}<h1>${esc(video.title)}</h1><p>${link(`/playlist/${playlist.id}`, playlist.title)}</p>
-<h2>من نفس القائمة</h2>${list(playlist.videos.filter((v) => v.id !== video.id).slice(0, 20).map((v) => link(`/video/${v.id}`, v.title)))}`,
+      date: video.published,
+      crumbs: [{ name: 'المرئيات', path: '/videos' }, { name: listTitle, path: listPath }, { name: title, path }],
+      nodes: [schema.videoObject({ id: video.id, name: title, description, date: video.published, path })],
+      body: `${nav}<h1>${esc(title)}</h1><p>درس مرئي للشيخ أشرف مازن من سلسلة ${link(listPath, listTitle)}.</p>
+${near.length ? `<h2>الدرس السابق والتالي</h2>${list(near.map((v) => link(`/video/${v.id}`, cleanVideoTitle(v.title))))}` : ''}
+<h2>من نفس السلسلة</h2>${list(playlist.videos.filter((v) => v.id !== video.id).slice(0, 20).map((v) => link(`/video/${v.id}`, cleanVideoTitle(v.title))))}`,
     });
-  }
+  });
 }
 
 // Books
@@ -285,15 +322,15 @@ for (const book of books) {
   if (!SAFE.test(String(book.id))) continue;
   const path = `/book/${book.id}`;
   const description = excerpt(book.description) || `كتاب «${book.title}»${book.author ? ` - ${book.author}` : ''}، للقراءة والتحميل PDF.`;
-  write({
+  const image = /^https:\/\//.test(book.cover_url || '') ? book.cover_url : undefined;
+  page({
     path,
+    type: 'ItemPage',
     title: `${book.title} - المكتبة - ${SITE_NAME}`,
     description,
-    image: /^https:\/\//.test(book.cover_url || '') ? book.cover_url : undefined,
-    schema: [
-      breadcrumbs([{ name: 'المكتبة', path: '/books' }, { name: book.title, path }]),
-      { '@context': 'https://schema.org', '@type': 'Book', name: book.title, author: book.author ? { '@type': 'Person', name: book.author } : undefined, url: url(path), inLanguage: 'ar' },
-    ],
+    image,
+    crumbs: [{ name: 'المكتبة', path: '/books' }, { name: book.title, path }],
+    nodes: [schema.book({ path, title: book.title, author: book.author, image })],
     body: `${nav}<h1>${esc(book.title)}</h1><p>${esc(book.author)}</p><p>${esc(book.description)}</p>`,
   });
 }

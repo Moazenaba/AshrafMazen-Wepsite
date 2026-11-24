@@ -2,6 +2,7 @@
 // channel after the last deploy reaches Google within the hour without waiting for one. Pure functions; the function
 // that serves it is sitemap-videos.ts. What the admin hid or removed is taken off before this is built.
 import type { YoutubeOverrides } from '../src/services/data/youtube';
+import { cleanVideoTitle, videoDescription } from '../src/lib/seoText.js';
 
 export interface SitemapPlaylist {
   id: string;
@@ -55,8 +56,8 @@ export function videosSitemap(playlists: SitemapPlaylist[], siteUrl: string, dat
     <loc>${escapeXml(`${siteUrl}/video/${video.id}`)}</loc>
     <video:video>
       <video:thumbnail_loc>${escapeXml(`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`)}</video:thumbnail_loc>
-      <video:title>${escapeXml(video.title)}</video:title>
-      <video:description>${escapeXml(`${video.title} - من «${playlist.title}» للشيخ أشرف مازن.`)}</video:description>
+      <video:title>${escapeXml(cleanVideoTitle(video.title))}</video:title>
+      <video:description>${escapeXml(videoDescription(video.title, playlist.title))}</video:description>
       <video:player_loc>${escapeXml(`https://www.youtube-nocookie.com/embed/${video.id}`)}</video:player_loc>${date && !Number.isNaN(Date.parse(date)) ? `\n      <video:publication_date>${escapeXml(date)}</video:publication_date>` : ''}
     </video:video>
   </url>`);

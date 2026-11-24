@@ -5,7 +5,7 @@ import { useYoutubeLibrary } from '../lib/youtubeLibrary';
 import type { SitePlaylist, SiteVideo } from '../lib/libraryOverrides';
 import { DownloadDialog } from '../components/DownloadDialog';
 import { MediaStage } from '../components/media/MediaStage';
-import { namedTitle, usePageMeta } from '../lib/pageMeta';
+import { namedTitle, usePageMeta, videoDescription } from '../lib/pageMeta';
 import { stageOfVideo } from '../components/media/stageMedia';
 import { ReportLink } from '../components/ReportLink';
 import { BookmarkButton } from '../components/BookmarkButton';
@@ -42,7 +42,7 @@ export const VideoView: React.FC = () => {
   const next = playlist && index >= 0 && index < playlist.videos.length - 1 ? playlist.videos[index + 1] : null;
   const resumeAt = useMemo(() => getResumeSeconds(progressKey(videoId)), [videoId]);
   // The page's own title and description (the prerendered video pages have them; this covers one found since the deploy)
-  usePageMeta(video && video.title ? { title: namedTitle(video.title), description: `${video.title}${playlist ? ` - من «${playlist.title}»` : ''} للشيخ أشرف مازن.` } : null);
+  usePageMeta(video && video.title ? { title: namedTitle(video.title), description: videoDescription(video.title, playlist?.title) } : null);
 
   // Statistics: seconds actually played (a jump forward or back adds nothing), and how often it was watched
   const statsKey = `yt:${videoId}`;

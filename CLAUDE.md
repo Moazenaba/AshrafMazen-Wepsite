@@ -38,6 +38,9 @@ channel id). The admin only controls Telegram (a manual switch + link in "الو
 `dist/` (own title, description, canonical, schema.org, text with links; data from `scripts/site-data.mjs`). Pages added after
 a deploy fall back to `dist/app.html` (no canonical) and `useCanonical` sets it. The one public domain is `https://ashrafmazen.com`;
 `www.ashrafmazen.com` and the `*.vercel.app` addresses redirect to it (Vercel domains + `vercel.json`); DNS is on Cloudflare, DNS only (grey cloud). Search Console tag: env `GOOGLE_SITE_VERIFICATION` (Vercel), then redeploy.
+Schema.org: one `@graph` per page from `scripts/seoSchema.mjs` (never add a second Person). Search titles go through `src/lib/seoText.ts`
+(`cleanVideoTitle` drops hashtag tails). `npm run seo:audit` checks `dist/` (also in `check` and CI); `npm run seo:live` checks production (read-only).
+Reports and the external checklist: `docs/seo/`.
 
 Admin screens without a login: run `npm run dev`, open `/dev/admin` (fake in-memory database and fake storage, dev only).
 
