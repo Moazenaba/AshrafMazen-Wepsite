@@ -38,9 +38,18 @@ export function FeatureAudio({ url }: { url: string }) {
         () => {}
       );
     };
-    begin();
+    // The trial waits until the page has finished loading: the file can be tens of MB, and starting it at once
+    // competed with the page itself for the connection (PageSpeed measured a 21 MB download on the home page)
+    let timer = 0;
+    const later = () => {
+      timer = window.setTimeout(begin, 1500);
+    };
+    if (document.readyState === 'complete') later();
+    else window.addEventListener('load', later, { once: true });
     for (const type of GESTURES) window.addEventListener(type, start, { once: true, passive: true });
     return () => {
+      window.removeEventListener('load', later);
+      window.clearTimeout(timer);
       for (const type of GESTURES) window.removeEventListener(type, start);
       audio?.pause();
       audio = null;

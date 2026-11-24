@@ -30,3 +30,10 @@ Not changed: visible titles in the app (except the browser tab title of a video)
 ## 2026-11-25 — the home page is the page for the name
 
 Name searches were landing on `/reels`, `/videos` or `/audio`. Home is now a `ProfilePage` whose `mainEntity` is the site Person (`scripts/seoSchema.mjs`, `scripts/prerender.mjs`); the prerendered nav links to `/` with the text «الشيخ أشرف مازن» instead of «الرئيسية», and the app's logo link is named the same (`src/components/Navbar.tsx`); `/videos` and `/audio` titles put the topic first and the name last. `seo-audit` fails if home is not that ProfilePage.
+
+## 2026-11-25 — findings from Search Console and PageSpeed
+
+- Old property `ashraf-mazen.vercel.app` (last 90 days): 14 clicks / 55 impressions, avg position 4.4; 54 of 55 impressions on the home page, none on `/reels`. 7 pages indexed, 397 "Discovered – currently not indexed" (Google had not crawled them yet).
+- New Domain property: both sitemaps read OK (403 + 394 pages); home and `/reels` indexed; reports still processing.
+- PageSpeed mobile on `/`: Performance 64, Accessibility/Best practices/SEO 100. CLS 0.375 (0.335 from the Cairo font swapping in), LCP 4.9 s, 22 MB payload of which 21.5 MB was the home card's background mp3.
+- Fixes: Cairo and IBM Plex Sans Arabic `font-display: optional` (no swap shift; `index.html`); the home background sound's autoplay trial waits for page load + 1.5 s (`src/pages/home/FeatureAudio.tsx`).
