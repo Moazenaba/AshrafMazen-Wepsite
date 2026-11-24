@@ -56,6 +56,8 @@ export function makeSchema({ siteUrl, siteName, description, socials = [] }) {
     inLanguage: 'ar',
     isPartOf: { '@id': ids.website },
     about: { '@id': ids.person },
+    // The home page is the sheikh's own page: Google reads ProfilePage + mainEntity as "this page is about this person"
+    ...(type === 'ProfilePage' ? { mainEntity: { '@id': ids.person } } : {}),
     ...(image ? { primaryImageOfPage: { '@type': 'ImageObject', url: image } } : {}),
     ...(crumbs ? { breadcrumb: { '@id': `${url(path)}#breadcrumb` } } : {}),
     ...(date ? { datePublished: date } : {}),

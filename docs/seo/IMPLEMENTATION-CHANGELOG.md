@@ -26,3 +26,7 @@
 Search Console URL Inspection of `/reels` showed 5 of 36 resources blocked by robots.txt (`/api/site`, `/api/live`, `/api/youtube-library`, `/api/youtube-shorts`) and the rendered page empty. `Disallow: /api/` removed from robots.txt (`scripts/generate-sitemap.mjs`); every `/api/*` answer now sends `X-Robots-Tag: noindex` (`vercel.json`) so the JSON is fetched for rendering but never indexed; `seo-audit` fails if robots.txt blocks `/api/`, `/assets/` or `/fonts/`.
 
 Not changed: visible titles in the app (except the browser tab title of a video), routes, admin, uploads, playback, APIs, the CSP.
+
+## 2026-11-25 — the home page is the page for the name
+
+Name searches were landing on `/reels`, `/videos` or `/audio`. Home is now a `ProfilePage` whose `mainEntity` is the site Person (`scripts/seoSchema.mjs`, `scripts/prerender.mjs`); the prerendered nav links to `/` with the text «الشيخ أشرف مازن» instead of «الرئيسية», and the app's logo link is named the same (`src/components/Navbar.tsx`); `/videos` and `/audio` titles put the topic first and the name last. `seo-audit` fails if home is not that ProfilePage.

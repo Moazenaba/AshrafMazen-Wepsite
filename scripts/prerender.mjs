@@ -103,7 +103,7 @@ for (const items of lessonsBySeries.values()) items.sort((a, b) => (a.lesson_num
 
 schema = makeSchema({ siteUrl, siteName: SITE_NAME, description: DEFAULT_DESCRIPTION, socials });
 const nav = `<nav><p>${[
-  link('/', 'الرئيسية'),
+  link('/', SITE_NAME), // the name points to the home page from every page, so a search for the name lands there
   link('/videos', 'المرئيات'),
   link('/audio', 'الصوتيات'),
   link('/books', 'المكتبة'),
@@ -131,6 +131,7 @@ const page = ({ path, type, title, description, image, crumbs, date, nodes = [],
 // Home
 page({
   path: '/',
+  type: 'ProfilePage',
   title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`,
   description: DEFAULT_DESCRIPTION,
   body: `${nav}<h1>${SITE_NAME}</h1><p>${esc(DEFAULT_DESCRIPTION)}</p>
@@ -145,7 +146,7 @@ page({
 page({
   path: '/videos',
   type: 'CollectionPage',
-  title: `المرئيات: دروس ومحاضرات الشيخ أشرف مازن بالفيديو`,
+  title: `المرئيات: دروس ومحاضرات بالفيديو - ${SITE_NAME}`,
   description: `دروس وخطب ومحاضرات الشيخ أشرف مازن المرئية، مرتبة في ${library.length} سلسلة منها ${library
     .slice(0, 3)
     .map((p) => `«${cleanVideoTitle(p.title)}»`)
@@ -158,7 +159,7 @@ const audioLessons = lessons.filter((l) => l.audio_url);
 page({
   path: '/audio',
   type: 'CollectionPage',
-  title: `الصوتيات: دروس ومحاضرات الشيخ أشرف مازن الصوتية`,
+  title: `الصوتيات: دروس ومحاضرات صوتية - ${SITE_NAME}`,
   description: 'استمع إلى دروس الشيخ أشرف مازن الصوتية: شروح وخطب ومحاضرات، مع إمكانية التحميل.',
   crumbs: [{ name: 'الصوتيات', path: '/audio' }],
   body: `${nav}<h1>الصوتيات</h1><p>الدروس الصوتية للشيخ أشرف مازن.</p>${list(audioLessons.map((l) => link(`/lesson/${l.id}`, l.title)))}`,

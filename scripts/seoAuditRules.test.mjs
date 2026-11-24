@@ -34,6 +34,11 @@ describe('auditPage', () => {
     expect(check(page({ body: '<h1>x</h1><a href="/nowhere">x</a>' }), '/videos', (p) => p !== '/nowhere')).toContain('link to /nowhere, which is not a page');
     expect(check(page({ body: '<h1>x</h1><a href="/lesson/new">x</a>' }), '/videos', () => false)).toEqual([]);
   });
+  it('wants the home page to be a ProfilePage about the site Person', () => {
+    expect(check(page({ path: '/' }), '/')).toContain('home page is not a ProfilePage about the site Person');
+    const profile = graph([{ '@type': 'ProfilePage', '@id': `${siteUrl}/`, mainEntity: { '@id': `${siteUrl}/#person` } }]);
+    expect(check(page({ path: '/', ld: profile }), '/')).toEqual([]);
+  });
 });
 
 describe('auditSite', () => {

@@ -110,7 +110,7 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-3 h-16 sm:h-[72px]">
           {/* Wordmark: uploaded logo, or the sheikh's name in Ruqaa */}
-          <Link to="/" className="min-w-0 shrink rounded-lg min-h-11 flex items-center" aria-label="الصفحة الرئيسية">
+          <Link to="/" className="min-w-0 shrink rounded-lg min-h-11 flex items-center" aria-label={`${banner_name || 'الشيخ أشرف مازن'} - الصفحة الرئيسية`}>
             {banner_logo_url ? (
               <img
                 src={fileSrc(banner_logo_url)}

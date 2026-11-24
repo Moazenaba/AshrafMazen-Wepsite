@@ -59,6 +59,10 @@ export function auditPage(path, html, { siteUrl, exists = () => true }) {
     if (new Set(ids).size !== ids.length) errors.push('JSON-LD repeats an @id');
     if (!nodes.some((n) => n['@type'] === 'Person' && n['@id'] === `${siteUrl}/#person`)) errors.push('JSON-LD has no site Person');
     if (!nodes.some((n) => n['@type'] === 'WebSite' && n['@id'] === `${siteUrl}/#website`)) errors.push('JSON-LD has no WebSite');
+    // A search for the sheikh's name should land on the home page: it is his ProfilePage
+    if (path === '/' && !nodes.some((n) => n['@type'] === 'ProfilePage' && n.mainEntity?.['@id'] === `${siteUrl}/#person`)) {
+      errors.push('home page is not a ProfilePage about the site Person');
+    }
     const text = JSON.stringify(data);
     for (const u of text.match(/https?:\/\/[^"\s]+/g) ?? []) {
       if (/\.vercel\.app/.test(u)) errors.push(`JSON-LD names an old address ${u}`);
