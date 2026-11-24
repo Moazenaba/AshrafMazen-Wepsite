@@ -51,9 +51,11 @@ describe('WelcomeSound', () => {
     expect(h.created.filter((s) => s.includes('w.mp3'))).toEqual([]);
   });
 
-  it('still measures an old record that has no saved length', async () => {
+  it('never downloads an old record that has no saved length (measuring it could mean the whole file)', async () => {
     h.get.mockResolvedValue(welcome({}));
     renderWithProviders(<WelcomeSound />);
-    await waitFor(() => expect(h.created.some((s) => s.includes('w.mp3'))).toBe(true));
+    await waitFor(() => expect(h.get).toHaveBeenCalled());
+    await new Promise((r) => setTimeout(r, 20));
+    expect(h.created.filter((s) => s.includes('w.mp3'))).toEqual([]);
   });
 });

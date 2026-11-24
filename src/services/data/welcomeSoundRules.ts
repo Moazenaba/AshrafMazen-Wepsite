@@ -71,5 +71,7 @@ export function welcomeTooLongMessage(seconds: number): string {
 }
 
 // Whether the visitor's browser should fetch the recording at all: not when its saved length says it would be refused.
-// A record without a length (saved before the length was kept) is loaded as before and measured on arrival.
-export const shouldLoadWelcome = (seconds: number | undefined) => seconds === undefined || isShortWelcome(seconds);
+// A record without a length (saved before the length was kept) is never fetched: measuring it meant downloading the
+// file, and an mp3 without a length header is downloaded whole (PageSpeed saw 21 MB on the home page for a
+// 23-minute lesson saved as the greeting). Saving the sound again in the admin stores its length.
+export const shouldLoadWelcome = (seconds: number | undefined) => seconds !== undefined && isShortWelcome(seconds);

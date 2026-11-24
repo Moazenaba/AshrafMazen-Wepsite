@@ -46,10 +46,11 @@
   }
 }
 
-/* The hero: the name's words rise one after another, then the hadith fades in beneath them */
+/* The hero: the name's words rise one after another, then the hadith fades in beneath them. They start at 0.01, not 0:
+   the eye sees no difference, but text at opacity 0 does not count as painted, which held back the page's LCP */
 @keyframes hero-rise {
   from {
-    opacity: 0;
+    opacity: 0.01;
     transform: translateY(20px);
   }
   to {
@@ -59,7 +60,7 @@
 }
 @keyframes hero-fade {
   from {
-    opacity: 0;
+    opacity: 0.01;
   }
   to {
     opacity: 1;

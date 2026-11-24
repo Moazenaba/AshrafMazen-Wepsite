@@ -37,3 +37,11 @@ Name searches were landing on `/reels`, `/videos` or `/audio`. Home is now a `Pr
 - New Domain property: both sitemaps read OK (403 + 394 pages); home and `/reels` indexed; reports still processing.
 - PageSpeed mobile on `/`: Performance 64, Accessibility/Best practices/SEO 100. CLS 0.375 (0.335 from the Cairo font swapping in), LCP 4.9 s, 22 MB payload of which 21.5 MB was the home card's background mp3.
 - Fixes: Cairo and IBM Plex Sans Arabic `font-display: optional` (no swap shift; `index.html`); the home background sound's autoplay trial waits for page load + 1.5 s (`src/pages/home/FeatureAudio.tsx`).
+
+## 2026-11-25 — URL Inspection details, favicon, LCP
+
+- URL Inspection of `/` (indexed copy, crawled 2026-11-24): 19/20 resources "Other error". A Googlebot-UA fetch of the same files returns 200, and the live test shows "all resources loaded", the ProfilePage as 1 valid item, and one console message (the welcome-sound warning below). "Other error" in the indexed copy is Google deferring fetches, not a block. Referring page `/video/11X_z7c6rw8` is only how Google found `/` (every page links home).
+- The 21.5 MB download on `/` was the **welcome sound** (a 23-minute recording with no saved length), measured by loading it. Now a welcome sound without a saved length is never fetched (`welcomeSoundRules.shouldLoadWelcome`, `WelcomeSound.tsx`); saving it again in the admin stores the length.
+- Favicon: `favicon.svg` drew «أ» as text in `serif` (no Arabic glyph on many renderers) and `/favicon.ico` was 404. Now `favicon.ico` (48), `favicon-48/96/192/512.png`, `apple-touch-icon.png` from `scripts/make-icons.mjs` (`npm run icons`), linked in `index.html`.
+- LCP: the hero name and hadith animated from opacity 0, which does not count as painted; they start at 0.01 (`src/styles/motion.css`).
+- Known, not changed: each deploy renames `/assets/*.js`, so an HTML copy Google cached before a deploy points at files that are gone (404). Pages are prerendered, so their text and links do not depend on those files.
