@@ -15,6 +15,7 @@ import { excerpt, loadSiteData, root, siteUrl, youtubeId } from './site-data.mjs
 import { esc, render as renderPage, withNameFont, withSiteSeed } from './prerenderParts.mjs';
 import { contentHash } from './contentHash.mjs';
 import { makeSchema } from './seoSchema.mjs';
+import { featureCardHtml, readFeature } from './prerenderFeature.mjs';
 import { cleanVideoTitle, namedTitle as named, videoDescription } from '../src/lib/seoText.ts';
 
 const soft = process.argv.includes('--soft');
@@ -62,13 +63,14 @@ function write(page) {
 writeFileSync(resolve(dist, 'app.html'), render({ path: '/', title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`, description: DEFAULT_DESCRIPTION, noCanonical: true, seeded: true, schema: [schema.graph([])] }), 'utf8');
 
 let data;
+let seed = null; // the /api/site answer seeded into the home page (its settings hold the featured card)
 try {
   data = await loadSiteData();
   template = withNameFont(template, data.nameFont);
   seededTemplate = await withSiteSeed(template, async () => {
     const seedUrl = (process.env.VITE_SUPABASE_URL || '').replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
     const { readSiteData } = await import('../api/site.ts');
-    return readSiteData(seedUrl, process.env.VITE_SUPABASE_ANON_KEY || '');
+    return (seed = await readSiteData(seedUrl, process.env.VITE_SUPABASE_ANON_KEY || ''));
   });
   schema = makeSchema({ siteUrl, siteName: SITE_NAME, description: DEFAULT_DESCRIPTION, socials: data.socials });
   // The fallback shell again, now with the chosen font
@@ -134,7 +136,8 @@ page({
   type: 'ProfilePage',
   title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`,
   description: DEFAULT_DESCRIPTION,
-  body: `${nav}<h1>${SITE_NAME}</h1><p>${esc(DEFAULT_DESCRIPTION)}</p>
+  // The featured card right under the name, painted with the first response (the page's LCP on phones)
+  body: `${nav}<h1>${SITE_NAME}</h1>${featureCardHtml(readFeature(seed?.settings))}<p>${esc(DEFAULT_DESCRIPTION)}</p>
 <h2>الأقسام العلمية</h2>${list(categories.map((c) => link(`/category/${c.slug}`, c.name)))}
 <h2>السلاسل العلمية</h2>${list(series.map((s) => link(`/series/${s.slug}`, s.title)))}
 <h2>أحدث الدروس</h2>${list(lessons.slice(0, 40).map((l) => link(`/lesson/${l.id}`, l.title)))}

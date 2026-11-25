@@ -46,9 +46,9 @@ describe('welcome sound rules', () => {
 });
 
 describe('shouldLoadWelcome', () => {
-  it('loads only a recording whose saved length is short', () => {
+  it('allows a short recording and one whose length is unknown (checked on arrival), never a long one', () => {
     expect(shouldLoadWelcome(8)).toBe(true);
-    expect(shouldLoadWelcome(undefined)).toBe(false);
+    expect(shouldLoadWelcome(undefined)).toBe(true);
     expect(shouldLoadWelcome(60)).toBe(false);
   });
 

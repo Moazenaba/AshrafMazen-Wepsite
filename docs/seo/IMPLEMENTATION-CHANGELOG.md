@@ -45,3 +45,8 @@ Name searches were landing on `/reels`, `/videos` or `/audio`. Home is now a `Pr
 - Favicon: `favicon.svg` drew «أ» as text in `serif` (no Arabic glyph on many renderers) and `/favicon.ico` was 404. Now `favicon.ico` (48), `favicon-48/96/192/512.png`, `apple-touch-icon.png` from `scripts/make-icons.mjs` (`npm run icons`), linked in `index.html`.
 - LCP: the hero name and hadith animated from opacity 0, which does not count as painted; they start at 0.01 (`src/styles/motion.css`).
 - Known, not changed: each deploy renames `/assets/*.js`, so an HTML copy Google cached before a deploy points at files that are gone (404). Pages are prerendered, so their text and links do not depend on those files.
+
+## 2026-11-25 — featured card in the first HTML, welcome sound on first tap
+
+- LCP on `/` was the featured card (title `h3` / picture), drawn only after the scripts ran. The prerendered home now contains the same card (same Tailwind classes, `fetchpriority="high"` picture) right under the name, so it is painted with the first response (`scripts/prerenderFeature.mjs`, used by `scripts/prerender.mjs`; tests in `prerenderFeature.test.mjs`). Keep its classes in step with `src/pages/home/HomeFeatureCard.tsx`.
+- Welcome sound: nothing is downloaded before the visitor's first tap. A recording without a saved length is fetched on that tap and stopped (download cancelled) before it is heard if it is over 30 s (`WelcomeSound.tsx`, `welcomeSoundRules.shouldLoadWelcome`).

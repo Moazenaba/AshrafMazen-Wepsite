@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Volume2, X } from 'lucide-react';
 import { getSiteContent } from '../services/data/siteContent';
-import { isQuietPage, MAX_WELCOME_SECONDS, shouldLoadWelcome, shouldWelcome, type WelcomeSound as Sound } from '../services/data/welcomeSoundRules';
+import { isQuietPage, isShortWelcome, MAX_WELCOME_SECONDS, shouldLoadWelcome, shouldWelcome, type WelcomeSound as Sound } from '../services/data/welcomeSoundRules';
 import { useAudio } from '../context/AudioContext';
 import { fileSrc } from '../lib/fileLinks';
 
@@ -37,13 +37,19 @@ export const WelcomeSound: React.FC = () => {
   const engine = useAudio();
 
   const stop = () => {
-    audioRef.current?.pause();
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      // Ends the download too, not just the sound
+      audio.removeAttribute('src');
+      audio.load();
+    }
     audioRef.current = null;
     setPlaying(false);
   };
 
-  // Only a recording whose saved length is a short greeting is ever fetched (the admin saves the length with it);
-  // anything longer, such as a lesson saved here by mistake, or a length never saved, costs visitors nothing
+  // Nothing is downloaded until the visitor's first tap (the recording can be large). A saved length over the limit
+  // means it is never fetched at all; an unknown length is checked as soon as the first data arrives on the tap
   useEffect(() => {
     if (played() || isQuietPage(firstPath.current)) return;
     let alive = true;
@@ -65,6 +71,13 @@ export const WelcomeSound: React.FC = () => {
       audio.volume = sound.volume / 100;
       audio.onended = stop;
       audio.onerror = stop;
+      // Length never saved: a recording over the limit (a lesson saved here by mistake) stops before it is heard
+      audio.onloadedmetadata = () => {
+        if (!isShortWelcome(audio.duration)) {
+          console.warn(`welcome sound not played: ${Math.round(audio.duration)} s is longer than ${MAX_WELCOME_SECONDS} s`);
+          stop();
+        }
+      };
       // Never longer than a greeting, whatever the file
       audio.ontimeupdate = () => {
         if (audio.currentTime >= MAX_WELCOME_SECONDS) stop();

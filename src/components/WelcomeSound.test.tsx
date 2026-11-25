@@ -17,7 +17,12 @@ class FakeAudio {
     h.created.push(src ?? '(empty)');
   }
   removeAttribute() {}
+  load() {}
   pause() {}
+  play() {
+    return Promise.resolve();
+  }
+  addEventListener() {}
   set src(v: string) {
     h.created.push(v);
     queueMicrotask(() => this.onloadedmetadata?.());
@@ -51,11 +56,13 @@ describe('WelcomeSound', () => {
     expect(h.created.filter((s) => s.includes('w.mp3'))).toEqual([]);
   });
 
-  it('never downloads an old record that has no saved length (measuring it could mean the whole file)', async () => {
+  it('downloads nothing before the first tap, then fetches a record with no saved length on that tap', async () => {
     h.get.mockResolvedValue(welcome({}));
     renderWithProviders(<WelcomeSound />);
     await waitFor(() => expect(h.get).toHaveBeenCalled());
     await new Promise((r) => setTimeout(r, 20));
     expect(h.created.filter((s) => s.includes('w.mp3'))).toEqual([]);
+    document.body.click();
+    await waitFor(() => expect(h.created.some((s) => s.includes('w.mp3'))).toBe(true));
   });
 });

@@ -70,8 +70,7 @@ export function welcomeTooLongMessage(seconds: number): string {
   return `الصوت الترحيبي يجب أن يكون قصيراً (${MAX_WELCOME_SECONDS} ثانية أو أقل)، وهذا الملف مدته ${length}. إن كان تسجيل درس فارفعه من «إدارة الدروس».`;
 }
 
-// Whether the visitor's browser should fetch the recording at all: not when its saved length says it would be refused.
-// A record without a length (saved before the length was kept) is never fetched: measuring it meant downloading the
-// file, and an mp3 without a length header is downloaded whole (PageSpeed saw 21 MB on the home page for a
-// 23-minute lesson saved as the greeting). Saving the sound again in the admin stores its length.
-export const shouldLoadWelcome = (seconds: number | undefined) => seconds !== undefined && isShortWelcome(seconds);
+// Whether the recording may be fetched on the visitor's first tap: not when its saved length says it would be refused.
+// Nothing is fetched before that tap, ever. A record without a saved length is fetched on the tap and stopped before it
+// is heard if its length turns out to be over the limit (WelcomeSound checks it when the first data arrives).
+export const shouldLoadWelcome = (seconds: number | undefined) => seconds === undefined || isShortWelcome(seconds);
