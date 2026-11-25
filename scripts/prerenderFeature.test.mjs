@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { featureCardHtml, readFeature } from './prerenderFeature.mjs';
+import { featureCardHtml, heroHtml, readFeature } from './prerenderFeature.mjs';
 
 const row = (value) => [{ key: 'home_feature', value: JSON.stringify(value) }];
 
@@ -19,5 +19,17 @@ describe('prerendered featured card', () => {
     expect(readFeature(row({ enabled: true, title: 'x' }))).toBeNull();
     expect(readFeature([{ key: 'home_feature', value: '{bad' }])).toBeNull();
     expect(featureCardHtml(null)).toBe('');
+  });
+
+  it('writes the hero name word by word in the name font, and the hadith, without a second <h1>', () => {
+    const html = heroHtml([
+      { key: 'banner_name', value: 'أشرف بن طه' },
+      { key: 'hero_quote', value: JSON.stringify({ intro: 'قال ﷺ:', text: 'الدين النصيحة', source: 'مسلم' }) },
+    ]);
+    expect(html).toContain('class="font-name');
+    expect(html.match(/class="hero-word"/g)).toHaveLength(3);
+    expect(html).toContain('«الدين النصيحة»');
+    expect(html).not.toContain('<h1');
+    expect(heroHtml([])).toContain('مازن');
   });
 });

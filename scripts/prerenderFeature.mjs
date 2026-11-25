@@ -37,3 +37,29 @@ export function featureCardHtml(feature) {
     title ? `<h3 class="font-sans text-base min-[360px]:text-lg sm:text-3xl font-bold leading-snug text-balance line-clamp-3 sm:line-clamp-none">${esc(title)}</h3>` : ''
   }${subtitle ? `<p class="-mt-1 sm:-mt-2 text-xs sm:text-sm text-gold-soft">${esc(subtitle)}</p>` : ''}${link}</div><div class="order-1 sm:order-none"><span class="relative block aspect-video w-full overflow-hidden rounded-lg bg-mushaf-deep"><img src="${esc(image)}" alt="${esc(title)}" fetchpriority="high" class="absolute inset-0 w-full h-full object-cover"></span></div></div></article>`;
 }
+
+// The hero (the sheikh's name in the admin's font, and the hadith under it), with the classes of
+// src/pages/home/HeroSection.tsx. On a phone the name is the biggest text on the first screen, so it is the LCP element;
+// written here it is painted with the first response. The name is a <div>: the page's one <h1> stays the SEO heading.
+const DEFAULT_NAME = 'أبو عبد الرحمن أشرف بن طه بن مازن';
+
+export function heroHtml(settings = []) {
+  const get = (key) => settings.find((row) => row.key === key)?.value;
+  const name = String(get('banner_name') || DEFAULT_NAME).trim() || DEFAULT_NAME;
+  let hero = null;
+  try {
+    hero = JSON.parse(get('hero_quote') || 'null');
+  } catch {
+    hero = null;
+  }
+  const words = name
+    .split(' ')
+    .map((word, i) => `<span class="hero-word" style="animation-delay:${(0.08 * i).toFixed(2)}s">${esc(word)}</span>`)
+    .join(' ');
+  const quote = hero?.text
+    ? `<p class="hero-fade mx-auto max-w-xs sm:max-w-none font-amiri text-xl sm:text-3xl leading-relaxed sm:leading-loose text-gold-deep dark:text-gold text-balance">${
+        hero.intro ? `<span class="block sm:inline text-base sm:text-3xl text-stone-600 dark:text-stone-400 sm:text-gold-deep sm:dark:text-gold">${esc(hero.intro)}</span> ` : ''
+      }«${esc(hero.text)}»${hero.source ? `<span class="block mt-1 sm:mt-0 text-sm sm:text-base text-stone-600 dark:text-stone-400">${esc(hero.source)}</span>` : ''}</p>`
+    : '';
+  return `<section class="px-6 sm:px-8 pt-5 pb-5 sm:pt-20 sm:pb-12 text-center space-y-4 sm:space-y-5"><div class="font-name text-[2.5rem] sm:text-6xl lg:text-7xl leading-[1.25] sm:leading-[1.3] text-mushaf dark:text-gold-soft text-balance">${words}</div>${quote}</section>`;
+}

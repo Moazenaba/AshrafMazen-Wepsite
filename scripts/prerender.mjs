@@ -15,7 +15,7 @@ import { excerpt, loadSiteData, root, siteUrl, youtubeId } from './site-data.mjs
 import { esc, render as renderPage, withNameFont, withSiteSeed } from './prerenderParts.mjs';
 import { contentHash } from './contentHash.mjs';
 import { makeSchema } from './seoSchema.mjs';
-import { featureCardHtml, readFeature } from './prerenderFeature.mjs';
+import { featureCardHtml, heroHtml, readFeature } from './prerenderFeature.mjs';
 import { cleanVideoTitle, namedTitle as named, videoDescription } from '../src/lib/seoText.ts';
 
 const soft = process.argv.includes('--soft');
@@ -136,8 +136,8 @@ page({
   type: 'ProfilePage',
   title: `${SITE_NAME} | دروس وخطب ومحاضرات علمية`,
   description: DEFAULT_DESCRIPTION,
-  // The featured card right under the name, painted with the first response (the page's LCP on phones)
-  body: `${nav}<h1>${SITE_NAME}</h1>${featureCardHtml(readFeature(seed?.settings))}<p>${esc(DEFAULT_DESCRIPTION)}</p>
+  // The hero name and the featured card, painted with the first response (the biggest things on a phone's first screen)
+  body: `${nav}${heroHtml(seed?.settings)}<h1>${SITE_NAME}</h1>${featureCardHtml(readFeature(seed?.settings))}<p>${esc(DEFAULT_DESCRIPTION)}</p>
 <h2>الأقسام العلمية</h2>${list(categories.map((c) => link(`/category/${c.slug}`, c.name)))}
 <h2>السلاسل العلمية</h2>${list(series.map((s) => link(`/series/${s.slug}`, s.title)))}
 <h2>أحدث الدروس</h2>${list(lessons.slice(0, 40).map((l) => link(`/lesson/${l.id}`, l.title)))}
