@@ -60,7 +60,7 @@ const paint = async ({ src, size, rounded, markBottom }) => {
   o.beginPath();
   o.roundRect(0, 0, size, size, rounded ? size * 0.22 : 0);
   o.fill();
-  const box = size * 0.84;
+  const box = size * 0.96;
   const scale = Math.min(box / mw, box / mh);
   const dw = mw * scale, dh = mh * scale;
   o.imageSmoothingQuality = 'high';
