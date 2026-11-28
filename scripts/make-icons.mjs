@@ -1,31 +1,74 @@
-// Draws the site icons from one design (green rounded square, gold «أ» in the site's Amiri font):
+// Draws the site icons from the logo mark (orange dome + «منها», scripts/assets/logo.png) on a white rounded square:
 //   public/favicon.ico (48×48, PNG inside), public/favicon-48.png, favicon-96.png, favicon-192.png, favicon-512.png,
 //   public/apple-touch-icon.png (180×180).
-// Google shows a favicon next to the site in results only from a raster icon it can fetch (a multiple of 48 px);
-// the old favicon.svg drew the letter as <text> in "serif", which has no Arabic glyph on many renderers.
+// The words «منهاج أهل السنة» under the mark are left out: unreadable at tab size.
+// Google shows a favicon next to the site in results only from a raster icon it can fetch (a multiple of 48 px).
 //   node scripts/make-icons.mjs        (npm run icons)
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { chromium } from '@playwright/test';
 import { root } from './site-data.mjs';
 
-const font = `data:font/woff2;base64,${readFileSync(resolve(root, 'public/fonts/amiri-arabic-700-normal.woff2')).toString('base64')}`;
-const html = (size, rounded) => `<!doctype html><html><head><style>
-@font-face{font-family:Amiri;font-weight:700;src:url(${font})}
-html,body{margin:0;width:${size}px;height:${size}px;background:transparent}
-div{width:${size}px;height:${size}px;border-radius:${rounded ? size * 0.22 : 0}px;background:#0f5c43;display:flex;align-items:center;
-  justify-content:center;font-family:Amiri;font-weight:700;color:#e6c36a;font-size:${size * 0.62}px;line-height:1;box-sizing:border-box}
-span{display:block;transform:translateY(${size * 0.1}px)}
-</style></head><body><div><span>أ</span></div></body></html>`;
+const logo = `data:image/png;base64,${readFileSync(resolve(root, 'scripts/assets/logo.png')).toString('base64')}`;
+const MARK_BOTTOM = 0.7; // fraction of the logo height: the mark ends above the line and the words
 
 const browser = await chromium.launch();
 const tab = await browser.newPage();
-const draw = async (size, rounded = true) => {
-  await tab.setViewportSize({ width: size, height: size });
-  await tab.setContent(html(size, rounded));
-  await tab.evaluate(() => document.fonts.ready);
-  return tab.screenshot({ omitBackground: true });
+await tab.setContent('<!doctype html><html><body style="margin:0;background:transparent"></body></html>');
+
+// Runs in the page: finds the mark (orange pixels) and draws it centred on a white (rounded) square.
+const paint = async ({ src, size, rounded, markBottom }) => {
+  const img = new Image();
+  img.src = src;
+  await img.decode();
+  const work = document.createElement('canvas');
+  work.width = img.width;
+  work.height = img.height;
+  const w = work.getContext('2d');
+  w.drawImage(img, 0, 0);
+  const data = w.getImageData(0, 0, img.width, img.height).data;
+  let x0 = img.width, y0 = img.height, x1 = 0, y1 = 0;
+  const maxY = Math.floor(img.height * markBottom);
+  for (let y = 0; y < maxY; y++) {
+    for (let x = 0; x < img.width; x++) {
+      const i = (y * img.width + x) * 4;
+      if (data[i] - data[i + 2] > 60) { // orange: much more red than blue
+        if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      }
+    }
+  }
+  // Mark only, background made transparent (alpha from how far the pixel is from the light grey).
+  const mw = x1 - x0 + 1, mh = y1 - y0 + 1;
+  const mark = document.createElement('canvas');
+  mark.width = mw;
+  mark.height = mh;
+  const m = mark.getContext('2d');
+  const part = w.getImageData(x0, y0, mw, mh);
+  const bg = 246, orange = [255, 140, 66];
+  for (let i = 0; i < part.data.length; i += 4) {
+    const a = Math.max(0, Math.min(1, (bg - part.data[i + 2]) / (bg - orange[2])));
+    part.data[i] = orange[0]; part.data[i + 1] = orange[1]; part.data[i + 2] = orange[2];
+    part.data[i + 3] = Math.round(a * 255);
+  }
+  m.putImageData(part, 0, 0);
+
+  const out = document.createElement('canvas');
+  out.width = size;
+  out.height = size;
+  const o = out.getContext('2d');
+  o.fillStyle = '#ffffff';
+  o.beginPath();
+  o.roundRect(0, 0, size, size, rounded ? size * 0.22 : 0);
+  o.fill();
+  const box = size * 0.84;
+  const scale = Math.min(box / mw, box / mh);
+  const dw = mw * scale, dh = mh * scale;
+  o.imageSmoothingQuality = 'high';
+  o.drawImage(mark, (size - dw) / 2, (size - dh) / 2, dw, dh);
+  return out.toDataURL('image/png').split(',')[1];
 };
+const draw = async (size, rounded = true) =>
+  Buffer.from(await tab.evaluate(paint, { src: logo, size, rounded, markBottom: MARK_BOTTOM }), 'base64');
 
 const out = (name, buf) => writeFileSync(resolve(root, 'public', name), buf);
 for (const size of [48, 96, 192, 512]) out(`favicon-${size}.png`, await draw(size));
